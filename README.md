@@ -1,66 +1,110 @@
 # Info Pack
 
-A BepInEx 6 (IL2CPP) plugin for Survival Log that shows information the game knows but never puts on screen: how many of an item you have at home, what a trader's food does to you, which brew tier an alcohol is, which items are only worth scrapping, and what an ingredient or dish does while you cook. It also stops the game from highlighting containers you have already emptied. It only shows things. It never changes an item, a stat or a save.
+See how many of an item you have at home, what a trader's food does to you, how good a brew is, which loot is only worth scrapping, and stop emptied containers from staying highlighted.
 
-## What it does
+Survival Log knows a lot it never puts on screen. You can't see how many planks are already in your storages while you trade, what a trader's food will do to your stats before you buy it, or which brew tier a bottle is. Info Pack adds that to the game's own tooltips and windows, marks junk that is only good for scrap, and lets containers you have already emptied look like plain furniture. It only shows things. It never changes an item, a stat or a save.
 
-Each piece has its own toggle (see Config). The tooltip pieces draw inside the game's own windows, in the game's own tooltip style.
+## Features
 
-- **Base counts.** Item tooltips in the backpack, the trade window and the cooking window get a line `At home: N`: how many of that item are in your bag, in every storage on your home map and its home group (hidden ones included), and in the workbench drawer, added together: the same pool the game's crafting counts from. The number is refreshed every two seconds while a game is loaded.
-- **Trade stats.** In the trade window, the tooltip of an item on the trader's shelf gets a line naming what it does to satiety, mood, energy, health and life, in the game's own wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
-- **Alcohol quality.** The tooltip of a brew product says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While a brew is set up but not started, the brew panel shows the batch's quality score under its quality bar, with the score each better tier starts at: `Quality 0.62: Normal from 0.40, Strong from 0.80`, with the tier names in the game's language.
-- **Scrap only.** Items that are only worth breaking down get a line `Only useful as scrap` in their tooltips, a small `Scrap` chip on their backpack slots, and a `Scrap` tag in the pickup list. An item is marked only when the game can shred it, no workbench or cooking recipe uses it, it is a material, electrical part, daily good or uncategorised item, it has no other use (not food, not usable, not fuel, not brewable, not a seed, trap or furniture), and it is worth no more in trade than what shredding it gives back. The rule leans towards leaving an item unmarked.
-- **Cooking codex.** In the cooking window, hovering an ingredient adds its description and its stat line to the game's tooltip, followed by the lines above. Hovering a recipe adds the same for the dish it makes (its normal result, or the next result the recipe names when it has no normal one).
-- **Hide looted highlights.** On explore maps the game colours a container's outline by what you know about it when you hold Alt or point at it: not searched yet, items left, or searched and empty. Containers you have searched and emptied lose that colour and look like any other furniture. Containers you have not searched and ones with items still in them keep the game's colour, and nothing else the game marks (quest markers, item search marks) is touched.
+- **Home counts**: item tooltips in the backpack, the trade window and the cooking window get a line `At home: N`: how many of that item are in your bag, in every storage at home (hidden ones included) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
+- **Trade stats**: in the trade window, the tooltip of an item on the trader's shelf says what it does to satiety, mood, energy, health and life, in the game's own wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
+- **Brew quality**: the tooltip of a brewed drink says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, before it starts, the brew panel shows the batch's quality score and the score each better tier starts at, for example `Quality 0.62: Normal from 0.40, Strong from 0.80`.
+- **Scrap only**: items only worth breaking down get a line `Only useful as scrap` in their tooltips, a small `Scrap` chip on their backpack slots and a `Scrap` tag in the pickup list.
+- **Cooking codex**: in the cooking window, hovering an ingredient adds its description and stats to the game's tooltip. Hovering a recipe does the same for the dish it makes.
+- **Hide looted highlights**: on explore maps the game colours a container's outline by what you know about it when you hold Alt or point at it. Containers you have searched and emptied lose that colour and look like any other furniture. Containers you have not searched, and ones with items still in them, keep the game's colour.
+- **A log file**: what the mod did and anything that went wrong is written to `BepInEx\info-pack.log`.
 
-The pages keep their additions across reloads: the script puts itself back whenever the game's web view reloads.
+Every piece has its own setting, so you can turn off the ones you don't want. The tooltip lines draw inside the game's own windows, in the game's own tooltip style.
 
-## Controls
+There are no hotkeys and no buttons. Everything shows up in tooltips and windows the game already has.
 
-None. Everything shows up in tooltips and windows the game already has; there are no buttons and no hotkeys.
+Info Pack adds no data to your save and does not edit game files. You can remove it at any time.
 
-## Config
+## Replaces ItemTotals
 
-`BepInEx/config/com.dev.survivallog.infopack.cfg`:
+The home count does the job of the separate ItemTotals mod. If you have ItemTotals installed, remove `ItemTotals.dll` from `BepInEx\plugins`, or item tooltips will show two count lines: ItemTotals' `Total: N` and this mod's `At home: N`. If you would rather keep ItemTotals, set `BaseCounts` to `false` instead (see [CONFIG.md](CONFIG.md)).
 
-| Setting | Default | What it does |
-| --- | --- | --- |
-| `Features/BaseCounts` | `true` | The `At home: N` line in the backpack, trade and cooking tooltips. |
-| `Features/TradeStats` | `true` | The stat line in the trade window's tooltip for the trader's items. |
-| `Features/AlcoholQuality` | `true` | The `Brew quality: R of M` tooltip line and the quality readout in the brew panel. |
-| `Features/ScrapOnly` | `true` | The `Only useful as scrap` tooltip line, the `Scrap` chip on backpack slots and the `Scrap` tag in the pickup list. |
-| `Features/CookingCodex` | `true` | Descriptions and stat lines in the cooking window's ingredient and recipe tooltips. |
-| `Features/HideLootedHighlights` | `true` | No search colour on containers you have searched and emptied on explore maps. |
+## How it works
 
-With every setting off the plugin logs that it has nothing to do and stays out of the game entirely.
+**Home counts** add up your bag, every storage on your home map and its home group, hidden ones included, and the workbench drawer. A storage is never counted twice.
 
-## Log
+**Scrap only** marks an item only when all of these hold:
 
-`BepInEx/info-pack.log`. It gets a start line naming the version and which pieces are on, a line saying whether the looted highlight hook went in, a line when the facts are built for a loaded world or a new language (item count, size, language and how many milliseconds it took), and one line per distinct failure: a game table that could not be read or stat wording that fell back to English (each reported once), and a page piece that threw (once per page load).
+- the game can shred it;
+- no workbench or cooking recipe uses it;
+- it is a material, an electrical part, a daily good or has no category;
+- it has no other use (not food, not usable, not fuel, not brewable, not a seed, trap or furniture);
+- it is worth no more in trade than what shredding it gives back.
 
-## Known limits
+The rule leans towards leaving an item unmarked: when in doubt, it is not called scrap.
 
-- Ingredient lines under a recipe in the cooking window are the game's own and get no counts.
-- The scrap rule does not know about wishes, aid demands, robot modules or trap bait, so an item only those ask for can still be marked. Anything the game burns as fuel is treated as useful and never marked.
-- Items on the trader's side that the game's item cache does not hold get no lines in the trade tooltip. Items you sell are looked up by their instance id, which can take a moment the first time.
+**Brew quality** reads the brew tiers the game itself uses for each barrel. The tier names in the brew panel come from the game, in your language.
+
+**The pages** in the game's windows keep these additions across reloads: the mod puts them back whenever the game reloads its web view.
+
+## Known issues and limits
+
+Tooltips and windows are finicky. The game draws them as web pages and reloads them often, and this mod adds lines to them. If a line is missing, wrong, shows twice, or a tooltip looks broken, please tell me (see [Feedback](#feedback-and-bug-reports)), even if you are not sure the mod caused it. If one piece misbehaves, turn just that one off in the settings.
+
+- The ingredient lines under a recipe in the cooking window are the game's own and get no counts.
+- The scrap rule does not know about wishes, aid demands, robot modules or trap bait, so an item only those ask for can still be marked as scrap. Check before you shred something rare. Anything the game burns as fuel counts as useful and is never marked.
+- Items on the trader's side that the game has not loaded yet get no lines in the trade tooltip. Items you sell can take a moment to show their lines the first time.
 - The game places its tooltips for a fixed size. A tooltip made taller by these lines can reach past the bottom of the screen near the lower edge.
-- The brew panel readout shows the quality while a brew is being set up. Once the barrel is brewing it is hidden.
+- The brew panel shows the quality score only while a brew is being set up. Once the barrel is brewing it is hidden.
 - An emptied container still gets the plain outline every piece of furniture gets while Alt is held, and the outline when you point at it. Only the search colour goes.
-- Text is English apart from the stat wording, the item descriptions and the brew tier names, which come from the game in your language.
+- The mod's own text is in English. The stat wording, item descriptions and brew tier names come from the game, in your language.
+- `BepInEx\info-pack.log` is never trimmed. Delete it now and then if it grows large.
+
+## Requirements
+
+- Survival Log 1.1.18317. Built for this version; a game update can break it until the mod is updated.
+- The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
+- Not together with ItemTotals, unless you turn off `BaseCounts` (see [Replaces ItemTotals](#replaces-itemtotals)).
 
 ## Install
 
-Copy `InfoPack.dll` into `BepInEx/plugins`. Needs BepInEx 6 (IL2CPP build).
+1. Install the [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12) (if no other mods were installed before, start the game once so BepInEx finishes setup, then quit).
+2. Download `InfoPack.dll` from the [latest release](https://github.com/AnExiledDev/SurvivalLog-InfoPack/releases/latest) and put it in the `BepInEx\plugins` folder inside the game folder (the folder with the game .exe). Full path example: `C:\Program Files (x86)\Steam\steamapps\common\Survival Log\BepInEx\plugins\InfoPack.dll`
+3. If you use ItemTotals, delete `ItemTotals.dll` from `BepInEx\plugins`.
 
-## Build and test
+## Uninstall
 
-```sh
-dotnet build src/InfoPack -c Release -p:GameDir="D:\path\to\Survival Log"
+Delete `InfoPack.dll` from the `BepInEx\plugins` folder. For a clean slate, also delete `BepInEx\config\com.dev.survivallog.infopack.cfg` and `BepInEx\info-pack.log`.
+
+## Configuration
+
+Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Edit it while the game is closed; changes apply at the next game start. See [CONFIG.md](CONFIG.md) for every setting.
+
+## Troubleshooting
+
+Built against BepInEx `6.0.0-be.788`.
+
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.2.0 started`. It lists which pieces are on. The lines after it say whether the looted highlight hook went in, and when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+
+The same lines are in `BepInEx\info-pack.log`, which survives restarts.
+
+If no lines show up in tooltips, look in the log for a line starting `could not`. If every setting is off, the log says so and the mod does nothing.
+
+## Feedback and bug reports
+
+Found a bug, have an idea, or something feels off? Come say so on the Core Directive Discord: https://discord.gg/trTsyxUFqg . You can also leave a comment on the Nexus page or [open an issue](https://github.com/AnExiledDev/SurvivalLog-InfoPack/issues). When reporting a bug, attach `BepInEx\LogOutput.log` and `BepInEx\info-pack.log`.
+
+## Build
+
+This is a BepInEx 6 IL2CPP plugin. It compiles against BepInEx and the game's IL2CPP interop assemblies, so a game install with BepInEx set up and started once is required. Those assemblies come from the game and are not part of this repo. The .NET 8 SDK is required.
+
+```
+dotnet build src/InfoPack -c Release -p:GameDir="C:\path\to\Survival Log"
+```
+
+`GameDir` is the game folder. The default in the project file is a local path you will almost certainly need to override. The output DLL is at `src\InfoPack\bin\Release\InfoPack.dll`.
+
+The unit tests cover the pure rules (home counts, stat lines, brew tiers, the scrap rule and the looted highlight) and need nothing from the game:
+
+```
 dotnet test tests/InfoPack.Tests
 ```
 
-The build references BepInEx and the game's interop assemblies under `GameDir`, so BepInEx must be installed and the game launched once. The tests compile only the pure `Core` code and need nothing from the game.
-
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT. Copyright (c) 2026 AnExiledDev. See [LICENSE](LICENSE).
