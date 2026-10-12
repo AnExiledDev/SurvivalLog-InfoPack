@@ -6,9 +6,10 @@ using InfoPack.Core;
 namespace InfoPack.Adapters;
 
 /// <summary>
-/// Right after the game colours a container's outline by its search state, runs the game's own clear when the
-/// container is searched and empty. Show side only: the search state, the plain outline all furniture gets under Alt
-/// and the hover outline are left as the game draws them. Static because a Harmony postfix has nowhere else to look.
+/// Right before the game colours a container's outline by its search state, swaps searched-and-empty for no state, so
+/// the game's own code draws no search colour. Show side only: the search state the game keeps, the plain outline all
+/// furniture gets under Alt and the hover outline are left as the game draws them. Static because a Harmony prefix has
+/// nowhere else to look.
 /// </summary>
 internal static class LootedOutlinePatch
 {
@@ -23,7 +24,7 @@ internal static class LootedOutlinePatch
         {
             harmony.Patch(
                 AccessTools.Method(typeof(AgentModel), nameof(AgentModel.Furniture_ShowSearchState), new[] { typeof(int) }),
-                postfix: new HarmonyMethod(typeof(LootedOutlinePatch), nameof(ClearIfLooted)));
+                prefix: new HarmonyMethod(typeof(LootedOutlinePatch), nameof(ShowLootedAsPlain)));
             log("hiding the search highlight on emptied containers");
         }
         catch (Exception ex)
@@ -32,12 +33,16 @@ internal static class LootedOutlinePatch
         }
     }
 
-    /// <summary>Never throws into the game: on any failure the outline stays as the game set it.</summary>
-    private static void ClearIfLooted(AgentModel __instance, int state)
+    /// <summary>
+    /// Only rewrites the argument and never calls into the game: a call back into the game from inside this hook
+    /// crashes it, and that crash cannot be caught. Never throws into the game: on any failure the state goes through
+    /// as the game sent it.
+    /// </summary>
+    private static void ShowLootedAsPlain(ref int state)
     {
         try
         {
-            if (LootedOutline.ShouldClear(state)) __instance.Furniture_HideSearchState();
+            state = LootedOutline.ShownState(state);
         }
         catch (Exception ex)
         {

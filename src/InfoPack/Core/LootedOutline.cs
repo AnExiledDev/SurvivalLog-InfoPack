@@ -16,8 +16,10 @@ public enum SearchState
 public static class LootedOutline
 {
     /// <summary>
-    /// Only a container searched down to nothing loses its colour. Unsearched ones, ones with items left and any state
-    /// the game might add later keep the game's colour, so nothing the player still needs stops standing out.
+    /// The state the game is asked to draw. Only a container searched down to nothing is shown as None, which the game
+    /// draws with no search colour. Unsearched ones, ones with items left and any state the game might add later pass
+    /// through unchanged and keep the game's colour, so nothing the player still needs stops standing out.
     /// </summary>
-    public static bool ShouldClear(int gameState) => gameState == (int)SearchState.Empty;
+    public static int ShownState(int gameState) =>
+        gameState == (int)SearchState.Empty ? (int)SearchState.None : gameState;
 }

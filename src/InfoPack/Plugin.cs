@@ -11,7 +11,7 @@ namespace InfoPack;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.2.0";
+    private const string Version = "0.2.1";
 
     public override void Load()
     {

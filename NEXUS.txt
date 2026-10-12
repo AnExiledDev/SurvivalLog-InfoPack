@@ -54,5 +54,10 @@ To turn off any piece, edit [font=Courier New]BepInEx&#92;config&#92;com.dev.sur
 [size=5]Feedback[/size]
 Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url], or leave a comment here. For bugs, please include [font=Courier New]BepInEx&#92;LogOutput.log[/font] and [font=Courier New]BepInEx&#92;info-pack.log[/font].
 
+[size=5]Changelog[/size]
+[list]
+[*]0.2.1: Fixed a crash on expeditions with Hide looted highlights on.[/*]
+[/list]
+
 [size=5]Source and license[/size]
 Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-InfoPack]github.com/AnExiledDev/SurvivalLog-InfoPack[/url]
