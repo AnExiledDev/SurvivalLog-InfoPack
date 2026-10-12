@@ -2,7 +2,8 @@ namespace InfoPack.Core;
 
 /// <summary>
 /// The search colour the game gives a container's outline on an explore map while Alt is held or the container is
-/// hovered, numbered as the game numbers it. Empty means searched with no items left in it.
+/// hovered, numbered as the game numbers it (ExploreSearchStateManager.ExploreSearchState, which
+/// AgentModel.Furniture_ShowSearchState turns into outline bits). Empty means searched with no items left in it.
 /// </summary>
 public enum SearchState
 {
