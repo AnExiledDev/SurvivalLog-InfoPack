@@ -11,7 +11,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 | `AlcoholQuality` | `true` | Show which brew tier a drink is in its tooltip (`Brew quality: 2 of 3`), and the brew panel's quality score with the score each better tier starts at. |
 | `ScrapOnly` | `true` | Mark items that are only worth breaking down: an `Only useful as scrap` tooltip line, a `Scrap` chip on backpack slots and a `Scrap` tag in the pickup list. |
 | `CookingCodex` | `true` | Add the description and stats of an ingredient, or of a recipe's dish, to the cooking window's tooltips. |
-| `HideLootedHighlights` | `true` | On explore maps, stop the search colour from marking containers you have already searched and emptied. Unsearched containers and ones with items left keep their colour. |
+| `HideLootedHighlights` | `false` | New, off by default. On explore maps, stop the search colour from marking containers you have already searched and emptied. Unsearched containers and ones with items left keep their colour. |
 
 Each piece works on its own, so turn off any you don't want and the rest keep working.
 

@@ -21,7 +21,7 @@ public sealed class Plugin : BasePlugin
             Config.Bind("Features", "AlcoholQuality", true, "Show which brew tier an alcohol is in its tooltip, and the brew panel's quality score with the tier thresholds.").Value,
             Config.Bind("Features", "ScrapOnly", true, "Mark items that are only worth breaking down: a tooltip line, a Scrap chip on backpack slots and a tag in the pickup list.").Value,
             Config.Bind("Features", "CookingCodex", true, "Add the description and stats of an ingredient, or of a recipe's dish, to the cooking window's tooltips.").Value,
-            Config.Bind("Features", "HideLootedHighlights", true, "On explore maps, stop the search colour from marking containers you have already searched and emptied. Unsearched containers and ones with items left keep their colour.").Value);
+            Config.Bind("Features", "HideLootedHighlights", false, "New, off by default. On explore maps, stop the search colour from marking containers you have already searched and emptied. Unsearched containers and ones with items left keep their colour.").Value);
         var log = new InfoLog(Log, Path.Combine(Paths.BepInExRootPath, "info-pack.log"));
 
         log.Write($"===== Info Pack {Version} started, features {features.ToJson()}, hide looted highlights {features.HideLootedHighlights}");

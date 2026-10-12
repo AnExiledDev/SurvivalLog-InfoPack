@@ -11,7 +11,7 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 [*][b]Brew quality[/b]: a brewed drink's tooltip shows its tier, like "Brew quality: 2 of 3". While setting up a brew, the brew panel shows the quality score and what the next tier needs.[/*]
 [*][b]Scrap only[/b]: items only worth breaking down get an "Only useful as scrap" line, a Scrap chip on backpack slots and a Scrap tag in the pickup list.[/*]
 [*][b]Cooking codex[/b]: hover an ingredient or recipe in the cooking window to see its description and stats.[/*]
-[*][b]Hide looted highlights[/b]: containers you have already searched and emptied lose their search colour on explore maps.[/*]
+[*][b]Hide looted highlights[/b]: containers you have already searched and emptied lose their search colour on explore maps. New and off by default; turn on HideLootedHighlights in the config to try it.[/*]
 [/list]
 Every piece can be turned off on its own in the config. There are no hotkeys.
 
@@ -56,7 +56,7 @@ Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUF
 
 [size=5]Changelog[/size]
 [list]
-[*]0.2.1: Fixed a crash on expeditions with Hide looted highlights on.[/*]
+[*]0.2.1: Hide looted highlights is turned off by default after a crash on expeditions, and reworked to hook a safer spot. If you used 0.2.0, your config file still has it on: set HideLootedHighlights to false to turn it off.[/*]
 [/list]
 
 [size=5]Source and license[/size]

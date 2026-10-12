@@ -1,16 +1,22 @@
 using System;
-using GameCore.HotUpdate.Battle.Show;
+using GameCore.HotUpdate.Battle.Logic;
 using HarmonyLib;
 using InfoPack.Core;
 
 namespace InfoPack.Adapters;
 
 /// <summary>
-/// Right before the game colours a container's outline by its search state, swaps searched-and-empty for no state, so
-/// the game's own code draws no search colour. Show side only: the search state the game keeps, the plain outline all
-/// furniture gets under Alt and the hover outline are left as the game draws them. Static because a Harmony prefix has
-/// nowhere else to look.
+/// Right after the game looks up a container's search state on an explore map, answers "no state" for a container
+/// searched down to nothing, so the game never asks for its search colour. Hooks ExploreSearchStateManager.TryGetState,
+/// whose only callers are the Alt-held and hover handlers; with no state they skip the colour and, on hover exit, the
+/// game's own clear finds nothing to clear. Show side only: the plain outline all furniture gets under Alt and the
+/// hover outline are left as the game draws them. Static because a Harmony postfix has nowhere else to look.
 /// </summary>
+/// <remarks>
+/// 0.2.0 hooked AgentModel.Furniture_ShowSearchState instead and the game crashed on expeditions inside that hook. The
+/// cause is not confirmed. The likeliest one is that the method opens with short jumps the native hook has to copy
+/// elsewhere; TryGetState opens with plain register saves. Off by default until it is confirmed in game.
+/// </remarks>
 internal static class LootedOutlinePatch
 {
     private static Action<string> _log = _ => { };
@@ -23,8 +29,11 @@ internal static class LootedOutlinePatch
         try
         {
             harmony.Patch(
-                AccessTools.Method(typeof(AgentModel), nameof(AgentModel.Furniture_ShowSearchState), new[] { typeof(int) }),
-                prefix: new HarmonyMethod(typeof(LootedOutlinePatch), nameof(ShowLootedAsPlain)));
+                AccessTools.Method(
+                    typeof(ExploreSearchStateManager),
+                    nameof(ExploreSearchStateManager.TryGetState),
+                    new[] { typeof(Furniture), typeof(ExploreSearchStateManager.ExploreSearchState).MakeByRefType() }),
+                postfix: new HarmonyMethod(typeof(LootedOutlinePatch), nameof(HideIfLooted)));
             log("hiding the search highlight on emptied containers");
         }
         catch (Exception ex)
@@ -34,15 +43,14 @@ internal static class LootedOutlinePatch
     }
 
     /// <summary>
-    /// Only rewrites the argument and never calls into the game: a call back into the game from inside this hook
-    /// crashes it, and that crash cannot be caught. Never throws into the game: on any failure the state goes through
-    /// as the game sent it.
+    /// Only reads the state the game just found and makes no call into the game. Never throws into the game: on any
+    /// failure the game's answer stands.
     /// </summary>
-    private static void ShowLootedAsPlain(ref int state)
+    private static void HideIfLooted(ref bool __result, ref ExploreSearchStateManager.ExploreSearchState state)
     {
         try
         {
-            state = LootedOutline.ShownState(state);
+            if (__result && !LootedOutline.ShowsSearchColour((int)state)) __result = false;
         }
         catch (Exception ex)
         {
