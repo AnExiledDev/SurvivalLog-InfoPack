@@ -1,9 +1,12 @@
 namespace InfoPack.Core;
 
 /// <summary>Which pieces the player left on. Each one is its own config toggle and can be turned off alone.</summary>
-public sealed record Features(bool BaseCounts, bool TradeStats, bool AlcoholQuality, bool ScrapOnly, bool CookingCodex)
+public sealed record Features(bool BaseCounts, bool TradeStats, bool AlcoholQuality, bool ScrapOnly, bool CookingCodex, bool HideLootedHighlights)
 {
-    public bool IsAnyOn => BaseCounts || TradeStats || AlcoholQuality || ScrapOnly || CookingCodex;
+    public bool IsAnyOn => IsAnyPageOn || HideLootedHighlights;
+
+    /// <summary>The pieces drawn by the page script. Hiding looted highlights works in the game world and needs no page.</summary>
+    public bool IsAnyPageOn => BaseCounts || TradeStats || AlcoholQuality || ScrapOnly || CookingCodex;
 
     /// <summary>The stat line is shown by two pieces: the trade tooltip and the cooking codex section.</summary>
     public bool NeedsStats => TradeStats || CookingCodex;

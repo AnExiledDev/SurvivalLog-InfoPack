@@ -6,12 +6,12 @@ namespace InfoPack.Tests;
 
 public class FeaturesTests
 {
-    private static readonly Features AllOff = new(false, false, false, false, false);
+    private static readonly Features AllOff = new(false, false, false, false, false, false);
 
     [Fact]
     public void The_page_reads_each_toggle_under_its_own_flag()
     {
-        var flags = JsonDocument.Parse(new Features(true, false, true, false, true).ToJson()).RootElement;
+        var flags = JsonDocument.Parse(new Features(true, false, true, false, true, true).ToJson()).RootElement;
 
         Assert.True(flags.GetProperty("counts").GetBoolean());
         Assert.False(flags.GetProperty("stats").GetBoolean());
@@ -25,6 +25,26 @@ public class FeaturesTests
     {
         Assert.False(AllOff.IsAnyOn);
         Assert.True((AllOff with { ScrapOnly = true }).IsAnyOn);
+    }
+
+    [Fact]
+    public void Hiding_looted_highlights_alone_still_runs_the_mod_but_needs_no_page()
+    {
+        var onlyLooted = AllOff with { HideLootedHighlights = true };
+
+        Assert.True(onlyLooted.IsAnyOn);
+        Assert.False(onlyLooted.IsAnyPageOn);
+    }
+
+    [Fact]
+    public void Every_tooltip_piece_needs_the_page()
+    {
+        Assert.False(AllOff.IsAnyPageOn);
+        Assert.True((AllOff with { BaseCounts = true }).IsAnyPageOn);
+        Assert.True((AllOff with { TradeStats = true }).IsAnyPageOn);
+        Assert.True((AllOff with { AlcoholQuality = true }).IsAnyPageOn);
+        Assert.True((AllOff with { ScrapOnly = true }).IsAnyPageOn);
+        Assert.True((AllOff with { CookingCodex = true }).IsAnyPageOn);
     }
 
     [Fact]
