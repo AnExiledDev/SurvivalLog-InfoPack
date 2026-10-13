@@ -11,7 +11,7 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
 - **Brew quality**: the tooltip of a brewed drink says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, before it starts, the brew panel shows the batch's quality score and the score each better tier starts at, for example `Quality 0.62: Normal from 0.40, Strong from 0.80`.
 - **Scrap only**: items only worth breaking down get a line `Only useful as scrap` in their tooltips, a small `Scrap` chip on their backpack slots and a `Scrap` tag in the pickup list.
 - **Cooking codex**: in the cooking window, hovering an ingredient adds its description and stats to the game's tooltip. Hovering a recipe does the same for the dish it makes.
-- **Hide looted highlights**: on explore maps the game colours a container's outline by what you know about it when you hold Alt or point at it. Containers you have searched and emptied lose that colour and look like any other furniture. Containers you have not searched, and ones with items still in them, keep the game's colour. This one is new and off by default: set `HideLootedHighlights` to `true` to try it (see [CONFIG.md](CONFIG.md)).
+- **Hide looted highlights**: on explore maps the game colours a container's outline by what you know about it when you hold Alt or point at it. Containers you have searched and emptied lose that colour and look like any other furniture. Containers you have not searched, and ones with items still in them, keep the game's colour. This one is off by default: set `HideLootedHighlights` to `true` to try it (see [CONFIG.md](CONFIG.md)).
 - **A log file**: what the mod did and anything that went wrong is written to `BepInEx\info-pack.log`.
 
 Every piece has its own setting, so you can turn off the ones you don't want. The tooltip lines draw inside the game's own windows, in the game's own tooltip style.
@@ -79,7 +79,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.2.1 started`. It lists which pieces are on. The lines after it say whether the looted highlight hook went in (only when HideLootedHighlights is on), and when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.2.2 started`. It lists which pieces are on. The lines after it say whether the looted highlight hook went in (only when HideLootedHighlights is on), and when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -91,6 +91,7 @@ Found a bug, have an idea, or something feels off? Come say so on the Core Direc
 
 ## Changelog
 
+- 0.2.2: The setting descriptions are shorter and plainer, and each one now has a Simplified Chinese line. No setting or default changed.
 - 0.2.1: Hide looted highlights is turned off by default after a crash on expeditions, and reworked to hook a safer spot. If you used 0.2.0, your settings file still has it on: set `HideLootedHighlights` to `false` to turn it off.
 
 ## Build

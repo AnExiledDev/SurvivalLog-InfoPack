@@ -6,12 +6,12 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `BaseCounts` | `true` | Show how many of an item you have at home (bag, home storages and the workbench drawer) as an `At home: N` line in the backpack, trade and cooking tooltips. |
-| `TradeStats` | `true` | Show what an item does to satiety, mood, energy, health and life in the trade window's tooltip for the trader's items. |
-| `AlcoholQuality` | `true` | Show which brew tier a drink is in its tooltip (`Brew quality: 2 of 3`), and the brew panel's quality score with the score each better tier starts at. |
-| `ScrapOnly` | `true` | Mark items that are only worth breaking down: an `Only useful as scrap` tooltip line, a `Scrap` chip on backpack slots and a `Scrap` tag in the pickup list. |
-| `CookingCodex` | `true` | Add the description and stats of an ingredient, or of a recipe's dish, to the cooking window's tooltips. |
-| `HideLootedHighlights` | `false` | New, off by default. On explore maps, stop the search colour from marking containers you have already searched and emptied. Unsearched containers and ones with items left keep their colour. |
+| `BaseCounts` | `true` | Item tooltips in the backpack, trade and cooking windows get an `At home: N` line counting that item in your backpack, every storage at home and the workbench drawer. Turn it off if you also use the ItemTotals mod, so tooltips don't show two counts. |
+| `TradeStats` | `true` | The tooltip of an item on the trader's shelf in the trade window shows what it does to satiety, mood, energy, health and life. |
+| `AlcoholQuality` | `true` | A brewed drink's tooltip shows its tier, like `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, the brew panel also shows the batch's quality score and the score each better tier starts at. |
+| `ScrapOnly` | `true` | Items only worth shredding get an `Only useful as scrap` line in their tooltip, a `Scrap` chip on their backpack slot and a `Scrap` tag in the pickup list. |
+| `CookingCodex` | `true` | Hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes. |
+| `HideLootedHighlights` | `false` | Off by default. When on, containers on explore maps that you have searched and emptied lose their search colour when you hold Alt or point at them, while unsearched containers and ones with items left keep it. |
 
 Each piece works on its own, so turn off any you don't want and the rest keep working.
 
