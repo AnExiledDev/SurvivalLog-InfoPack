@@ -7,16 +7,17 @@ namespace InfoPack.Core;
 
 /// <summary>
 /// The JSON the page script draws from. The facts are fixed for a loaded world (stat lines, descriptions, which dish a
-/// recipe makes, brew tiers, the scrap list) and only the pieces the player left on are worked out. The home counts
-/// change as the player plays and go in their own message.
+/// recipe makes, brew tiers, the scrap list, planning card badges) and only the pieces the player left on are worked
+/// out. The home counts change as the player plays and go in their own message.
 /// </summary>
 public static class PageFacts
 {
     private const int CategoryFood = 1;
 
     /// <summary>
-    /// {"stats":{id:text},"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id]}, with a key
-    /// left out when its piece is off. Keys are in ascending id order so the same tables always give the same text.
+    /// {"stats":{id:text},"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id],
+    /// "plan":{talentId:badge}}, with a key left out when its piece is off. Keys are in ascending id order so the same
+    /// tables always give the same text.
     /// </summary>
     public static string Build(GameTables tables, IGameText text, Features features)
     {
@@ -32,6 +33,7 @@ public static class PageFacts
 
         if (features.AlcoholQuality) parts.Add(Member("brew", BrewObject(BrewTiers.Map(tables.BrewProducts))));
         if (features.ScrapOnly) parts.Add(Member("scrap", "[" + string.Join(",", ScrapRule.ScrapOnly(tables).Select(Number)) + "]"));
+        if (features.PlanningBadges) parts.Add(Member("plan", TextObject(PlanBadges.Map(tables.Talents, tables.BuffDurations))));
 
         return "{" + string.Join(",", parts) + "}";
     }

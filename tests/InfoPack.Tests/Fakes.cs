@@ -27,13 +27,17 @@ internal static class Rows
         IEnumerable<ProductionRecipe>? production = null,
         IEnumerable<CookingRecipe>? cooking = null,
         IEnumerable<IReadOnlyList<int>>? brewProducts = null,
-        IReadOnlyDictionary<int, IReadOnlyList<Yield>>? shredYields = null) =>
+        IReadOnlyDictionary<int, IReadOnlyList<Yield>>? shredYields = null,
+        IEnumerable<TalentRow>? talents = null,
+        IReadOnlyDictionary<int, float>? buffDurations = null) =>
         new(
             new List<ItemRow>(items),
             new List<ProductionRecipe>(production ?? new ProductionRecipe[0]),
             new List<CookingRecipe>(cooking ?? new CookingRecipe[0]),
             new List<IReadOnlyList<int>>(brewProducts ?? new IReadOnlyList<int>[0]),
-            shredYields ?? new Dictionary<int, IReadOnlyList<Yield>>());
+            shredYields ?? new Dictionary<int, IReadOnlyList<Yield>>(),
+            new List<TalentRow>(talents ?? new TalentRow[0]),
+            buffDurations ?? new Dictionary<int, float>());
 
     public static CookingRecipe Recipe(int id, int normal, int good = 0, int perfect = 0, int fail = 0, params int[] ingredients) =>
         new(id, ingredients, normal, good, perfect, fail);

@@ -6,18 +6,27 @@ namespace InfoPack.Tests;
 
 public class FeaturesTests
 {
-    private static readonly Features AllOff = new(false, false, false, false, false, false);
+    private static readonly Features AllOff = new(false, false, false, false, false, false, false);
 
     [Fact]
     public void The_page_reads_each_toggle_under_its_own_flag()
     {
-        var flags = JsonDocument.Parse(new Features(true, false, true, false, true, true).ToJson()).RootElement;
+        var flags = JsonDocument.Parse(new Features(true, false, true, false, true, true, true).ToJson()).RootElement;
 
         Assert.True(flags.GetProperty("counts").GetBoolean());
         Assert.False(flags.GetProperty("stats").GetBoolean());
         Assert.True(flags.GetProperty("brew").GetBoolean());
         Assert.False(flags.GetProperty("scrap").GetBoolean());
         Assert.True(flags.GetProperty("codex").GetBoolean());
+        Assert.True(flags.GetProperty("plan").GetBoolean());
+    }
+
+    [Fact]
+    public void Turning_planning_badges_off_tells_the_page_to_leave_the_cards_alone()
+    {
+        var flags = JsonDocument.Parse((AllOff with { CookingCodex = true }).ToJson()).RootElement;
+
+        Assert.False(flags.GetProperty("plan").GetBoolean());
     }
 
     [Fact]
@@ -25,6 +34,7 @@ public class FeaturesTests
     {
         Assert.False(AllOff.IsAnyOn);
         Assert.True((AllOff with { ScrapOnly = true }).IsAnyOn);
+        Assert.True((AllOff with { PlanningBadges = true }).IsAnyOn);
     }
 
     [Fact]
@@ -45,6 +55,7 @@ public class FeaturesTests
         Assert.True((AllOff with { AlcoholQuality = true }).IsAnyPageOn);
         Assert.True((AllOff with { ScrapOnly = true }).IsAnyPageOn);
         Assert.True((AllOff with { CookingCodex = true }).IsAnyPageOn);
+        Assert.True((AllOff with { PlanningBadges = true }).IsAnyPageOn);
     }
 
     [Fact]

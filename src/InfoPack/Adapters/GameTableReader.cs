@@ -37,7 +37,9 @@ internal sealed class GameTableReader
             Guarded("workbench recipes", () => Production(config), new List<ProductionRecipe>()),
             Guarded("cooking recipes", () => Cooking(config), new List<CookingRecipe>()),
             Guarded("brew barrels", () => BrewProducts(config), new List<IReadOnlyList<int>>()),
-            shredYields);
+            shredYields,
+            Guarded("talent table", () => Talents(config), new List<TalentRow>()),
+            Guarded("buff table", () => BuffDurations(config), new Dictionary<int, float>()));
     }
 
     private static List<ItemRow> Items(ConfigManager config, Il2CppSystem.Collections.Generic.Dictionary<int, Config_Item> table)
@@ -140,6 +142,33 @@ internal sealed class GameTableReader
         }
 
         return lists;
+    }
+
+    /// <summary>The planning cards need both this and the buff table; a missing one is thrown so it is logged once.</summary>
+    private static List<TalentRow> Talents(ConfigManager config)
+    {
+        var talents = new List<TalentRow>();
+        var table = config._Config_Talent_Dict ?? throw new InvalidOperationException("the game has no talent table loaded");
+
+        foreach (var talent in table.Values)
+        {
+            if (talent != null) talents.Add(new TalentRow(talent.ID, talent.Type, talent.BuffID));
+        }
+
+        return talents;
+    }
+
+    private static Dictionary<int, float> BuffDurations(ConfigManager config)
+    {
+        var durations = new Dictionary<int, float>();
+        var table = config._Config_Buff_Dict ?? throw new InvalidOperationException("the game has no buff table loaded");
+
+        foreach (var buff in table.Values)
+        {
+            if (buff != null) durations[buff.ID] = buff.BuffDuring;
+        }
+
+        return durations;
     }
 
     private static List<int> Ints(Il2CppInts? list)

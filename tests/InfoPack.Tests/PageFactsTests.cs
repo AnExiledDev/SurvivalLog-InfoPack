@@ -16,14 +16,26 @@ public class PageFactsTests
     private const int Stew = 701;
     private const int GoodStew = 702;
     private const int Ale = 15505;
+    private const int Energetic = 30651;
+    private const int Airdrop = 31301;
+    private const int Lounging = 31302;
+    private const int Awakening = 10011;
 
-    private static readonly Features AllOn = new(true, true, true, true, true, true);
-    private static readonly Features AllOff = new(false, false, false, false, false, false);
+    private static readonly Features AllOn = new(true, true, true, true, true, true, true);
+    private static readonly Features AllOff = new(false, false, false, false, false, false, false);
 
     private static GameTables World() => Tables(
         new[] { Junk(Battery, tradeValue: 0), Plain(Wire), Edible(Rice, 5f, 1f), Plain(Salt), Edible(Stew, 20f, 3f, 0f, 0f, -1f) },
         cooking: new[] { Recipe(900, normal: Stew, good: GoodStew, ingredients: new[] { Salt }) },
-        brewProducts: new IReadOnlyList<int>[] { new[] { Ale, 15504, 15506 } });
+        brewProducts: new IReadOnlyList<int>[] { new[] { Ale, 15504, 15506 } },
+        talents: new[]
+        {
+            new TalentRow(Lounging, PlanBadges.PlanningCardType, 313020),
+            new TalentRow(Energetic, PlanBadges.PlanningCardType, 306510),
+            new TalentRow(Airdrop, PlanBadges.PlanningCardType, 313010),
+            new TalentRow(Awakening, 1, 100110),
+        },
+        buffDurations: new Dictionary<int, float> { [306510] = 259200f, [313010] = 1f, [313020] = -1f, [100110] = 86400f });
 
     private static FakeText Text() => new FakeText()
         .Describes(Battery, "A dead battery.")
@@ -40,7 +52,7 @@ public class PageFactsTests
     [Fact]
     public void With_every_piece_on_the_page_gets_every_kind_of_fact()
     {
-        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap" }, Keys(Build(AllOn)));
+        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan" }, Keys(Build(AllOn)));
     }
 
     [Fact]
@@ -50,6 +62,7 @@ public class PageFactsTests
         Assert.Equal(new[] { "scrap" }, Keys(Build(AllOff with { ScrapOnly = true })));
         Assert.Equal(new[] { "brew" }, Keys(Build(AllOff with { AlcoholQuality = true })));
         Assert.Equal(new[] { "stats", "desc", "dish" }, Keys(Build(AllOff with { CookingCodex = true })));
+        Assert.Equal(new[] { "plan" }, Keys(Build(AllOff with { PlanningBadges = true })));
     }
 
     [Fact]
@@ -123,6 +136,16 @@ public class PageFactsTests
         var scrap = Build(AllOn).GetProperty("scrap").EnumerateArray().Select(value => value.GetInt32()).ToArray();
 
         Assert.Equal(new[] { Battery }, scrap);
+    }
+
+    [Fact]
+    public void Planning_badges_go_to_timed_and_one_off_cards_in_id_order()
+    {
+        var plan = Build(AllOn).GetProperty("plan");
+
+        Assert.Equal(new[] { "30651", "31301" }, Keys(plan));
+        Assert.Equal("3d", plan.GetProperty("30651").GetString());
+        Assert.Equal("1x", plan.GetProperty("31301").GetString());
     }
 
     [Fact]

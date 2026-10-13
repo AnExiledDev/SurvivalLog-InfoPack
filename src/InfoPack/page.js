@@ -1,7 +1,8 @@
 // Info Pack's web half. Runs in Root.html, the document every game page iframe sits in. It only reads: it adds lines
-// to the game's own tooltips (backpack, trade, cooking), a Scrap chip to backpack slots, a tag to the pickup list and a
-// quality readout to the brew panel, all styled with the game's own classes and colours. The game pages come and go as
-// iframes and Vue redraws them at will, so every addition is checked on a short poll and put back when it is gone.
+// to the game's own tooltips (backpack, trade, cooking), a Scrap chip to backpack slots, a tag to the pickup list, a
+// quality readout to the brew panel and duration badges to Survival Planning cards, all styled with the game's own
+// classes and colours. The game pages come and go as iframes and Vue redraws them at will, so every addition is
+// checked on a short poll and put back when it is gone.
 // Talks to the plugin through vuplex.postMessage("slmod|infopack|<verb>") and is driven by window.__slinfopack.
 (function () {
   if (window.__slinfopack) return;
@@ -21,11 +22,17 @@
     '.slip-line.slip-warn{color:#c9a94f}',
     '.slip-scrap{position:absolute;bottom:5px;left:3px;font-size:10px;font-weight:700;color:#c9a94f;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.12);padding:0 5px;border-radius:8px;line-height:13px;text-shadow:0 1px 2px rgba(0,0,0,.85);box-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;z-index:4}',
     '.slip-tag{font-size:11px;font-weight:bold;color:#c9a94f;background-color:rgba(0,0,0,.35);border:1px solid rgba(201,169,79,.35);padding:1px 6px;border-radius:3px;text-shadow:.7px .7px 1.4px black;flex-shrink:0}',
-    '.slip-brew{margin-top:4px;font-size:10px;color:#7e756c;text-align:center}'
+    '.slip-brew{margin-top:4px;font-size:10px;color:#7e756c;text-align:center}',
+    '.slip-plan{position:absolute;right:3px;bottom:3px;font-size:12px;font-weight:700;line-height:15px;padding:0 5px;border-radius:3px;letter-spacing:0;pointer-events:none;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.6)}',
+    '.slip-plan-timed{color:#1a1a1a;background:#ffc83a;border:1px solid rgba(255,235,180,.6)}',
+    '.slip-plan-once{color:#0d1f27;background:#6ec6e6;border:1px solid rgba(205,240,255,.6)}'
   ].join('\n');
 
+  // PlanBadges.OneOffBadge on the plugin side: a badge with this text gets the one-off colour, any other the timed one.
+  var ONE_OFF_BADGE = '1x';
+
   var features = null;
-  var facts = { stats: {}, desc: {}, dish: {}, brew: {}, scrap: {} };
+  var facts = { stats: {}, desc: {}, dish: {}, brew: {}, scrap: {}, plan: {} };
   var counts = {};
   var hasCounts = false;
   var instances = {};
@@ -58,7 +65,7 @@
 
     data = data || {};
     (data.scrap || []).forEach(function (id) { scrap[id] = true; });
-    facts = { stats: data.stats || {}, desc: data.desc || {}, dish: data.dish || {}, brew: data.brew || {}, scrap: scrap };
+    facts = { stats: data.stats || {}, desc: data.desc || {}, dish: data.dish || {}, brew: data.brew || {}, scrap: scrap, plan: data.plan || {} };
   }
 
   function setCounts(data) {
@@ -413,6 +420,47 @@
     }
   }
 
+  // ===== Survival Planning =====
+
+  // The page keys its card slots by position, so slot i always shows cards[i], and card.id is the talent id. A refresh
+  // swaps the cards under the same slots, which is why every badge is checked against its card on each poll. A slot
+  // count that differs from the list (a redraw in flight) skips the poll rather than badge the wrong card.
+  function patchPlanning(doc) {
+    var setup = vueSetup(doc);
+    var cards = setup ? setup.cards : null;
+    var slots = doc.querySelectorAll('.card-grid > .card-slot');
+
+    if (!cards) return diag('planning', 'no Vue state');
+    if (slots.length !== cards.length) return;
+
+    for (var i = 0; i < slots.length; i++) {
+      var frame = slots[i].querySelector(':scope > .card > .icon-frame');
+
+      if (frame) setPlanBadge(frame, doc, cards[i] ? facts.plan[cards[i].id] : null);
+    }
+  }
+
+  // The badge sits in the picture's bottom-right corner, clear of the game's exclusive seal, lock badge and
+  // "Activated" stamp, which all sit at the top of the card.
+  function setPlanBadge(frame, doc, text) {
+    var badge = frame.querySelector(':scope > .slip-plan');
+    var className = 'slip-plan ' + (text === ONE_OFF_BADGE ? 'slip-plan-once' : 'slip-plan-timed');
+
+    if (!text) {
+      if (badge) badge.remove();
+
+      return;
+    }
+
+    if (!badge) {
+      badge = doc.createElement('span');
+      frame.appendChild(badge);
+    }
+
+    if (badge.className !== className) badge.className = className;
+    if (badge.textContent !== text) badge.textContent = text;
+  }
+
   // ===== Finding the pages =====
 
   var PAGES = [
@@ -420,7 +468,8 @@
     { pattern: /TradeUI\.html/, isOn: function () { return features.counts || features.stats || features.brew || features.scrap; }, patch: function (win, doc) { patchTrade(doc); } },
     { pattern: /Cooking\.html/, isOn: function () { return features.counts || features.brew || features.scrap || features.codex; }, patch: patchCooking },
     { pattern: /BrewPanel\.html/, isOn: function () { return features.brew; }, patch: patchBrew },
-    { pattern: /ItemPickup\.html/, isOn: function () { return features.scrap; }, patch: function (win, doc) { patchPickup(doc); } }
+    { pattern: /ItemPickup\.html/, isOn: function () { return features.scrap; }, patch: function (win, doc) { patchPickup(doc); } },
+    { pattern: /RogueSelect\.html/, isOn: function () { return features.plan; }, patch: function (win, doc) { patchPlanning(doc); } }
   ];
 
   // The game's pages are same-origin iframes of this document, created and dropped whenever the game likes.

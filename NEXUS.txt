@@ -1,5 +1,5 @@
 Name: Info Pack
-Summary: Shows what the game knows but never puts on screen: how many of an item you have at home, a trader's food stats, brew quality, scrap-only loot and ingredient info while cooking. Emptied containers stop staying highlighted.
+Summary: Shows what the game knows but never puts on screen: how many of an item you have at home, a trader's food stats, brew quality, scrap-only loot, ingredient info while cooking and how long planning cards last. Emptied containers stop staying highlighted.
 
 Description (BBCode):
 Survival Log knows a lot it never shows you. Info Pack adds that information to the game's own tooltips and windows, in the game's own style. It only shows things; it never changes an item, a stat or a save.
@@ -11,6 +11,7 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 [*][b]Brew quality[/b]: a brewed drink's tooltip shows its tier, like "Brew quality: 2 of 3". While setting up a brew, the brew panel shows the quality score and what the next tier needs.[/*]
 [*][b]Scrap only[/b]: items only worth breaking down get an "Only useful as scrap" line, a Scrap chip on backpack slots and a Scrap tag in the pickup list.[/*]
 [*][b]Cooking codex[/b]: hover an ingredient or recipe in the cooking window to see its description and stats.[/*]
+[*][b]Planning badges[/b]: cards on the Survival Planning screen get a badge on their picture. Timed cards show how long they last, like "3d" or "24h"; cards that take effect once show "1x". Permanent cards get none.[/*]
 [*][b]Hide looted highlights[/b]: containers you have already searched and emptied lose their search colour on explore maps. Off by default; turn on HideLootedHighlights in the config to try it.[/*]
 [/list]
 Every piece can be turned off on its own in the config. There are no hotkeys.
@@ -56,6 +57,7 @@ Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUF
 
 [size=5]Changelog[/size]
 [list]
+[*]0.3.0: New planning badges: cards on the Survival Planning screen show how long they last ("3d", "24h") or "1x" for a one-time effect, so timed and permanent cards are easy to tell apart. On by default; turn off PlanningBadges in the config to hide them.[/*]
 [*]0.2.2: The setting descriptions are shorter and plainer, and each one now has a Simplified Chinese line. No setting or default changed.[/*]
 [*]0.2.1: Hide looted highlights is turned off by default after a crash on expeditions, and reworked to hook a safer spot. If you used 0.2.0, your config file still has it on: set HideLootedHighlights to false to turn it off.[/*]
 [/list]

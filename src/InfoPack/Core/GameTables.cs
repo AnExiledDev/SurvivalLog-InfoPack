@@ -11,7 +11,9 @@ public sealed record GameTables(
     IReadOnlyList<ProductionRecipe> Production,
     IReadOnlyList<CookingRecipe> Cooking,
     IReadOnlyList<IReadOnlyList<int>> BrewProducts,
-    IReadOnlyDictionary<int, IReadOnlyList<Yield>> ShredYields);
+    IReadOnlyDictionary<int, IReadOnlyList<Yield>> ShredYields,
+    IReadOnlyList<TalentRow> Talents,
+    IReadOnlyDictionary<int, float> BuffDurations);
 
 /// <summary>One row of the item table, reduced to what the pieces ask about.</summary>
 /// <param name="Category">The game's ItemCategory number (0 None, 1 Food, 4 Electrical, 5 Daily goods, 9 Material).</param>
@@ -44,6 +46,10 @@ public sealed record ProductionRecipe(IReadOnlyList<int> Materials, bool IsShred
 
 /// <summary>A cooking recipe: the ingredients it asks for by name and the dish each result quality gives.</summary>
 public sealed record CookingRecipe(int Id, IReadOnlyList<int> SpecificItems, int NormalItemId, int GoodItemId, int PerfectItemId, int FailItemId);
+
+/// <summary>One row of the talent table. Survival Planning cards are the rows of Type 2.</summary>
+/// <param name="BuffId">The buff the talent gives, 0 for none. BuffDurations has that buff's BuffDuring.</param>
+public sealed record TalentRow(int Id, int Type, int BuffId);
 
 /// <summary>One line of what shredding an item gives back.</summary>
 public readonly record struct Yield(int ConfigId, int Count);
