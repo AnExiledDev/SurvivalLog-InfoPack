@@ -25,7 +25,8 @@
     '.slip-brew{margin-top:4px;font-size:10px;color:#7e756c;text-align:center}',
     '.slip-plan{position:absolute;right:3px;bottom:3px;font-size:12px;font-weight:700;line-height:15px;padding:0 5px;border-radius:3px;letter-spacing:0;pointer-events:none;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.6)}',
     '.slip-plan-timed{color:#1a1a1a;background:#ffc83a;border:1px solid rgba(255,235,180,.6)}',
-    '.slip-plan-once{color:#0d1f27;background:#6ec6e6;border:1px solid rgba(205,240,255,.6)}'
+    '.slip-plan-once{color:#0d1f27;background:#6ec6e6;border:1px solid rgba(205,240,255,.6)}',
+    '.card.locked .slip-plan{opacity:.45}'
   ].join('\n');
 
   // PlanBadges.OneOffBadge on the plugin side: a badge with this text gets the one-off colour, any other the timed one.
@@ -440,6 +441,25 @@
     }
   }
 
+  // The poll alone can leave the old card's badge on a new card for a moment after a refresh, so the grid is also
+  // watched. Our own badge writes trigger one more pass that finds nothing to change, so it does not loop.
+  function patchPlanningPage(win, doc) {
+    var grid = doc.querySelector('.card-grid');
+
+    if (grid && win.__slipPlanGrid !== grid) {
+      win.__slipPlanGrid = grid;
+      new win.MutationObserver(function () {
+        try {
+          patchPlanning(doc);
+        } catch (e) {
+          diag('planning observer', e);
+        }
+      }).observe(grid, { childList: true, subtree: true });
+    }
+
+    patchPlanning(doc);
+  }
+
   // The badge sits in the picture's bottom-right corner, clear of the game's exclusive seal, lock badge and
   // "Activated" stamp, which all sit at the top of the card.
   function setPlanBadge(frame, doc, text) {
@@ -469,7 +489,7 @@
     { pattern: /Cooking\.html/, isOn: function () { return features.counts || features.brew || features.scrap || features.codex; }, patch: patchCooking },
     { pattern: /BrewPanel\.html/, isOn: function () { return features.brew; }, patch: patchBrew },
     { pattern: /ItemPickup\.html/, isOn: function () { return features.scrap; }, patch: function (win, doc) { patchPickup(doc); } },
-    { pattern: /RogueSelect\.html/, isOn: function () { return features.plan; }, patch: function (win, doc) { patchPlanning(doc); } }
+    { pattern: /RogueSelect\.html/, isOn: function () { return features.plan; }, patch: patchPlanningPage }
   ];
 
   // The game's pages are same-origin iframes of this document, created and dropped whenever the game likes.

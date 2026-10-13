@@ -41,7 +41,7 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 
 **Brew quality** reads the brew tiers the game itself uses for each barrel. The tier names in the brew panel come from the game, in your language.
 
-**Planning badges** read how long each card's effect lasts from the game's own tables. Lengths of two days or more show in days, shorter ones in hours, and anything that is not a whole number of hours in minutes, rounded up.
+**Planning badges** read how long each card's effect lasts from the game's own tables. Lengths of two days or more show in days, shorter ones in hours, and anything that is not a whole number of hours in minutes, rounded up. A few cards have a second stage the badge does not count: Knuckle Down gives 3 extra Survival Points a day for five days and then takes 1 a day for five more, and its badge shows `5d`.
 
 **The pages** in the game's windows keep these additions across reloads: the mod puts them back whenever the game reloads its web view.
 
