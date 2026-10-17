@@ -16,7 +16,8 @@ public static class PageFacts
 
     /// <summary>
     /// {"stats":{id:text},"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id],
-    /// "plan":{talentId:badge}}, with a key left out when its piece is off. Keys are in ascending id order so the same
+    /// "plan":{talentId:badge},"ui":{key:text}}, with a key left out when its piece is off. "ui" is always there and holds the
+    /// page's own words in the language the game shows. Keys are in ascending id order so the same
     /// tables always give the same text.
     /// </summary>
     public static string Build(GameTables tables, IGameText text, Features features)
@@ -35,8 +36,14 @@ public static class PageFacts
         if (features.ScrapOnly) parts.Add(Member("scrap", "[" + string.Join(",", ScrapRule.ScrapOnly(tables).Select(Number)) + "]"));
         if (features.PlanningBadges) parts.Add(Member("plan", TextObject(PlanBadges.Map(tables.Talents, tables.BuffDurations))));
 
+        parts.Add(Member("ui", Ui(text.IsChinese())));
+
         return "{" + string.Join(",", parts) + "}";
     }
+
+    /// <summary>{key:text} for every phrase the page script shows, in English or Chinese.</summary>
+    public static string Ui(bool isChinese) =>
+        "{" + string.Join(",", Texts.ByPageKey.Select(pair => Member(pair.Key, JsText.Literal(pair.Value.Pick(isChinese))))) + "}";
 
     /// <summary>{configId:count} in ascending id order, so equal counts always give equal text.</summary>
     public static string Counts(IReadOnlyDictionary<int, int> counts) =>

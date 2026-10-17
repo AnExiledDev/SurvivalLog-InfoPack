@@ -33,7 +33,7 @@
   var ONE_OFF_BADGE = '1x';
 
   var features = null;
-  var facts = { stats: {}, desc: {}, dish: {}, brew: {}, scrap: {}, plan: {} };
+  var facts = { stats: {}, desc: {}, dish: {}, brew: {}, scrap: {}, plan: {}, ui: {} };
   var counts = {};
   var hasCounts = false;
   var instances = {};
@@ -66,7 +66,7 @@
 
     data = data || {};
     (data.scrap || []).forEach(function (id) { scrap[id] = true; });
-    facts = { stats: data.stats || {}, desc: data.desc || {}, dish: data.dish || {}, brew: data.brew || {}, scrap: scrap, plan: data.plan || {} };
+    facts = { stats: data.stats || {}, desc: data.desc || {}, dish: data.dish || {}, brew: data.brew || {}, scrap: scrap, plan: data.plan || {}, ui: data.ui || {} };
   }
 
   function setCounts(data) {
@@ -98,6 +98,21 @@
 
   // ===== What to say about an item =====
 
+  // The plugin sends the page's words in the game's language (Texts.cs); English stands in until they arrive.
+  var ENGLISH = {
+    home: 'At home: {0}',
+    brew: 'Brew quality: {0} of {1}',
+    scrap: 'Only useful as scrap',
+    scrapChip: 'Scrap',
+    brewScore: 'Quality {0}: {1} from {2}, {3} from {4}'
+  };
+
+  function say(key) {
+    var values = Array.prototype.slice.call(arguments, 1);
+
+    return (facts.ui[key] || ENGLISH[key]).replace(/\{(\d)\}/g, function (token, slot) { return values[slot]; });
+  }
+
   function isScrap(configId) {
     return !!(features && features.scrap && facts.scrap[configId]);
   }
@@ -110,9 +125,9 @@
     if (!features || !(configId > 0)) return lines;
 
     if (withStats && features.stats && facts.stats[configId]) lines.push({ text: facts.stats[configId], kind: 'slip-stats' });
-    if (features.counts && hasCounts) lines.push({ text: 'At home: ' + (counts[configId] || 0), kind: '' });
-    if (features.brew && tier) lines.push({ text: 'Brew quality: ' + tier[0] + ' of ' + tier[1], kind: '' });
-    if (isScrap(configId)) lines.push({ text: 'Only useful as scrap', kind: 'slip-warn' });
+    if (features.counts && hasCounts) lines.push({ text: say('home', counts[configId] || 0), kind: '' });
+    if (features.brew && tier) lines.push({ text: say('brew', tier[0], tier[1]), kind: '' });
+    if (isScrap(configId)) lines.push({ text: say('scrap'), kind: 'slip-warn' });
 
     return lines;
   }
@@ -244,7 +259,7 @@
       for (var i = 0; i < cells.length; i++) {
         var item = items[i];
 
-        setChip(cells[i], doc, isScrap(item.cfgId) && !(item.useTimesMax > 1), 'slip-scrap', 'Scrap');
+        setChip(cells[i], doc, isScrap(item.cfgId) && !(item.useTimesMax > 1), 'slip-scrap', say('scrapChip'));
       }
     }
   }
@@ -397,7 +412,7 @@
     if (labels.nextSibling !== box) labels.parentNode.insertBefore(box, labels.nextSibling);
 
     box.style.display = '';
-    box.textContent = 'Quality ' + fixed(state.moodDensity) + ': ' + (text.tierMid || 'Normal') + ' from ' + fixed(low) + ', ' + (text.tierHigh || 'Strong') + ' from ' + fixed(high);
+    box.textContent = say('brewScore', fixed(state.moodDensity), text.tierMid || 'Normal', fixed(low), text.tierHigh || 'Strong', fixed(high));
   }
 
   function fixed(value) {
@@ -417,7 +432,7 @@
     for (var i = 0; i < rows.length; i++) {
       var info = rows[i].querySelector('.item-info');
 
-      if (info) setChip(info, doc, isScrap(items[i].configId), 'slip-tag', 'Scrap');
+      if (info) setChip(info, doc, isScrap(items[i].configId), 'slip-tag', say('scrapChip'));
     }
   }
 

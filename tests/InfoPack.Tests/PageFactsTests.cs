@@ -52,29 +52,29 @@ public class PageFactsTests
     [Fact]
     public void With_every_piece_on_the_page_gets_every_kind_of_fact()
     {
-        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan" }, Keys(Build(AllOn)));
+        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan", "ui" }, Keys(Build(AllOn)));
     }
 
     [Fact]
     public void A_piece_turned_off_sends_nothing_for_it()
     {
-        Assert.Empty(Keys(Build(AllOff)));
-        Assert.Equal(new[] { "scrap" }, Keys(Build(AllOff with { ScrapOnly = true })));
-        Assert.Equal(new[] { "brew" }, Keys(Build(AllOff with { AlcoholQuality = true })));
-        Assert.Equal(new[] { "stats", "desc", "dish" }, Keys(Build(AllOff with { CookingCodex = true })));
-        Assert.Equal(new[] { "plan" }, Keys(Build(AllOff with { PlanningBadges = true })));
+        Assert.Equal(new[] { "ui" }, Keys(Build(AllOff)));
+        Assert.Equal(new[] { "scrap", "ui" }, Keys(Build(AllOff with { ScrapOnly = true })));
+        Assert.Equal(new[] { "brew", "ui" }, Keys(Build(AllOff with { AlcoholQuality = true })));
+        Assert.Equal(new[] { "stats", "desc", "dish", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
+        Assert.Equal(new[] { "plan", "ui" }, Keys(Build(AllOff with { PlanningBadges = true })));
     }
 
     [Fact]
     public void Trade_stats_alone_still_gets_the_stat_lines()
     {
-        Assert.Equal(new[] { "stats" }, Keys(Build(AllOff with { TradeStats = true })));
+        Assert.Equal(new[] { "stats", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
     }
 
     [Fact]
     public void Base_counts_need_no_facts_because_counts_travel_on_their_own()
     {
-        Assert.Empty(Keys(Build(AllOff with { BaseCounts = true })));
+        Assert.Equal(new[] { "ui" }, Keys(Build(AllOff with { BaseCounts = true })));
     }
 
     [Fact]
@@ -159,5 +159,43 @@ public class PageFactsTests
     {
         Assert.Equal("{\"7\":1,\"40\":2,\"301\":5}", PageFacts.Counts(new Dictionary<int, int> { [301] = 5, [7] = 1, [40] = 2 }));
         Assert.Equal("{}", PageFacts.Counts(new Dictionary<int, int>()));
+    }
+
+    [Fact]
+    public void The_page_words_follow_the_language_the_game_shows()
+    {
+        var english = JsonDocument.Parse(PageFacts.Build(World(), Text(), AllOff)).RootElement.GetProperty("ui");
+        var chinese = JsonDocument.Parse(PageFacts.Build(World(), new FakeText { Chinese = true }, AllOff)).RootElement.GetProperty("ui");
+
+        Assert.Equal(Texts.Home.En, english.GetProperty("home").GetString());
+        Assert.Equal(Texts.Home.Zh, chinese.GetProperty("home").GetString());
+        Assert.Equal(Texts.ScrapChip.Zh, chinese.GetProperty("scrapChip").GetString());
+    }
+
+    [Fact]
+    public void Every_page_word_is_sent_under_its_own_key()
+    {
+        var ui = JsonDocument.Parse(PageFacts.Ui(false)).RootElement;
+
+        Assert.Equal(new[] { "home", "brew", "scrap", "scrapChip", "brewScore" }, Keys(ui));
+        Assert.All(Texts.ByPageKey, pair => Assert.Equal(pair.Value.En, ui.GetProperty(pair.Key).GetString()));
+    }
+
+    [Fact]
+    public void Every_phrase_has_both_languages_and_the_same_placeholders()
+    {
+        foreach (var pair in Texts.ByPageKey)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(pair.Value.En));
+            Assert.False(string.IsNullOrWhiteSpace(pair.Value.Zh));
+            Assert.NotEqual(pair.Value.En, pair.Value.Zh);
+
+            for (var slot = 0; slot < 5; slot++)
+            {
+                var token = "{" + slot + "}";
+
+                Assert.Equal(pair.Value.En.Contains(token), pair.Value.Zh.Contains(token));
+            }
+        }
     }
 }

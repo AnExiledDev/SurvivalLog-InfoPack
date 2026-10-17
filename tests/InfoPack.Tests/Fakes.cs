@@ -66,4 +66,8 @@ internal sealed class FakeText : IGameText
     public IReadOnlyList<StatFormat> StatFormats() => English;
 
     public string? Description(int itemId) => _descriptions.TryGetValue(itemId, out var description) ? description : null;
+
+    public bool Chinese { get; init; }
+
+    public bool IsChinese() => Chinese;
 }

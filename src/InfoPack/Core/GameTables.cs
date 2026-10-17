@@ -62,4 +62,7 @@ public interface IGameText
 
     /// <summary>The item's description in the player's language, or null when it has none.</summary>
     string? Description(int itemId);
+
+    /// <summary>True when the game shows Chinese. Anything unknown reads as English.</summary>
+    bool IsChinese();
 }

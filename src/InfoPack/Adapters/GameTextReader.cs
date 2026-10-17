@@ -50,6 +50,18 @@ internal sealed class GameTextReader : IGameText
     /// <summary>The language the game shows, or null before its settings exist. A plain field read on the game's side.</summary>
     public string? LanguageKey() => GameSingleton.Existing<SettingManager>()?.GetLanguageKey();
 
+    public bool IsChinese()
+    {
+        try
+        {
+            return GameSingleton.Existing<SettingManager>()?.IsChinese() == true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     public string? Description(int itemId)
     {
         var config = GameSingleton.Existing<ConfigManager>();

@@ -55,12 +55,12 @@ Tooltips and windows are finicky. The game draws them as web pages and reloads t
 - The game places its tooltips for a fixed size. A tooltip made taller by these lines can reach past the bottom of the screen near the lower edge.
 - The brew panel shows the quality score only while a brew is being set up. Once the barrel is brewing it is hidden.
 - An emptied container still gets the plain outline every piece of furniture gets while Alt is held, and the outline when you point at it. Only the search colour goes.
-- The mod's own text is in English. The stat wording, item descriptions and brew tier names come from the game, in your language.
+- The mod's own lines and tags follow the game's language, English or Simplified Chinese. The stat wording, item descriptions and brew tier names come from the game, in your language.
 - `BepInEx\info-pack.log` is never trimmed. Delete it now and then if it grows large.
 
 ## Requirements
 
-- Survival Log 1.1.18317. Built for this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.18902. Built for this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Not together with ItemTotals, unless you turn off `BaseCounts` (see [Replaces ItemTotals](#replaces-itemtotals)).
 
@@ -76,13 +76,13 @@ Delete `InfoPack.dll` from the `BepInEx\plugins` folder. For a clean slate, also
 
 ## Configuration
 
-Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Edit it while the game is closed; changes apply at the next game start. See [CONFIG.md](CONFIG.md) for every setting.
+Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Edit it while the game is closed; changes apply at the next game start. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting.
 
 ## Troubleshooting
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.3.0 started`. It lists which pieces are on. The lines after it say whether the looted highlight hook went in (only when HideLootedHighlights is on), and when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.3.1 started`. It lists which pieces are on. The lines after it say whether the looted highlight hook went in (only when HideLootedHighlights is on), and when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -94,6 +94,7 @@ Found a bug, have an idea, or something feels off? Come say so on the Core Direc
 
 ## Changelog
 
+- 0.3.1: The mod's own tooltip lines and tags show in Chinese when the game is in Chinese, and the cfg descriptions use the same words. Built for game version 1.1.18902.
 - 0.3.0: New planning badges: cards on the Survival Planning screen show how long they last (`3d`, `24h`) or `1x` for a one-time effect, so timed and permanent cards are easy to tell apart. On by default; set `PlanningBadges` to `false` to turn it off.
 - 0.2.2: The setting descriptions are shorter and plainer, and each one now has a Simplified Chinese line. No setting or default changed.
 - 0.2.1: Hide looted highlights is turned off by default after a crash on expeditions, and reworked to hook a safer spot. If you used 0.2.0, your settings file still has it on: set `HideLootedHighlights` to `false` to turn it off.
