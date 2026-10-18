@@ -47,8 +47,6 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 
 ## Known issues and limits
 
-Tooltips and windows are finicky. The game draws them as web pages and reloads them often, and this mod adds lines to them. If a line is missing, wrong, shows twice, or a tooltip looks broken, please tell me (see [Feedback](#feedback-and-bug-reports)), even if you are not sure the mod caused it. If one piece misbehaves, turn just that one off in the settings.
-
 - The ingredient lines under a recipe in the cooking window are the game's own and get no counts.
 - The scrap rule does not know about wishes, aid demands, robot modules or trap bait, so an item only those ask for can still be marked as scrap. Check before you shred something rare. Anything the game burns as fuel counts as useful and is never marked.
 - Items on the trader's side that the game has not loaded yet get no lines in the trade tooltip. Items you sell can take a moment to show their lines the first time.
@@ -56,7 +54,6 @@ Tooltips and windows are finicky. The game draws them as web pages and reloads t
 - The brew panel shows the quality score only while a brew is being set up. Once the barrel is brewing it is hidden.
 - An emptied container still gets the plain outline every piece of furniture gets while Alt is held, and the outline when you point at it. Only the search colour goes.
 - The mod's own lines and tags follow the game's language, English or Simplified Chinese. The stat wording, item descriptions and brew tier names come from the game, in your language.
-- `BepInEx\info-pack.log` is never trimmed. Delete it now and then if it grows large.
 
 ## Requirements
 

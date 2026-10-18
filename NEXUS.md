@@ -25,13 +25,11 @@ Works in English and Chinese.
 
 [size=5]Known issues[/size]
 [list]
-[*]Tooltips are finicky: the game draws them as web pages and reloads them often. If a line is missing, wrong or doubled, turn that piece off and tell me.[/*]
 [*]The scrap rule does not know about wishes, aid demands, robot modules or trap bait. Check before you shred something rare.[/*]
 [*]A tooltip made taller by these lines can reach past the bottom of the screen near the lower edge.[/*]
 [*]The brew panel score shows only while a brew is being set up, not once it is brewing.[/*]
 [*]Ingredient lines under a recipe in the cooking window get no home counts.[/*]
 [/list]
-If you run into anything strange, please tell me (see Feedback below).
 
 [size=5]Requirements[/size]
 [list]
@@ -94,13 +92,11 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 
 [size=5]已知问题[/size]
 [list]
-[*]提示比较难处理：游戏把提示当作网页绘制，并且经常重新加载。如果某一行缺失、出错或重复，请关闭那一项并告诉我。[/*]
 [*]回收规则不了解愿望、援助需求、机器人模块和陷阱诱饵。粉碎稀有物品前请先确认。[/*]
 [*]靠近屏幕底部时，因多出这些行而变高的提示可能超出屏幕。[/*]
 [*]酿酒面板的分数只在准备酿造时显示，开始酿造后就不再显示。[/*]
 [*]烹饪界面里菜谱下方的食材行不显示家中数量。[/*]
 [/list]
-如果遇到任何奇怪的情况，请告诉我（见下方反馈）。
 
 [size=5]前置要求[/size]
 [list]
