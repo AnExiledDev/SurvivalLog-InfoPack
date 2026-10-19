@@ -1,7 +1,6 @@
 using System.IO;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
-using ExiledToolkit;
 using HarmonyLib;
 using InfoPack.Adapters;
 using InfoPack.Core;
@@ -9,7 +8,7 @@ using InfoPack.Core;
 namespace InfoPack;
 
 [BepInPlugin(Guid, "Info Pack", Version)]
-[BepInDependency(ExiledToolkit.Plugin.Guid, ">=0.4.0")]
+[BepInDependency(OptionalLive.ToolkitGuid, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
@@ -17,6 +16,8 @@ public sealed class Plugin : BasePlugin
 
     public override void Load()
     {
+        if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
+
         var baseCounts = Config.Bind("Features", "BaseCounts", true,
             "When on (the default), item tooltips in the backpack, trade and cooking windows get an 'At home: N' line counting that item in your backpack, every storage at home and the workbench drawer. Turn it off if you also use the ItemTotals mod, so tooltips don't show two counts.\n" +
             "开启时（默认），背包、交易和烹饪界面的物品提示会多一行「家中共有：N」，显示这件物品在背包、家里所有储物家具和工作台抽屉里一共有多少。如果同时装了 ItemTotals 模组，请关闭此项，免得提示里出现两行数量。");
@@ -48,7 +49,7 @@ public sealed class Plugin : BasePlugin
 
         var session = new InfoSession(ReadFeatures(), new WebPage(log.Write), new GameTableReader(log.Write), new GameTextReader(log.Write), log.Write);
 
-        LiveSettings.Watch(() =>
+        OptionalLive.Watch(() =>
         {
             var features = ReadFeatures();
 
