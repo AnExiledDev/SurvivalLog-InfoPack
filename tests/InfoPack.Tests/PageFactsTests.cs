@@ -21,8 +21,8 @@ public class PageFactsTests
     private const int Lounging = 31302;
     private const int Awakening = 10011;
 
-    private static readonly Features AllOn = new(true, true, true, true, true, true, true);
-    private static readonly Features AllOff = new(false, false, false, false, false, false, false);
+    private static readonly Features AllOn = new(true, true, true, true, true, true);
+    private static readonly Features AllOff = new(false, false, false, false, false, false);
 
     private static GameTables World() => Tables(
         new[] { Junk(Battery, tradeValue: 0), Plain(Wire), Edible(Rice, 5f, 1f), Plain(Salt), Edible(Stew, 20f, 3f, 0f, 0f, -1f) },

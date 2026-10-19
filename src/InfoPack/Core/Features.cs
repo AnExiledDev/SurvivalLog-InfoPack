@@ -7,13 +7,10 @@ public sealed record Features(
     bool AlcoholQuality,
     bool ScrapOnly,
     bool CookingCodex,
-    bool HideLootedHighlights,
     bool PlanningBadges)
 {
-    public bool IsAnyOn => IsAnyPageOn || HideLootedHighlights;
-
-    /// <summary>The pieces drawn by the page script. Hiding looted highlights works in the game world and needs no page.</summary>
-    public bool IsAnyPageOn => BaseCounts || TradeStats || AlcoholQuality || ScrapOnly || CookingCodex || PlanningBadges;
+    /// <summary>Every piece is drawn by the page script, so with all of them off the mod has nothing to do.</summary>
+    public bool IsAnyOn => BaseCounts || TradeStats || AlcoholQuality || ScrapOnly || CookingCodex || PlanningBadges;
 
     /// <summary>The stat line is shown by two pieces: the trade tooltip and the cooking codex section.</summary>
     public bool NeedsStats => TradeStats || CookingCodex;

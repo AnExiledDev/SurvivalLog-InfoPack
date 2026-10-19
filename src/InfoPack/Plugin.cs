@@ -11,7 +11,7 @@ namespace InfoPack;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.3.1";
+    private const string Version = "0.3.2";
 
     public override void Load()
     {
@@ -31,15 +31,12 @@ public sealed class Plugin : BasePlugin
             Config.Bind("Features", "CookingCodex", true,
                 "When on (the default), hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes.\n" +
                 "开启时（默认），在烹饪界面悬停食材，提示里会加上它的描述和属性；悬停菜谱，则加上做出的菜肴的描述和属性。").Value,
-            Config.Bind("Features", "HideLootedHighlights", false,
-                "Off by default. When on, containers on explore maps that you have searched and emptied lose their search colour when you hold Alt or point at them, while unsearched containers and ones with items left keep it.\n" +
-                "默认关闭。开启后，在探索地图上按住 Alt 或指向容器时，已经搜寻过并搜空的容器不再显示搜寻状态的颜色；没搜寻过的容器和里面还有物品的容器保持原来的颜色。").Value,
             Config.Bind("Features", "PlanningBadges", true,
                 "When on (the default), cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like '3d' or '24h'. A card that takes effect once shows '1x'. Cards that last for good get no badge.\n" +
                 "开启时（默认），生存规划界面的卡牌图片上会显示一个小角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。").Value);
         var log = new InfoLog(Log, Path.Combine(Paths.BepInExRootPath, "info-pack.log"));
 
-        log.Write($"===== Info Pack {Version} started, features {features.ToJson()}, hide looted highlights {features.HideLootedHighlights}");
+        log.Write($"===== Info Pack {Version} started, features {features.ToJson()}");
 
         if (!features.IsAnyOn)
         {
@@ -49,10 +46,6 @@ public sealed class Plugin : BasePlugin
         }
 
         var harmony = new Harmony(Guid);
-
-        if (features.HideLootedHighlights) LootedOutlinePatch.Apply(harmony, log.Write);
-
-        if (!features.IsAnyPageOn) return;
 
         // Without the patch the page's messages never arrive, so a session would only re-post the install check forever.
         if (!PageMessages.Apply(harmony, log.Write)) return;

@@ -12,7 +12,6 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 | `ScrapOnly` | `true` | Items only worth shredding get an `Only useful as scrap` line in their tooltip, a `Scrap` chip on their backpack slot and a `Scrap` tag in the pickup list. |
 | `CookingCodex` | `true` | Hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes. |
 | `PlanningBadges` | `true` | Cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like `3d` or `24h`. A card that takes effect once shows `1x`. Cards that last for good get no badge. |
-| `HideLootedHighlights` | `false` | Off by default. When on, containers on explore maps that you have searched and emptied lose their search colour when you hold Alt or point at them, while unsearched containers and ones with items left keep it. |
 
 Each piece works on its own, so turn off any you don't want and the rest keep working.
 

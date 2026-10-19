@@ -12,7 +12,6 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 [*][b]Scrap only[/b]: items only worth breaking down get an "Only useful as scrap" line, a Scrap chip on backpack slots and a Scrap tag in the pickup list.[/*]
 [*][b]Cooking codex[/b]: hover an ingredient or recipe in the cooking window to see its description and stats.[/*]
 [*][b]Planning badges[/b]: cards on the Survival Planning screen get a badge on their picture. Timed cards show how long they last, like "3d" or "24h"; cards that take effect once show "1x". Permanent cards get none. A few cards have a second stage the badge does not count, such as Knuckle Down, which gives 3 Survival Points a day for five days and then takes 1 a day for five more.[/*]
-[*][b]Hide looted highlights[/b]: containers you have already searched and emptied lose their search colour on explore maps. Off by default; turn on HideLootedHighlights in the config to try it.[/*]
 [/list]
 Every piece can be turned off on its own in the config. There are no hotkeys.
 
@@ -57,6 +56,7 @@ Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUF
 
 [size=5]Changelog[/size]
 [list]
+[*]0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.[/*]
 [*]0.3.1: The mod's own tooltip lines and tags now show in Chinese when the game is in Chinese, and the setting descriptions use the same words. Built for game version 1.1.18902.[/*]
 [*]0.3.0: New planning badges: cards on the Survival Planning screen show how long they last ("3d", "24h") or "1x" for a one-time effect, so timed and permanent cards are easy to tell apart. On by default; turn off PlanningBadges in the config to hide them.[/*]
 [*]0.2.2: The setting descriptions are shorter and plainer, and each one now has a Simplified Chinese line. No setting or default changed.[/*]
@@ -79,7 +79,6 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 [*][b]只适合回收[/b]：只值得拆解的物品会多一行「只适合回收」，背包格子上显示「回收」角标，拾取列表里带上「回收」标记。[/*]
 [*][b]烹饪图鉴[/b]：在烹饪界面悬停食材或菜谱，可以看到它的描述和属性。[/*]
 [*][b]规划角标[/b]：生存规划界面的卡牌图片上会显示角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。少数卡牌有角标不计算的第二阶段，例如「短期激励」，前五天每天给 3 点生存点，之后五天每天扣 1 点。[/*]
-[*][b]隐藏已搜空的高亮[/b]：在探索地图上，已经搜寻过并搜空的容器不再显示搜寻状态的颜色。默认关闭；如需试用，请在配置中开启 HideLootedHighlights。[/*]
 [/list]
 每一项都可以在配置中单独关闭。没有快捷键。
 
