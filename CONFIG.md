@@ -1,6 +1,6 @@
 # Info Pack settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Edit the file while the game is closed; changes apply at the next game start. Delete the file to get the defaults back.
+Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, where they take effect at once, or edit the file while the game is closed. Delete the file to get the defaults back.
 
 ## Features
 
@@ -17,4 +17,4 @@ Each piece works on its own, so turn off any you don't want and the rest keep wo
 
 Set `BaseCounts` to `false` if you keep the ItemTotals mod installed, so tooltips don't show two count lines.
 
-With every setting `false`, the mod writes one line to the log saying it has nothing to do, and stays out of the game.
+With every setting `false`, the mod draws nothing and the log says every feature is off.

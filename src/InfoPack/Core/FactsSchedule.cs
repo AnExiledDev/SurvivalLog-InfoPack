@@ -32,4 +32,11 @@ public sealed class FactsSchedule
 
     /// <summary>A page reload often comes with a new save or language: look at once rather than at the next interval.</summary>
     public void PageReloaded() => _nextCheckAt = 0f;
+
+    /// <summary>The facts hold only what the features ask for, so a change of them builds the facts again at once.</summary>
+    public void SettingsChanged()
+    {
+        _built = null;
+        _nextCheckAt = 0f;
+    }
 }

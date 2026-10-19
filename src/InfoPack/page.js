@@ -59,6 +59,23 @@
 
   function setFeatures(flags) {
     features = flags || {};
+    clearDrawn();
+  }
+
+  // A change of the settings starts every page clean, so nothing of a feature turned off is left; the next poll draws
+  // what is still on.
+  function clearDrawn() {
+    var frames = document.querySelectorAll('iframe');
+
+    for (var i = 0; i < frames.length; i++) {
+      var doc = null;
+
+      try {
+        doc = frames[i].contentDocument;
+      } catch (e) {}
+
+      if (doc) doc.querySelectorAll('.slip-lines, .slip-brew, .slip-scrap, .slip-tag, .slip-plan').forEach(function (el) { el.remove(); });
+    }
   }
 
   function setFacts(data) {

@@ -14,7 +14,7 @@ internal sealed class InfoSession
 {
     private const float CheckSeconds = 2f;
 
-    private readonly Features _features;
+    private Features _features;
     private readonly WebPage _page;
     private readonly GameTableReader _tables;
     private readonly GameTextReader _text;
@@ -32,6 +32,18 @@ internal sealed class InfoSession
         _tables = tables;
         _text = text;
         _log = log;
+    }
+
+    /// <summary>
+    /// Called on the main thread at start and after each change. The page gets the new flags at once (it clears what it
+    /// drew and draws again), and the facts are built again for what is now on.
+    /// </summary>
+    public void UseFeatures(Features features)
+    {
+        _features = features;
+        _factsSchedule.SettingsChanged();
+
+        if (_isPageReady) _page.Features(features.ToJson());
     }
 
     public void Update()

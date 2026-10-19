@@ -26,6 +26,19 @@ public class FactsScheduleTests
     }
 
     [Fact]
+    public void A_change_of_features_builds_the_facts_again_at_once_for_the_same_world()
+    {
+        var schedule = new FactsSchedule(2f);
+
+        schedule.Building(English);
+        schedule.Checked(10f);
+        schedule.SettingsChanged();
+
+        Assert.True(schedule.IsDue(10.016f));
+        Assert.True(schedule.NeedsBuild(English));
+    }
+
+    [Fact]
     public void Facts_are_built_once_for_a_world_and_language()
     {
         var schedule = new FactsSchedule(2f);

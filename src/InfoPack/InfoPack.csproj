@@ -12,6 +12,7 @@
     <GameDir Condition="'$(GameDir)' == ''">D:\Games\Survival Log\Survival Log</GameDir>
     <BepInExCore>$(GameDir)\BepInEx\core</BepInExCore>
     <Interop>$(GameDir)\BepInEx\interop</Interop>
+    <ToolkitDll Condition="'$(ToolkitDll)' == ''">D:\devnew\game-mods\SurvivalLog\mods\sl-exiled-toolkit\src\ExiledToolkit\bin\Release\ExiledToolkit.dll</ToolkitDll>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,10 +28,22 @@
     <Reference Include="$(Interop)\UnityEngine.UI.dll" Private="false" />
     <Reference Include="$(Interop)\UnityEngine.InputLegacyModule.dll" Private="false" />
     <Reference Include="$(Interop)\Vuplex.WebView.dll" Private="false" />
+    <Reference Include="$(ToolkitDll)" Private="false" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="page.js" LogicalName="InfoPack.page.js" />
+  </ItemGroup>
+
+  <!-- What the Mod Manager's Mods screen shows about this mod. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="ModManager.Name" Value="Info Pack&#10;信息补充包" />
+    <AssemblyMetadata Include="ModManager.Description" Value="Shows what the game knows but never puts on screen: how many of an item you have at home, a trader's food stats, brew quality, scrap-only loot, ingredient info while cooking and how long planning cards last. Emptied containers stop staying highlighted.&#10;显示游戏知道却从不显示的信息：一件物品家里有多少、商人食物的属性、酒的品质、只适合回收的物品、烹饪时的食材信息，以及规划卡牌的持续时间。搜空的容器不再保持高亮。" />
+    <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
+    <AssemblyMetadata Include="ModManager.Category" Value="Interface" />
+    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.18902" />
+    <AssemblyMetadata Include="ModManager.Settings" Value="Live" />
+    <AssemblyMetadata Include="ModManager.GitHub" Value="AnExiledDev/SurvivalLog-InfoPack" />
   </ItemGroup>
 
 </Project>
