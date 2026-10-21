@@ -1,5 +1,5 @@
 Name: Info Pack
-Summary: Shows what the game knows but never puts on screen: how many of an item you have at home, a trader's food stats, brew quality, scrap-only loot, ingredient info while cooking and how long planning cards last. Emptied containers stop staying highlighted. 显示游戏知道却从不显示的信息：一件物品家里有多少、商人食物的属性、酒的品质、只适合回收的物品、烹饪时的食材信息，以及规划卡牌的持续时间。搜空的容器不再保持高亮。
+Summary: Shows what Survival Log knows but never puts on screen: how many of an item you have at home, what a trader's food does before you buy it, brew quality, which loot is only worth scrapping, ingredient stats while cooking and how long planning cards last. Every piece can be turned off on its own, and it never changes an item, a stat or a save.
 
 Description (BBCode):
 Survival Log knows a lot it never shows you. Info Pack adds that information to the game's own tooltips and windows, in the game's own style. It only shows things; it never changes an item, a stat or a save.
