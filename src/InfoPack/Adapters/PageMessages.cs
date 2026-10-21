@@ -33,7 +33,7 @@ internal static class PageMessages
         }
         catch (Exception ex)
         {
-            log("could not listen for page script messages, Info Pack stays off: " + ex.Message);
+            log("could not hook page script messages, Info Pack stays off: " + ex.Message);
 
             return false;
         }
