@@ -15,6 +15,8 @@ namespace InfoPack.Adapters;
 internal sealed class GameTableReader
 {
     private const int FoodCategory = 1;
+    private const int GeneratorType = 3;
+    private const int HeaterType = 7;
 
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
@@ -52,6 +54,7 @@ internal sealed class GameTableReader
             TrapBait = Guarded("trap bait table", () => TrapBait(config), new Dictionary<int, string>()),
             RobotModules = Guarded("robot module table", () => RobotModules(config), new Dictionary<int, int>()),
             Brewing = Guarded("brew settings", BrewSettings, BrewRules.Default),
+            Fuel = Guarded("fuel burners", () => FuelBurners(config), FuelRates.None),
         };
     }
 
@@ -224,6 +227,52 @@ internal sealed class GameTableReader
         Furniture.GetEffectiveTierThresholds(out var low, out var high);
 
         return new BrewRules(low, high, Furniture.GetEffectiveSatietyPerBottle());
+    }
+
+    /// <summary>
+    /// The rate of every cooking pot, heater (electrical type 7) and generator (type 3) that has fuel slots, with the
+    /// two fuel-saving talents as the leading role has them now.
+    /// </summary>
+    private static FuelRates FuelBurners(ConfigManager config)
+    {
+        var cookTable = config._Config_FurnitureCook_Dict ?? throw new InvalidOperationException("the game has no cooking furniture table loaded");
+        var electricalTable = config._Config_FurnitureElectrical_Dict ?? throw new InvalidOperationException("the game has no electrical furniture table loaded");
+        var cooking = new List<float>();
+        var heaters = new List<float>();
+        var generators = new List<float>();
+
+        foreach (var pot in cookTable.Values)
+        {
+            if (pot != null && pot.FuelSlotCount > 0) cooking.Add(pot.FuelRate);
+        }
+
+        foreach (var device in electricalTable.Values)
+        {
+            if (device == null || device.FuelSlotCount <= 0) continue;
+
+            if (device.ElectricalType == HeaterType) heaters.Add(device.FuelRate);
+            else if (device.ElectricalType == GeneratorType) generators.Add(device.FuelRate);
+        }
+
+        return new FuelRates(
+            cooking,
+            Saving(() => Furniture.GetTalentEffectRatio("Buff/AE_FuelSavingMultiplier")),
+            heaters,
+            generators,
+            Saving(() => PowerManager.GetTalentEffectRatio("Buff/AE_GeneratorFuelSaving")));
+    }
+
+    /// <summary>Before the leading role exists the game has no talents to ask about, which is the same as none.</summary>
+    private static float Saving(Func<float> read)
+    {
+        try
+        {
+            return read();
+        }
+        catch (Exception)
+        {
+            return 0f;
+        }
     }
 
     /// <summary>The planning cards need both this and the buff table; a missing one is thrown so it is logged once.</summary>

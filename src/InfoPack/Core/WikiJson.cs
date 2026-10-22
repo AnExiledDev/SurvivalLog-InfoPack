@@ -48,6 +48,7 @@ public static class WikiJson
         if (entry.Shred.Count > 0) fields.Add(Field("shred", JsonArray(entry.Shred.Select(shred => Pair(shred.ConfigId, shred.Count)))));
         if (entry.CutProduct > 0) fields.Add(Field("cut", Number(entry.CutProduct)));
         if (entry.BurnValue > 0) fields.Add(Field("burn", Number(entry.BurnValue)));
+        if (entry.Burn is not null) fields.Add(Field("bt", Burned(entry.Burn)));
         if (entry.Growth is not null) fields.Add(Field("grow", Grow(entry.Growth)));
         if (entry.FoundIn.Count > 0) fields.Add(Field("found", JsonArray(entry.FoundIn.Select(Found))));
 
@@ -57,7 +58,9 @@ public static class WikiJson
     private static string Use(ItemUse use) => use switch
     {
         ItemUse.Bench bench => JsonObject(new[] { Kind("bench"), Field("out", Number(bench.Product)), Field("need", Needs(bench.Needs)) }),
-        ItemUse.Cook cook => JsonObject(new[] { Kind("cook"), Field("out", Number(cook.Dish)) }),
+        ItemUse.Cook cook => JsonObject(cook.Seconds > 0
+            ? new[] { Kind("cook"), Field("out", Number(cook.Dish)), Field("t", Number(cook.Seconds)) }
+            : new[] { Kind("cook"), Field("out", Number(cook.Dish)) }),
         ItemUse.Brew brew => Brewed(brew),
         _ => throw new InvalidOperationException("unhandled item use " + use),
     };
@@ -86,6 +89,20 @@ public static class WikiJson
 
         return JsonObject(fields);
     }
+
+    /// <summary>{c,h,g}: [shortest, longest] game seconds in a cooking pot, a heater and a generator, each only where there is one.</summary>
+    private static string Burned(BurnTimes burn)
+    {
+        var fields = new List<string>();
+
+        if (burn.Cooking is not null) fields.Add(Field("c", Span(burn.Cooking)));
+        if (burn.Heater is not null) fields.Add(Field("h", Span(burn.Heater)));
+        if (burn.Generator is not null) fields.Add(Field("g", Span(burn.Generator)));
+
+        return JsonObject(fields);
+    }
+
+    private static string Span(BurnSpan span) => Pair(span.Shortest, span.Longest);
 
     /// <summary>A recipe that goes by food tags names no ingredients, and one without a cook time gives none.</summary>
     private static string Cooked(ItemSource.Cook cook)

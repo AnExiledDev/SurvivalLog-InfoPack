@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Dishes under Used in: each dish an item cooks into now shows its cook time, like `Cooking, 15m`, and what eating it does on a second line, like `+30 Satiety, +5 Mood`.
+- How long fuel burns: under Fuel, an item that burns shows how long one lasts in a cooking pot, a heater and a fuel generator, like `Cooks for 1h 51m` and `Runs a generator for 2d 2h`. Where the game has more than one model with different rates, it shows the range. Fuel saving talents count as they were when the world loaded.
+- The Chinese brewing lines now use the game's own word for mood.
+- Made for Survival Log 1.1.19131.
+
 ## 0.7.0
 
 - Brewing under Used in: an item that goes in a brewing barrel now shows the drink a barrel of only that item makes and its quality, like `Brewed alone, quality 0.10`, and what each one adds to any brew, like `In a barrel: 10 satiety, +1 mood each; 3 per bottle`. Quality is the batch's total mood over its total satiety, so a high-mood item lifts a mix and a negative-mood one drags it down. The thresholds and bottle size include your brewing talents as they were when the world loaded.

@@ -6,7 +6,7 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 
 [size=5]Main features[/size]
 [list]
-[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's own lines, split into sections: Effects (green for gains, red for losses), Freshness (time left, shelf life, what it rots into), At home, Used in (with how many you can make now), and Growing for seeds. Hold Shift for Value, Made from, Breaks down into, Fuel, Found in and About. Sections with nothing to say are left out.[/*]
+[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's own lines, split into sections: Effects (green for gains, red for losses), Freshness (time left, shelf life, what it rots into), At home, Used in (with how many you can make now, and each dish's cook time and what eating it does), and Growing for seeds. Hold Shift for Value, Made from, Breaks down into, Fuel (with how long it burns in a cooking pot, heater or generator), Found in and About. Sections with nothing to say are left out.[/*]
 [*][b]Where is it?[/b]: hold Ctrl over an item to see which storages at home hold it and how many each has.[/*]
 [*][b]What the game wants[/b]: the food you are craving says "You're craving this", and an item a relief request still needs says how many more, with a gold star on its backpack slot. Food and drink you have never had say "Never tried". Robot modules show their level and bait its kind.[/*]
 [*][b]Stat bars[/b]: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you.[/*]
@@ -34,7 +34,7 @@ Works in English and Chinese.
 [*]A relief request that asks for an amount of any food or material, rather than one item, gets no line or star.[/*]
 [*]The food forecast counts only you, not other people at home, and leaves out spoiling and cooking.[/*]
 [*]The brew panel score shows only while a brew is being set up, not once it is brewing.[/*]
-[*]The brewing lines use the brew thresholds from when the world loaded. A brewing talent picked later counts after you load the save again.[/*]
+[*]The brewing lines and fuel burn times use the numbers from when the world loaded. A brewing or fuel saving talent picked later counts after you load the save again.[/*]
 [*]Ingredient lines under a recipe in the cooking window get no home counts.[/*]
 [/list]
 
@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.0: Dishes under Used in show their cook time and what eating them does, and fuel shows how long it burns in a cooking pot, a heater and a fuel generator.[/*]
 [*]0.7.0: Brewable items show, under Used in, the drink and quality a barrel of only that item gives, and the satiety and mood each adds to a brew.[/*]
 [*]0.6.0: Tooltips say when an item is the food you are craving, how many more a relief request needs (with a star on the slot), and when you have never tried a food. Robot modules show their level and bait its kind. Hover a HUD stat bar to see how fast it drops and when it runs out, and the satiety bar for how many days the food at home lasts. Items relief requests ask for are no longer marked as scrap.[/*]
 [*]0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot.[/*]
@@ -88,7 +89,7 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 
 [size=5]主要功能[/size]
 [list]
-[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏：「效果」（增加为绿色，减少为红色）、「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）、「家中」、「用途」（以及现在能做几份）和种子的「种植」。按住 Shift 可查看「价值」、「获取方式」、「可分解为」、「燃料」、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
+[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏：「效果」（增加为绿色，减少为红色）、「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）、「家中」、「用途」（以及现在能做几份、每道菜的烹饪时间和食用效果）和种子的「种植」。按住 Shift 可查看「价值」、「获取方式」、「可分解为」、「燃料」（以及在灶具、取暖器和发电机中能烧多久）、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
 [*][b]放在哪里[/b]：在物品上按住 Ctrl，可以看到家里哪些储物家具放着它，以及各有多少。[/*]
 [*][b]游戏想要什么[/b]：你正想吃的食物会显示「正想吃这个」；救助委托还需要的物品会显示还差几个，背包格子上还有一颗金色星星。从没吃过的食物和饮品会显示「从没尝过」。机器人模块显示等级，诱饵显示种类。[/*]
 [*][b]状态条[/b]：悬停界面上的状态条，可以看到它每个游戏小时下降多少，以及大约多久后耗尽。饱腹条还会显示家中食物大约够你吃几天。[/*]
@@ -96,7 +97,7 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 [*][b]提示不出屏幕[/b]：变高的提示不会再超出窗口底部。[/*]
 [*][b]家中数量[/b]：背包、交易和烹饪界面的物品提示会显示「家中共有：N」，统计背包、家里所有储物家具和工作台抽屉里的数量。[/*]
 [*][b]交易属性[/b]：购买前就能看到商人的物品对饱腹、心态、精力、健康和生命的影响。[/*]
-[*][b]酒的品质[/b]：酿出的酒在提示里显示档次，例如「酿造品质：第 2 档，共 3 档」。准备酿造时，酿酒面板会显示品质分数，以及下一档需要多少分。可酿造的物品会显示只用它酿出的酒和品质，以及每个能为酒桶加多少饱腹和心情。[/*]
+[*][b]酒的品质[/b]：酿出的酒在提示里显示档次，例如「酿造品质：第 2 档，共 3 档」。准备酿造时，酿酒面板会显示品质分数，以及下一档需要多少分。可酿造的物品会显示只用它酿出的酒和品质，以及每个能为酒桶加多少饱腹和心态。[/*]
 [*][b]只适合回收[/b]：只值得拆解的物品会多一行「只适合回收」，背包格子上显示「回收」角标，拾取列表里带上「回收」标记。[/*]
 [*][b]烹饪图鉴[/b]：在烹饪界面悬停食材或菜谱，可以看到它的描述和属性。[/*]
 [*][b]规划角标[/b]：生存规划界面的卡牌图片上会显示角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。少数卡牌有角标不计算的第二阶段，例如「短期激励」，前五天每天给 3 点生存点，之后五天每天扣 1 点。[/*]
@@ -116,7 +117,7 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 [*]要求任意某类食物或材料数量的救助委托，不会显示提示行或星星。[/*]
 [*]食物预估只算你自己，不算家里的其他人，也不计腐坏和烹饪。[/*]
 [*]酿酒面板的分数只在准备酿造时显示，开始酿造后就不再显示。[/*]
-[*]酿造信息使用读档时的品质门槛。之后才选的酿造天赋，要重新读档后才会计入。[/*]
+[*]酿造信息和燃料燃烧时间使用读档时的数值。之后才选的酿造或节省燃料天赋，要重新读档后才会计入。[/*]
 [*]烹饪界面里菜谱下方的食材行不显示家中数量。[/*]
 [/list]
 

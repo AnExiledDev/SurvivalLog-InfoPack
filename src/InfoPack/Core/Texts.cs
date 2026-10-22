@@ -73,9 +73,11 @@ public static class Texts
         Key("makeNow", new("can make {0} now", "现可制作 {0}")),
         Key("useBench", new("Workbench", "工作台")),
         Key("useCook", new("Cooking", "烹饪")),
+        Key("useCookTime", new("Cooking, {0}", "烹饪，{0}")),
+        Key("dishStat", new("{0} {1}", "{1} {0}")),
         Key("useBrew", new("Brewed alone, quality {0}", "单独酿造，品质 {0}")),
-        Key("useBrewMix", new("In a barrel: {0} satiety, {1} mood each; {2} per bottle", "酒桶中：每个 {0} 饱腹、{1} 心情；每瓶 {2} 个")),
-        Key("useBrewMood", new("In a barrel: {0} mood each, no satiety", "酒桶中：每个 {0} 心情，不加饱腹")),
+        Key("useBrewMix", new("In a barrel: {0} satiety, {1} mood each; {2} per bottle", "酒桶中：每个 {0} 饱腹、{1} 心态；每瓶 {2} 个")),
+        Key("useBrewMood", new("In a barrel: {0} mood each, no satiety", "酒桶中：每个 {0} 心态，不加饱腹")),
         Key("more", new("+{0} more", "另有 {0} 项")),
 
         Key("growTime", new("Grows in {0}", "生长时间 {0}")),
@@ -99,6 +101,10 @@ public static class Texts
         Key("makeShred", new("Shredding {0}", "粉碎 {0}")),
 
         Key("fuelBurn", new("Burn value {0}", "燃烧值 {0}")),
+        Key("fuelCook", new("Cooks for {0}", "可烹饪 {0}")),
+        Key("fuelHeat", new("Heats for {0}", "可取暖 {0}")),
+        Key("fuelPower", new("Runs a generator for {0}", "可供发电机运转 {0}")),
+        Key("span", new("{0} to {1}", "{0} 至 {1}")),
         Key("hintMore", new("{0}: more", "{0}：更多")),
         Key("hintWhere", new("{0}: where", "{0}：存放位置")),
 

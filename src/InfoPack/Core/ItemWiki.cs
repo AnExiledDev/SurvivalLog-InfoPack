@@ -17,8 +17,8 @@ public abstract record ItemUse
     /// <summary>A workbench recipe making Product out of Needs, the item among them.</summary>
     public sealed record Bench(int Product, IReadOnlyList<Ingredient> Needs) : ItemUse;
 
-    /// <summary>A cooking recipe that names the item as an ingredient. Dish is the dish the recipe stands for.</summary>
-    public sealed record Cook(int Dish) : ItemUse;
+    /// <summary>A cooking recipe that names the item as an ingredient. Dish is the dish the recipe stands for; Seconds its cook time, 0 for none.</summary>
+    public sealed record Cook(int Dish, int Seconds) : ItemUse;
 
     /// <summary>
     /// The item can go in a brewing barrel, adding Satiety and Mood to the batch. Alone is what a barrel of only this
@@ -62,6 +62,7 @@ public sealed record LootSource(string Furniture, IReadOnlyList<string> Places);
 /// value for one that does not burn.
 /// </summary>
 /// <param name="Effects">Satiety, mood, energy, health and life to one decimal, or null when all of them are 0.</param>
+/// <param name="Burn">How long the item burns in each kind of fuel burner; null when it gives no fuel.</param>
 public sealed record WikiEntry(
     IReadOnlyList<double>? Effects,
     int ShelfLifeDays,
@@ -74,7 +75,8 @@ public sealed record WikiEntry(
     int CutProduct,
     int BurnValue,
     Growth? Growth,
-    IReadOnlyList<LootSource> FoundIn)
+    IReadOnlyList<LootSource> FoundIn,
+    BurnTimes? Burn = null)
 {
     public bool IsEmpty =>
         Effects is null && ShelfLifeDays == 0 && RotProduct == 0 && Weight == 0 && TradeValue == 0 && Uses.Count == 0 &&
@@ -165,6 +167,7 @@ public static class ItemWiki
         IReadOnlyDictionary<int, List<LootSource>> foundIn)
     {
         var spoils = item.ShelfLifeDays > 0;
+        var burnValue = item.IsBurnable ? Math.Max(item.BurnValue, 0) : 0;
 
         return new WikiEntry(
             Effects(item.Stats),
@@ -176,9 +179,10 @@ public static class ItemWiki
             Ordered(Find(sources, item.Id), CompareSources),
             ShredYields(tables, item.Id),
             Math.Max(item.CutProduct, 0),
-            item.IsBurnable ? Math.Max(item.BurnValue, 0) : 0,
+            burnValue,
             Grow(item, tables.Plants),
-            Find(foundIn, item.Id));
+            Find(foundIn, item.Id),
+            FuelBurn.Of(burnValue, tables.Fuel));
     }
 
     /// <summary>Rounded the way the stat line rounds them, so the two never disagree. Always five, so the page can index them.</summary>
@@ -219,7 +223,7 @@ public static class ItemWiki
         {
             if (recipe.Dish <= 0) continue;
 
-            foreach (var ingredient in recipe.SpecificItems.Distinct()) Add(uses, ingredient, new ItemUse.Cook(recipe.Dish));
+            foreach (var ingredient in recipe.SpecificItems.Distinct()) Add(uses, ingredient, new ItemUse.Cook(recipe.Dish, Math.Max(recipe.CookTime, 0)));
         }
 
         var barrel = BarrelProducts(tables.BrewProducts);
@@ -397,7 +401,7 @@ public static class ItemWiki
     private static int CompareUses(ItemUse left, ItemUse right) => (left, right) switch
     {
         (ItemUse.Bench a, ItemUse.Bench b) => Then(a.Product.CompareTo(b.Product), CompareNeeds(a.Needs, b.Needs)),
-        (ItemUse.Cook a, ItemUse.Cook b) => a.Dish.CompareTo(b.Dish),
+        (ItemUse.Cook a, ItemUse.Cook b) => Then(a.Dish.CompareTo(b.Dish), a.Seconds.CompareTo(b.Seconds)),
         _ => Rank(left).CompareTo(Rank(right)),
     };
 

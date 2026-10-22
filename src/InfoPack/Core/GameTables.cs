@@ -38,6 +38,9 @@ public sealed record GameTables(
 
     /// <summary>The brewing barrel's quality thresholds and bottle size.</summary>
     public BrewRules Brewing { get; init; } = BrewRules.Default;
+
+    /// <summary>How fast the cooking pots, heaters and generators use fuel.</summary>
+    public FuelRates Fuel { get; init; } = FuelRates.None;
 }
 
 /// <summary>One row of the item table, reduced to what the pieces ask about.</summary>

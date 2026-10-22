@@ -288,7 +288,7 @@
     statSatiety: 'Satiety', statMood: 'Mood', statEnergy: 'Energy', statHealth: 'Health', statLife: 'Life',
     freshLeft: '{0} left', freshBase: 'Keeps {0} when fresh', freshRots: 'Rots into {0}', spoiled: 'Spoiled',
     homeCount: '{0} at home', where: '{0}: {1}', whereNone: 'None stored at home',
-    makeNow: 'can make {0} now', useBench: 'Workbench', useCook: 'Cooking', useBrew: 'Brewed alone, quality {0}',
+    makeNow: 'can make {0} now', useBench: 'Workbench', useCook: 'Cooking', useCookTime: 'Cooking, {0}', dishStat: '{0} {1}', useBrew: 'Brewed alone, quality {0}',
     useBrewMix: 'In a barrel: {0} satiety, {1} mood each; {2} per bottle', useBrewMood: 'In a barrel: {0} mood each, no satiety',
     more: '+{0} more',
     growTime: 'Grows in {0}', growHarvest: 'Harvest within {0}', growLight: 'Light: {0}', lightLow: 'low',
@@ -297,7 +297,8 @@
     valueTrade: 'Trade value {0}', valueWeight: 'Weight {0}', valuePerKg: '{0} trade value per kg',
     satietyPerKg: '{0} satiety per kg',
     makeBench: 'Workbench: {0}', makeCook: 'Cooking: {0}', makePlant: 'Harvest of {0}', makeShred: 'Shredding {0}',
-    fuelBurn: 'Burn value {0}', hintMore: '{0}: more', hintWhere: '{0}: where',
+    fuelBurn: 'Burn value {0}', fuelCook: 'Cooks for {0}', fuelHeat: 'Heats for {0}', fuelPower: 'Runs a generator for {0}',
+    span: '{0} to {1}', hintMore: '{0}: more', hintWhere: '{0}: where',
     wantWish: "You're craving this", wantAid: 'Relief request needs {0} more', untried: 'Never tried',
     useRobot: 'Robot module, level {0}', useBait: 'Trap bait: {0}', rate: '-{0} per hour, empty in about {1}',
     forecast: 'Food at home lasts you about {0}',
@@ -461,7 +462,7 @@
       case 'value': return valueRows(context);
       case 'madefrom': return madeFromRows(context);
       case 'breaks': return breakRows(context);
-      case 'fuel': return context.wiki.burn > 0 ? [{ parts: [say('fuelBurn', context.wiki.burn)] }] : [];
+      case 'fuel': return fuelRows(context);
       case 'foundin': return foundInRows(context);
       case 'about': return facts.desc[context.id] ? [{ parts: [facts.desc[context.id]], cls: 'slip-about' }] : [];
       default: return [];
@@ -571,13 +572,25 @@
           metaCls: times > 0 ? 'slip-good' : 'slip-dim'
         });
       } else if (use.k === 'cook' && use.out > 0) {
-        rest.push({ parts: [itemRef(use.out)], meta: say('useCook'), metaCls: 'slip-dim' });
+        rest.push({ parts: [itemRef(use.out)], meta: use.t > 0 ? say('useCookTime', formatSeconds(use.t)) : say('useCook'), metaCls: 'slip-dim', sub: dishStats(use.out) });
       } else if (use.k === 'brew') {
         rest.push.apply(rest, brewRows(use));
       }
     });
 
     return ready.concat(other, rest);
+  }
+
+  // What eating the dish does, the way the effects section words it: "+30 Satiety, +5 Mood".
+  function dishStats(dishId) {
+    var fx = (facts.wiki[dishId] || {}).fx || [];
+    var stats = [];
+
+    fx.forEach(function (value, i) {
+      if (value && STATS[i]) stats.push(say('dishStat', signed(value), say(STATS[i].phrase)));
+    });
+
+    return stats.join(', ');
   }
 
   // The drink a barrel of only this item makes, then what the item adds to any batch. An item with no satiety cannot
@@ -590,6 +603,27 @@
     rows.push({ parts: [use.n > 0 ? say('useBrewMix', trimNumber(use.s, 1), signed(use.m), use.n) : say('useBrewMood', signed(use.m))] });
 
     return rows;
+  }
+
+  // How long one item lasts in each kind of burner, as a range when the burners of a kind differ.
+  function fuelRows(context) {
+    var wiki = context.wiki;
+    var times = wiki.bt || {};
+    var rows = [];
+
+    if (!(wiki.burn > 0)) return rows;
+
+    rows.push({ parts: [say('fuelBurn', wiki.burn)] });
+
+    if (times.c) rows.push({ parts: [say('fuelCook', burnSpan(times.c))] });
+    if (times.h) rows.push({ parts: [say('fuelHeat', burnSpan(times.h))] });
+    if (times.g) rows.push({ parts: [say('fuelPower', burnSpan(times.g))] });
+
+    return rows;
+  }
+
+  function burnSpan(span) {
+    return span[0] === span[1] ? formatSeconds(span[0]) : say('span', formatSeconds(span[0]), formatSeconds(span[1]));
   }
 
   function growRows(context) {
