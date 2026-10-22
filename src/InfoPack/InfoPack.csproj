@@ -45,6 +45,7 @@
     <AssemblyMetadata Include="ModManager.Settings" Value="Restart" />
     <AssemblyMetadata Include="ModManager.GitHub" Value="AnExiledDev/SurvivalLog-InfoPack" />
     <AssemblyMetadata Include="ModManager.Changelog" Value="https://github.com/AnExiledDev/SurvivalLog-InfoPack/blob/main/CHANGELOG.md" />
+    <AssemblyMetadata Include="ModManager.NexusId" Value="81" />
   </ItemGroup>
 
 </Project>
