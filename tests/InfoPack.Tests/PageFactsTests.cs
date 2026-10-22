@@ -186,7 +186,7 @@ public class PageFactsTests
     {
         var ui = JsonDocument.Parse(PageFacts.Ui(false)).RootElement;
 
-        Assert.Equal(new[] { "home", "brew", "scrap", "scrapChip", "brewScore" }, Keys(ui));
+        Assert.Equal(Texts.ByPageKey.Select(pair => pair.Key), Keys(ui));
         Assert.All(Texts.ByPageKey, pair => Assert.Equal(pair.Value.En, ui.GetProperty(pair.Key).GetString()));
     }
 

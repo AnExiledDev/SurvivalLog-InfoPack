@@ -23,6 +23,32 @@ public class PageCommandTests
     }
 
     [Theory]
+    [InlineData("slmod|infopack|where|15501", 15501)]
+    [InlineData("slmod|infopack|where|1", 1)]
+    [InlineData("slmod|infopack|where|2147483647", int.MaxValue)]
+    public void A_breakdown_request_carries_the_config_id_of_the_hovered_item(string message, int configId)
+    {
+        Assert.Equal(new PageCommand.Where(configId), PageCommand.Parse(message));
+    }
+
+    [Theory]
+    [InlineData("slmod|infopack|where")]
+    [InlineData("slmod|infopack|where|")]
+    [InlineData("slmod|infopack|where|0")]
+    [InlineData("slmod|infopack|where|-3")]
+    [InlineData("slmod|infopack|where|+3")]
+    [InlineData("slmod|infopack|where| 3")]
+    [InlineData("slmod|infopack|where|3.0")]
+    [InlineData("slmod|infopack|where|1e3")]
+    [InlineData("slmod|infopack|where|2147483648")]
+    [InlineData("slmod|infopack|where|abc")]
+    [InlineData("slmod|infopack|where|3|4")]
+    public void A_breakdown_request_without_a_real_item_id_is_never_answered(string message)
+    {
+        Assert.Equal(new PageCommand.Unknown(message), PageCommand.Parse(message));
+    }
+
+    [Theory]
     [InlineData("slmod|infopack|inst")]
     [InlineData("slmod|infopack|inst|")]
     [InlineData("slmod|infopack|inst|12abc")]

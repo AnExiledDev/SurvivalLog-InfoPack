@@ -1,11 +1,15 @@
 Name: Info Pack
-Summary: Shows what Survival Log knows but never puts on screen: how many of an item you have at home, what a trader's food does before you buy it, brew quality, which loot is only worth scrapping, ingredient stats while cooking and how long planning cards last. Every piece can be turned off on its own, and it never changes an item, a stat or a save.
+Summary: Turns Survival Log's item tooltips into a small wiki: effects, freshness, home counts, what an item is used in and made from, growing info and where it is found, with more on Shift. Also shows trade stats, brew quality, scrap-only loot and how long planning cards last. Every section can be set to show always, on Shift or never.
 
 Description (BBCode):
 Survival Log knows a lot it never shows you. Info Pack adds that information to the game's own tooltips and windows, in the game's own style. It only shows things; it never changes an item, a stat or a save.
 
 [size=5]Main features[/size]
 [list]
+[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's own lines, split into sections: Effects (green for gains, red for losses), Freshness (time left, shelf life, what it rots into), At home, Used in (with how many you can make now), and Growing for seeds. Hold Shift for Value, Made from, Breaks down into, Fuel, Found in and About. Sections with nothing to say are left out.[/*]
+[*][b]Where is it?[/b]: hold Ctrl over an item to see which storages at home hold it and how many each has.[/*]
+[*][b]Spoil badges[/b]: food that spoils within a day gets a small coloured corner on its slot.[/*]
+[*][b]Tooltips stay on screen[/b]: tall tooltips no longer run off the bottom of the window.[/*]
 [*][b]Home counts[/b]: item tooltips in the backpack, trade and cooking windows show "At home: N", counting your bag, every storage at home and the workbench drawer.[/*]
 [*][b]Trade stats[/b]: see what a trader's item does to satiety, mood, energy, health and life before you buy it.[/*]
 [*][b]Brew quality[/b]: a brewed drink's tooltip shows its tier, like "Brew quality: 2 of 3". While setting up a brew, the brew panel shows the quality score and what the next tier needs.[/*]
@@ -13,7 +17,7 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 [*][b]Cooking codex[/b]: hover an ingredient or recipe in the cooking window to see its description and stats.[/*]
 [*][b]Planning badges[/b]: cards on the Survival Planning screen get a badge on their picture. Timed cards show how long they last, like "3d" or "24h"; cards that take effect once show "1x". Permanent cards get none. A few cards have a second stage the badge does not count, such as Knuckle Down, which gives 3 Survival Points a day for five days and then takes 1 a day for five more.[/*]
 [/list]
-Every piece can be turned off on its own in the config. There are no hotkeys.
+Every piece can be turned off on its own in the config. Each tooltip section can show always, only while Shift is held, or never, in the order you choose. The two keys, Shift for more and Ctrl for where, can be changed in the config.
 
 [size=5]Replaces ItemTotals[/size]
 The home count does the job of ItemTotals. If you have ItemTotals installed, remove [font=Courier New]ItemTotals.dll[/font], or tooltips will show two count lines. To keep ItemTotals instead, turn off BaseCounts in the config.
@@ -25,7 +29,6 @@ Works in English and Chinese.
 [size=5]Known issues[/size]
 [list]
 [*]The scrap rule does not know about wishes, aid demands, robot modules or trap bait. Check before you shred something rare.[/*]
-[*]A tooltip made taller by these lines can reach past the bottom of the screen near the lower edge.[/*]
 [*]The brew panel score shows only while a brew is being set up, not once it is brewing.[/*]
 [*]Ingredient lines under a recipe in the cooking window get no home counts.[/*]
 [/list]
@@ -60,6 +63,7 @@ Coming soon: a Survival Log wiki with detailed documentation for all of my mods.
 
 [size=5]Changelog[/size]
 [list]
+[*]0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot.[/*]
 [*]0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.[/*]
 [*]0.3.1: The mod's own tooltip lines and tags now show in Chinese when the game is in Chinese, and the setting descriptions use the same words. Built for game version 1.1.18902.[/*]
 [*]0.3.0: New planning badges: cards on the Survival Planning screen show how long they last ("3d", "24h") or "1x" for a one-time effect, so timed and permanent cards are easy to tell apart. On by default; turn off PlanningBadges in the config to hide them.[/*]
@@ -77,6 +81,10 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 
 [size=5]主要功能[/size]
 [list]
+[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏：「效果」（增加为绿色，减少为红色）、「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）、「家中」、「用途」（以及现在能做几份）和种子的「种植」。按住 Shift 可查看「价值」、「获取方式」、「可分解为」、「燃料」、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
+[*][b]放在哪里[/b]：在物品上按住 Ctrl，可以看到家里哪些储物家具放着它，以及各有多少。[/*]
+[*][b]腐败角标[/b]：一天内就会腐败的食物，格子上会显示一个彩色小角标。[/*]
+[*][b]提示不出屏幕[/b]：变高的提示不会再超出窗口底部。[/*]
 [*][b]家中数量[/b]：背包、交易和烹饪界面的物品提示会显示「家中共有：N」，统计背包、家里所有储物家具和工作台抽屉里的数量。[/*]
 [*][b]交易属性[/b]：购买前就能看到商人的物品对饱腹、心态、精力、健康和生命的影响。[/*]
 [*][b]酒的品质[/b]：酿出的酒在提示里显示档次，例如「酿造品质：第 2 档，共 3 档」。准备酿造时，酿酒面板会显示品质分数，以及下一档需要多少分。[/*]
@@ -84,7 +92,7 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 [*][b]烹饪图鉴[/b]：在烹饪界面悬停食材或菜谱，可以看到它的描述和属性。[/*]
 [*][b]规划角标[/b]：生存规划界面的卡牌图片上会显示角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。少数卡牌有角标不计算的第二阶段，例如「短期激励」，前五天每天给 3 点生存点，之后五天每天扣 1 点。[/*]
 [/list]
-每一项都可以在配置中单独关闭。没有快捷键。
+每一项都可以在配置中单独关闭。每个提示栏目都可以设为一直显示、仅在按住 Shift 时显示或不显示，顺序也可以自己定。两个按键（Shift 查看更多，Ctrl 查看存放位置）可以在配置中更改。
 
 [size=5]取代 ItemTotals[/size]
 家中数量的功能和 ItemTotals 相同。如果装了 ItemTotals，请删除 [font=Courier New]ItemTotals.dll[/font]，否则提示里会出现两行数量。如果想保留 ItemTotals，请在配置中关闭 BaseCounts。
@@ -96,7 +104,6 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 [size=5]已知问题[/size]
 [list]
 [*]回收规则不了解愿望、援助需求、机器人模块和陷阱诱饵。粉碎稀有物品前请先确认。[/*]
-[*]靠近屏幕底部时，因多出这些行而变高的提示可能超出屏幕。[/*]
 [*]酿酒面板的分数只在准备酿造时显示，开始酿造后就不再显示。[/*]
 [*]烹饪界面里菜谱下方的食材行不显示家中数量。[/*]
 [/list]

@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0
+
+Item tooltips work like a small wiki now. Below the game's own lines, Info Pack adds one tidy block split into sections, each with a short heading:
+
+- Effects: what the item does to satiety, mood, energy, health and life, green for gains and red for losses.
+- Freshness: how long until it spoils, how long it keeps when fresh and what it rots into.
+- At home: how many you have at home. Hold Ctrl to see which storages hold them.
+- Used in: the workbench recipes, dishes and brewing that use it, and how many you can make now with what you have at home.
+- Growing: for seeds, the grow time, harvest window, light need, cold resistance, yield and seed chance.
+- Hold Shift for more: value and weight, what it is made from, what it breaks down into, its burn value as fuel, where it can be found and its description.
+
+Other changes:
+
+- New Tooltip settings: when each section shows (always, only while Shift is held, or never), the order of the sections, the two keys, keeping tooltips on screen and spoil badges.
+- Tall tooltips no longer run off the bottom of the window.
+- Food that spoils within a day gets a small coloured corner on its slot.
+- Made for Survival Log 1.1.19131.
+
 ## 0.4.1
 
 - After a game update, a hook that can no longer be placed is logged as an error, so the Mod Manager can mark the mod as maybe needing an update.

@@ -54,6 +54,13 @@ internal sealed class WebPage
     public void Instance(long itemId, int configId) =>
         Call("setInstance(" + JsText.Literal(itemId.ToString(CultureInfo.InvariantCulture)) + "," + configId.ToString(CultureInfo.InvariantCulture) + ")");
 
+    /// <summary>Which of the detail and breakdown keys are held.</summary>
+    public void Keys(string json) => Call("setKeys(" + json + ")");
+
+    /// <summary>The answer to a breakdown request: the home storages holding the item and how many each holds.</summary>
+    public void Where(int configId, string rows) =>
+        Call("setWhere(" + JsText.Literal(configId.ToString(CultureInfo.InvariantCulture)) + "," + rows + ")");
+
     /// <summary>Does nothing when the script is not there; the next check puts it back and it asks again.</summary>
     private void Call(string call) => Run(Handle + "&&" + Handle + "." + call);
 

@@ -24,6 +24,9 @@ public abstract record PageCommand
     /// <summary>The trade window hovered an item it only knows by instance id; the page wants that item's config id.</summary>
     public sealed record Instance(long ItemId) : PageCommand;
 
+    /// <summary>The breakdown key is held over an item; the page wants to know which home storages hold it.</summary>
+    public sealed record Where(int ConfigId) : PageCommand;
+
     public sealed record Unknown(string Text) : PageCommand;
 
     public static bool IsOurs(string? message) => message is not null && message.StartsWith(Prefix, StringComparison.Ordinal);
@@ -40,9 +43,14 @@ public abstract record PageCommand
             ("ready", 1) => new Ready(),
             ("noscript", 1) => new NoScript(),
             ("inst", 2) when IsWholeNumber(parts[1], out var id) => new Instance(id),
+            ("where", 2) when IsConfigId(parts[1], out var configId) => new Where(configId),
             _ => new Unknown(message),
         };
     }
+
+    /// <summary>Item config ids are positive, written as plain digits.</summary>
+    private static bool IsConfigId(string text, out int value) =>
+        int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out value) && value > 0;
 
     private static bool IsWholeNumber(string text, out long value) =>
         long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value);

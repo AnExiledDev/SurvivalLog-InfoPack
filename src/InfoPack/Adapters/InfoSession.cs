@@ -8,26 +8,31 @@ namespace InfoPack.Adapters;
 
 /// <summary>
 /// The mod's game side, run once a frame. It keeps the page script installed, answers its messages, sends it the facts
-/// once per loaded world and language and the home counts whenever they change. It only reads; nothing here changes the game.
+/// once per loaded world and language, the home counts whenever they change, and the detail and breakdown keys whenever
+/// they are pressed or let go. It only reads; nothing here changes the game.
 /// </summary>
 internal sealed class InfoSession
 {
     private const float CheckSeconds = 2f;
 
     private Features _features;
+    private readonly TipKeys _keys;
     private readonly WebPage _page;
     private readonly GameTableReader _tables;
     private readonly GameTextReader _text;
     private readonly Action<string> _log;
     private readonly CountRefresh _counts = new(CheckSeconds);
     private readonly FactsSchedule _factsSchedule = new(CheckSeconds);
+    private readonly KeySync _keySync = new();
     private string? _facts;
     private bool _isPageReady;
     private bool _hasSentFacts;
+    private bool _hasReportedWhereFailure;
 
-    public InfoSession(Features features, WebPage page, GameTableReader tables, GameTextReader text, Action<string> log)
+    public InfoSession(Features features, TipKeys keys, WebPage page, GameTableReader tables, GameTextReader text, Action<string> log)
     {
         _features = features;
+        _keys = keys;
         _page = page;
         _tables = tables;
         _text = text;
@@ -55,6 +60,7 @@ internal sealed class InfoSession
 
         if (!_isPageReady) return;
 
+        SendKeys();
         CheckFacts(now);
         SendFacts();
         SendCounts(now);
@@ -78,6 +84,9 @@ internal sealed class InfoSession
                 case PageCommand.Instance instance:
                     _page.Instance(instance.ItemId, HomeItems.ConfigOfInstance(instance.ItemId));
                     break;
+                case PageCommand.Where where:
+                    AnswerWhere(where.ConfigId);
+                    break;
                 case PageCommand.Unknown unknown:
                     _log("page said: " + unknown.Text);
                     break;
@@ -94,6 +103,41 @@ internal sealed class InfoSession
         _hasSentFacts = false;
         _counts.PageReloaded();
         _factsSchedule.PageReloaded();
+        _keySync.PageReloaded();
+    }
+
+    private void SendKeys()
+    {
+        var held = _keys.Read();
+
+        if (_keySync.ShouldSend(held)) _page.Keys(held.ToJson());
+    }
+
+    /// <summary>
+    /// The breakdown belongs to the home count, so it is only answered while the count is on. A home that cannot be
+    /// read yet gets no answer and the page asks again; a failure is logged once and the tooltip keeps its count.
+    /// </summary>
+    private void AnswerWhere(int configId)
+    {
+        if (!_features.BaseCounts) return;
+
+        try
+        {
+            var home = HomeItems.TryRead();
+
+            if (home == null) return;
+
+            var isChinese = _text.IsChinese();
+            var rows = WhereKept.Rows(home, storageId => home.StorageName(storageId, isChinese), configId);
+
+            _page.Where(configId, WhereKept.ToJson(rows));
+        }
+        catch (Exception ex)
+        {
+            if (!_hasReportedWhereFailure) _log("could not list where an item is kept (reported once): " + ex.Message);
+
+            _hasReportedWhereFailure = true;
+        }
     }
 
     /// <summary>

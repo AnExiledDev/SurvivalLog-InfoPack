@@ -1,11 +1,21 @@
 # Info Pack
 
-See how many of an item you have at home, what a trader's food does to you, how good a brew is, which loot is only worth scrapping and which planning cards wear off, and stop emptied containers from staying highlighted.
+Turn item tooltips into a small wiki: what an item does, how long it keeps, what it is used in and made from, and where it can be found. See how many of an item you have at home, what a trader's food does to you, how good a brew is, which loot is only worth scrapping and which planning cards wear off, and stop emptied containers from staying highlighted.
 
 Survival Log knows a lot it never puts on screen. You can't see how many planks are already in your storages while you trade, what a trader's food will do to your stats before you buy it, or which brew tier a bottle is. Info Pack adds that to the game's own tooltips and windows, marks junk that is only good for scrap, and lets containers you have already emptied look like plain furniture. It only shows things. It never changes an item, a stat or a save.
 
 ## Features
 
+- **Tooltip sections**: item tooltips in the backpack, storage, trade and cooking windows get one Info Pack block below the game's own lines, split into sections with a short heading each. A section with nothing to say about an item is left out.
+  - **Effects**: what the item does to satiety, mood, energy, health and life, green for gains and red for losses.
+  - **Freshness**: how long until it spoils, coloured as it gets close, how long it keeps when fresh and what it rots into.
+  - **Notes**: the scrap and brew quality lines below.
+  - **At home**: the home count. Hold Ctrl to list which storages hold the item and how many each has.
+  - **Used in**: workbench recipes, dishes and brewing that use the item, with how many you can make now from what is at home. Up to three rows; hold Shift for all of them.
+  - **Growing**: for seeds, the grow time, harvest window, light need, cold resistance, yield and seed chance.
+  - Shown while Shift is held: **Value** (trade value, weight, value and satiety per kg), **Made from** (recipes, plants and shredding that give the item), **Breaks down into** (shredding, cutting and rotting), **Fuel** (burn value), **Found in** (furniture it turns up in while searching, and where) and **About** (the item's description). A `Shift: more` hint shows when there is more to see.
+- **Spoil badges**: food in backpack and storage slots that spoils within a day gets a small coloured corner.
+- **Tooltips stay on screen**: a tooltip that would run past an edge of the window is moved back inside it.
 - **Home counts**: item tooltips in the backpack, the trade window and the cooking window get a line `At home: N`: how many of that item are in your bag, in every storage at home (hidden ones included) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
 - **Trade stats**: in the trade window, the tooltip of an item on the trader's shelf says what it does to satiety, mood, energy, health and life, in the game's own wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
 - **Brew quality**: the tooltip of a brewed drink says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, before it starts, the brew panel shows the batch's quality score and the score each better tier starts at, for example `Quality 0.62: Normal from 0.40, Strong from 0.80`.
@@ -16,7 +26,12 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
 
 Every piece has its own setting, so you can turn off the ones you don't want. The tooltip lines draw inside the game's own windows, in the game's own tooltip style.
 
-There are no hotkeys and no buttons. Everything shows up in tooltips and windows the game already has.
+There are no buttons. Everything shows up in tooltips and windows the game already has. Two keys, both changeable in the settings:
+
+- **Shift** (`DetailKey`): hold it over an item to see the sections set to show on Shift, and every row of long lists.
+- **Ctrl** (`WhereKey`): hold it over an item to see which storages at home hold it.
+
+Either side of Shift, Ctrl or Alt works. Which sections show always, only on Shift or never, and their order, are settings too (see [CONFIG.md](CONFIG.md)).
 
 Info Pack adds no data to your save and does not edit game files. You can remove it at any time.
 
@@ -49,7 +64,6 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 - The ingredient lines under a recipe in the cooking window are the game's own and get no counts.
 - The scrap rule does not know about wishes, aid demands, robot modules or trap bait, so an item only those ask for can still be marked as scrap. Check before you shred something rare. Anything the game burns as fuel counts as useful and is never marked.
 - Items on the trader's side that the game has not loaded yet get no lines in the trade tooltip. Items you sell can take a moment to show their lines the first time.
-- The game places its tooltips for a fixed size. A tooltip made taller by these lines can reach past the bottom of the screen near the lower edge.
 - The brew panel shows the quality score only while a brew is being set up. Once the barrel is brewing it is hidden.
 - An emptied container still gets the plain outline every piece of furniture gets while Alt is held, and the outline when you point at it. Only the search colour goes.
 - The mod's own lines and tags follow the game's language, English or Simplified Chinese. The stat wording, item descriptions and brew tier names come from the game, in your language.
@@ -82,7 +96,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.4.1 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.5.0 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -98,6 +112,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot. See [CHANGELOG.md](CHANGELOG.md).
 - 0.4.0: Settings can be changed on the Mod Manager's Mods screen without a restart; turning a feature off takes away what it drew. Works with Exiled's Toolkit 0.4.0 or newer, which is optional.
 - 0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.
 - 0.3.1: The mod's own tooltip lines and tags show in Chinese when the game is in Chinese, and the cfg descriptions use the same words. Built for game version 1.1.18902.
@@ -115,7 +130,7 @@ dotnet build src/InfoPack -c Release -p:GameDir="C:\path\to\Survival Log"
 
 `GameDir` is the game folder. The default in the project file is a local path you will almost certainly need to override. The output DLL is at `src\InfoPack\bin\Release\InfoPack.dll`.
 
-The unit tests cover the pure rules (home counts, stat lines, brew tiers, the scrap rule and the planning badges) and need nothing from the game:
+The unit tests cover the pure rules (home counts and where items are kept, stat lines, brew tiers, the scrap rule, the planning badges and the tooltip settings) and need nothing from the game:
 
 ```
 dotnet test tests/InfoPack.Tests

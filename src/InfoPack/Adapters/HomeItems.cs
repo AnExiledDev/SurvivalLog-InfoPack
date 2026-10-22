@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.ReduxUI;
@@ -15,13 +16,20 @@ namespace InfoPack.Adapters;
 /// </summary>
 internal sealed class HomeItems : IHomeItems
 {
-    private readonly Il2CppItems _cache;
-    private readonly List<long> _storageIds;
+    private const string InventoryTextId = "ToolTable_0";
+    private const string WorkbenchDrawerTextId = "ToolTable_14";
 
-    private HomeItems(Il2CppItems cache, List<long> storageIds)
+    private readonly Il2CppItems _cache;
+    private readonly long _playerId;
+    private readonly List<long> _storageIds;
+    private readonly Dictionary<long, int> _furnitureConfigIds;
+
+    private HomeItems(Il2CppItems cache, long playerId, List<long> storageIds, Dictionary<long, int> furnitureConfigIds)
     {
         _cache = cache;
+        _playerId = playerId;
         _storageIds = storageIds;
+        _furnitureConfigIds = furnitureConfigIds;
     }
 
     /// <summary>Null until a save is loaded.</summary>
@@ -34,6 +42,7 @@ internal sealed class HomeItems : IHomeItems
         if (cache == null || agents == null || player == null) return null;
 
         var storageIds = new List<long> { player.InstanceId, WorkbenchDrawerConfig.DrawerOwnerId };
+        var furnitureConfigIds = new Dictionary<long, int>();
         // The same call and scope the game's GetAvailableItemCount uses for crafting: hidden storages count too.
         var found = agents.GetFurnituresWithBag(agents.GetHomeMapId(), false, true, false);
 
@@ -41,10 +50,13 @@ internal sealed class HomeItems : IHomeItems
         {
             var furniture = found[i];
 
-            if (furniture != null) storageIds.Add(furniture.InstanceId);
+            if (furniture == null) continue;
+
+            storageIds.Add(furniture.InstanceId);
+            furnitureConfigIds[furniture.InstanceId] = furniture.AgentConfigId;
         }
 
-        return new HomeItems(cache, storageIds);
+        return new HomeItems(cache, player.InstanceId, storageIds, furnitureConfigIds);
     }
 
     /// <summary>
@@ -76,6 +88,42 @@ internal sealed class HomeItems : IHomeItems
             if (item != null) yield return new HeldStack(item.OwnerId, item.ItemConfigId, item.ItemCount);
         }
     }
+
+    /// <summary>
+    /// A home storage's name in the game's language: the game's own words for the bag and the workbench drawer, and a
+    /// furniture's name from its table row, as Storage Hub names them.
+    /// </summary>
+    public string StorageName(long storageId, bool isChinese)
+    {
+        if (storageId == _playerId) return ConstantText(InventoryTextId) ?? Texts.Inventory.Pick(isChinese);
+
+        if (storageId == WorkbenchDrawerConfig.DrawerOwnerId) return ConstantText(WorkbenchDrawerTextId) ?? Texts.WorkbenchDrawer.Pick(isChinese);
+
+        return FurnitureName(storageId) ?? string.Format(CultureInfo.InvariantCulture, Texts.UnnamedStorage.Pick(isChinese), storageId);
+    }
+
+    private string? FurnitureName(long storageId)
+    {
+        var config = GameSingleton.Existing<ConfigManager>();
+
+        if (config == null || !_furnitureConfigIds.TryGetValue(storageId, out var configId)) return null;
+
+        var name = config.Get_Config_Furniture(configId)?.Name;
+
+        return Translate(config, name) ?? NonEmpty(name);
+    }
+
+    /// <summary>The game's lookup hands the key back when it has no text for it.</summary>
+    private static string? Translate(ConfigManager config, string? key)
+    {
+        if (string.IsNullOrEmpty(key)) return null;
+
+        return NonEmpty(config.GetLocalTxt(key)) is { } text && text != key ? text : null;
+    }
+
+    private static string? ConstantText(string textId) => NonEmpty(ConstantTextTools.ToConstantTextOrEmpty(textId));
+
+    private static string? NonEmpty(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;
 
     private static Il2CppItems? ItemCache() =>
         GameSingleton.Existing<ReduxUISystem>()?.GetData<State_Data_Item>(Il2CppType.Of<State_Data_Item>())?.OwnerCache;

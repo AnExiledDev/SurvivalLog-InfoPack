@@ -1,5 +1,7 @@
 using System.IO;
+using System.Linq;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using InfoPack.Adapters;
@@ -12,7 +14,7 @@ namespace InfoPack;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.4.1";
+    private const string Version = "0.5.0";
 
     public override void Load()
     {
@@ -36,26 +38,35 @@ public sealed class Plugin : BasePlugin
         var planningBadges = Config.Bind("Features", "PlanningBadges", true,
             "When on (the default), cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like '3d' or '24h'. A card that takes effect once shows '1x'. Cards that last for good get no badge.\n" +
             "开启时（默认），生存规划界面的卡牌图片上会显示一个小角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。");
+        var featureSettings = new ConfigEntryBase[] { baseCounts, tradeStats, alcoholQuality, scrapOnly, cookingCodex, planningBadges };
+        var tooltip = new TooltipConfig(Config);
         var log = new InfoLog(Log, Path.Combine(Paths.BepInExRootPath, "info-pack.log"));
 
         log.Write($"===== Info Pack {Version} started");
 
-        Features ReadFeatures() => new(baseCounts.Value, tradeStats.Value, alcoholQuality.Value, scrapOnly.Value, cookingCodex.Value, planningBadges.Value);
+        Features ReadFeatures() => new(baseCounts.Value, tradeStats.Value, alcoholQuality.Value, scrapOnly.Value, cookingCodex.Value, planningBadges.Value)
+        {
+            SpoilBadges = tooltip.SpoilBadges.Value,
+            KeepOnScreen = tooltip.KeepOnScreen.Value,
+            Tip = tooltip.Layout(),
+        };
 
         var harmony = new Harmony(Guid);
 
         // Without the patch the page's messages never arrive, so a session would only re-post the install check forever.
         if (!PageMessages.Apply(harmony, log.Write)) return;
 
-        var session = new InfoSession(ReadFeatures(), new WebPage(log.Write), new GameTableReader(log.Write), new GameTextReader(log.Write), log.Write);
+        var keys = new TipKeys(tooltip.DetailKey.Value, tooltip.WhereKey.Value);
+        var session = new InfoSession(ReadFeatures(), keys, new WebPage(log.Write), new GameTableReader(log.Write), new GameTextReader(log.Write), log.Write);
 
         OptionalLive.Watch(() =>
         {
             var features = ReadFeatures();
 
+            keys.Use(tooltip.DetailKey.Value, tooltip.WhereKey.Value);
             session.UseFeatures(features);
             log.Write(features.IsAnyOn ? $"features {features.ToJson()}" : "every feature is off, nothing is drawn");
-        }, baseCounts, tradeStats, alcoholQuality, scrapOnly, cookingCodex, planningBadges);
+        }, featureSettings.Concat(tooltip.Entries()).ToArray());
 
         InfoTicker.Session = session;
         InfoTicker.Log = log.Write;
