@@ -84,7 +84,7 @@ public class ItemWikiTests
             production: new[] { Bench(Bread, Flour, Water, Flour) },
             cooking: new[] { Recipe(1, normal: 0, good: Pie, ingredients: new[] { Flour, Flour }) }));
 
-        Assert.Equal("[{\"k\":\"bench\",\"out\":300,\"need\":[[10,2],[11,1]]},{\"k\":\"cook\",\"out\":400},{\"k\":\"brew\"}]", Field(wiki, Flour, "use"));
+        Assert.Equal("[{\"k\":\"bench\",\"out\":300,\"need\":[[10,2],[11,1]]},{\"k\":\"cook\",\"out\":400},{\"k\":\"brew\",\"s\":0,\"m\":0}]", Field(wiki, Flour, "use"));
         Assert.Equal("[{\"k\":\"bench\",\"out\":300,\"need\":[[10,2],[11,1]]}]", Field(wiki, Water, "use"));
     }
 

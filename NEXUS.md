@@ -14,7 +14,7 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 [*][b]Tooltips stay on screen[/b]: tall tooltips no longer run off the bottom of the window.[/*]
 [*][b]Home counts[/b]: item tooltips in the backpack, trade and cooking windows show "At home: N", counting your bag, every storage at home and the workbench drawer.[/*]
 [*][b]Trade stats[/b]: see what a trader's item does to satiety, mood, energy, health and life before you buy it.[/*]
-[*][b]Brew quality[/b]: a brewed drink's tooltip shows its tier, like "Brew quality: 2 of 3". While setting up a brew, the brew panel shows the quality score and what the next tier needs.[/*]
+[*][b]Brew quality[/b]: a brewed drink's tooltip shows its tier, like "Brew quality: 2 of 3". While setting up a brew, the brew panel shows the quality score and what the next tier needs. Brewable items show the drink and quality a barrel of only that item gives, and the satiety and mood each adds to a brew.[/*]
 [*][b]Scrap only[/b]: items only worth breaking down get an "Only useful as scrap" line, a Scrap chip on backpack slots and a Scrap tag in the pickup list.[/*]
 [*][b]Cooking codex[/b]: hover an ingredient or recipe in the cooking window to see its description and stats.[/*]
 [*][b]Planning badges[/b]: cards on the Survival Planning screen get a badge on their picture. Timed cards show how long they last, like "3d" or "24h"; cards that take effect once show "1x". Permanent cards get none. A few cards have a second stage the badge does not count, such as Knuckle Down, which gives 3 Survival Points a day for five days and then takes 1 a day for five more.[/*]
@@ -34,6 +34,7 @@ Works in English and Chinese.
 [*]A relief request that asks for an amount of any food or material, rather than one item, gets no line or star.[/*]
 [*]The food forecast counts only you, not other people at home, and leaves out spoiling and cooking.[/*]
 [*]The brew panel score shows only while a brew is being set up, not once it is brewing.[/*]
+[*]The brewing lines use the brew thresholds from when the world loaded. A brewing talent picked later counts after you load the save again.[/*]
 [*]Ingredient lines under a recipe in the cooking window get no home counts.[/*]
 [/list]
 
@@ -67,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.7.0: Brewable items show, under Used in, the drink and quality a barrel of only that item gives, and the satiety and mood each adds to a brew.[/*]
 [*]0.6.0: Tooltips say when an item is the food you are craving, how many more a relief request needs (with a star on the slot), and when you have never tried a food. Robot modules show their level and bait its kind. Hover a HUD stat bar to see how fast it drops and when it runs out, and the satiety bar for how many days the food at home lasts. Items relief requests ask for are no longer marked as scrap.[/*]
 [*]0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot.[/*]
 [*]0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.[/*]
@@ -94,7 +96,7 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 [*][b]提示不出屏幕[/b]：变高的提示不会再超出窗口底部。[/*]
 [*][b]家中数量[/b]：背包、交易和烹饪界面的物品提示会显示「家中共有：N」，统计背包、家里所有储物家具和工作台抽屉里的数量。[/*]
 [*][b]交易属性[/b]：购买前就能看到商人的物品对饱腹、心态、精力、健康和生命的影响。[/*]
-[*][b]酒的品质[/b]：酿出的酒在提示里显示档次，例如「酿造品质：第 2 档，共 3 档」。准备酿造时，酿酒面板会显示品质分数，以及下一档需要多少分。[/*]
+[*][b]酒的品质[/b]：酿出的酒在提示里显示档次，例如「酿造品质：第 2 档，共 3 档」。准备酿造时，酿酒面板会显示品质分数，以及下一档需要多少分。可酿造的物品会显示只用它酿出的酒和品质，以及每个能为酒桶加多少饱腹和心情。[/*]
 [*][b]只适合回收[/b]：只值得拆解的物品会多一行「只适合回收」，背包格子上显示「回收」角标，拾取列表里带上「回收」标记。[/*]
 [*][b]烹饪图鉴[/b]：在烹饪界面悬停食材或菜谱，可以看到它的描述和属性。[/*]
 [*][b]规划角标[/b]：生存规划界面的卡牌图片上会显示角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。少数卡牌有角标不计算的第二阶段，例如「短期激励」，前五天每天给 3 点生存点，之后五天每天扣 1 点。[/*]
@@ -114,6 +116,7 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 [*]要求任意某类食物或材料数量的救助委托，不会显示提示行或星星。[/*]
 [*]食物预估只算你自己，不算家里的其他人，也不计腐坏和烹饪。[/*]
 [*]酿酒面板的分数只在准备酿造时显示，开始酿造后就不再显示。[/*]
+[*]酿造信息使用读档时的品质门槛。之后才选的酿造天赋，要重新读档后才会计入。[/*]
 [*]烹饪界面里菜谱下方的食材行不显示家中数量。[/*]
 [/list]
 

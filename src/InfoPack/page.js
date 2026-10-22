@@ -288,7 +288,9 @@
     statSatiety: 'Satiety', statMood: 'Mood', statEnergy: 'Energy', statHealth: 'Health', statLife: 'Life',
     freshLeft: '{0} left', freshBase: 'Keeps {0} when fresh', freshRots: 'Rots into {0}', spoiled: 'Spoiled',
     homeCount: '{0} at home', where: '{0}: {1}', whereNone: 'None stored at home',
-    makeNow: 'can make {0} now', useBench: 'Workbench', useCook: 'Cooking', useBrew: 'Can be brewed', more: '+{0} more',
+    makeNow: 'can make {0} now', useBench: 'Workbench', useCook: 'Cooking', useBrew: 'Brewed alone, quality {0}',
+    useBrewMix: 'In a barrel: {0} satiety, {1} mood each; {2} per bottle', useBrewMood: 'In a barrel: {0} mood each, no satiety',
+    more: '+{0} more',
     growTime: 'Grows in {0}', growHarvest: 'Harvest within {0}', growLight: 'Light: {0}', lightLow: 'low',
     lightMid: 'medium', lightHigh: 'high', growCold: 'Cold resistant', growYield: 'Yields {0}',
     growSeed: '{0} chance of a seed',
@@ -571,11 +573,23 @@
       } else if (use.k === 'cook' && use.out > 0) {
         rest.push({ parts: [itemRef(use.out)], meta: say('useCook'), metaCls: 'slip-dim' });
       } else if (use.k === 'brew') {
-        rest.push({ parts: [say('useBrew')] });
+        rest.push.apply(rest, brewRows(use));
       }
     });
 
     return ready.concat(other, rest);
+  }
+
+  // The drink a barrel of only this item makes, then what the item adds to any batch. An item with no satiety cannot
+  // start a brew, so it gets the second line only.
+  function brewRows(use) {
+    var rows = [];
+
+    if (use.out > 0) rows.push({ parts: [itemRef(use.out)], meta: say('useBrew', fixed(use.q)), metaCls: 'slip-dim' });
+
+    rows.push({ parts: [use.n > 0 ? say('useBrewMix', trimNumber(use.s, 1), signed(use.m), use.n) : say('useBrewMood', signed(use.m))] });
+
+    return rows;
   }
 
   function growRows(context) {

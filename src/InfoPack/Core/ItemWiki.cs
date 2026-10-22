@@ -20,9 +20,15 @@ public abstract record ItemUse
     /// <summary>A cooking recipe that names the item as an ingredient. Dish is the dish the recipe stands for.</summary>
     public sealed record Cook(int Dish) : ItemUse;
 
-    /// <summary>The item can go in a brewing barrel.</summary>
-    public sealed record Brew : ItemUse;
+    /// <summary>
+    /// The item can go in a brewing barrel, adding Satiety and Mood to the batch. Alone is what a barrel of only this
+    /// item gives; null when the item adds no satiety, since such a barrel never starts.
+    /// </summary>
+    public sealed record Brew(double Satiety, double Mood, BrewAlone? Alone) : ItemUse;
 }
+
+/// <summary>A barrel of one item: its quality, the drink that quality makes (0 when unknown) and how many fill a bottle.</summary>
+public sealed record BrewAlone(double Quality, int Product, int ItemsPerBottle);
 
 /// <summary>A way to get the item out of other items.</summary>
 public abstract record ItemSource
@@ -93,7 +99,7 @@ public sealed record WikiEntry(
     {
         ItemUse.Bench bench => bench.Needs.Select(need => need.ConfigId).Append(bench.Product),
         ItemUse.Cook cook => new[] { cook.Dish },
-        ItemUse.Brew => Array.Empty<int>(),
+        ItemUse.Brew brew => brew.Alone is null ? Array.Empty<int>() : new[] { brew.Alone.Product },
         _ => throw new InvalidOperationException("unhandled item use " + use),
     };
 
@@ -216,12 +222,25 @@ public static class ItemWiki
             foreach (var ingredient in recipe.SpecificItems.Distinct()) Add(uses, ingredient, new ItemUse.Cook(recipe.Dish));
         }
 
+        var barrel = BarrelProducts(tables.BrewProducts);
+
         foreach (var item in items)
         {
-            if (item.CanBrew) Add(uses, item.Id, new ItemUse.Brew());
+            if (item.CanBrew) Add(uses, item.Id, BrewMix.Of(item, tables.Brewing, barrel));
         }
 
         return uses;
+    }
+
+    /// <summary>The game has one brewing barrel; its drinks are the first list there is, lowest tier first.</summary>
+    private static IReadOnlyList<int> BarrelProducts(IReadOnlyList<IReadOnlyList<int>> lists)
+    {
+        foreach (var list in lists)
+        {
+            if (list.Count > 0) return list;
+        }
+
+        return Array.Empty<int>();
     }
 
     private static Dictionary<int, List<ItemSource>> Sources(GameTables tables, IEnumerable<ItemRow> items)

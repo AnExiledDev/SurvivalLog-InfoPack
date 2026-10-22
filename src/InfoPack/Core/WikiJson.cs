@@ -58,7 +58,7 @@ public static class WikiJson
     {
         ItemUse.Bench bench => JsonObject(new[] { Kind("bench"), Field("out", Number(bench.Product)), Field("need", Needs(bench.Needs)) }),
         ItemUse.Cook cook => JsonObject(new[] { Kind("cook"), Field("out", Number(cook.Dish)) }),
-        ItemUse.Brew => JsonObject(new[] { Kind("brew") }),
+        ItemUse.Brew brew => Brewed(brew),
         _ => throw new InvalidOperationException("unhandled item use " + use),
     };
 
@@ -70,6 +70,22 @@ public static class WikiJson
         ItemSource.Shred shred => JsonObject(new[] { Kind("shred"), Field("from", Number(shred.From)), Field("n", Number(shred.Count)) }),
         _ => throw new InvalidOperationException("unhandled item source " + source),
     };
+
+    /// <summary>Satiety and mood always; quality, drink and items per bottle only for an item that adds satiety.</summary>
+    private static string Brewed(ItemUse.Brew brew)
+    {
+        var fields = new List<string> { Kind("brew"), Field("s", Rounded(brew.Satiety, 1)), Field("m", Rounded(brew.Mood, 1)) };
+
+        if (brew.Alone is not null)
+        {
+            fields.Add(Field("q", Rounded(brew.Alone.Quality, 2)));
+            fields.Add(Field("n", Number(brew.Alone.ItemsPerBottle)));
+
+            if (brew.Alone.Product > 0) fields.Add(Field("out", Number(brew.Alone.Product)));
+        }
+
+        return JsonObject(fields);
+    }
 
     /// <summary>A recipe that goes by food tags names no ingredients, and one without a cook time gives none.</summary>
     private static string Cooked(ItemSource.Cook cook)
@@ -127,6 +143,14 @@ public static class WikiJson
 
     /// <summary>Already rounded to one decimal; written without a trailing ".0" the way JSON numbers usually read.</summary>
     private static string OneDecimal(double value) => value.ToString("0.#", CultureInfo.InvariantCulture);
+
+    /// <summary>Rounded to the given decimals, with no "-0" for a value that rounds to nothing.</summary>
+    private static string Rounded(double value, int decimals)
+    {
+        var rounded = Math.Round(value, decimals, MidpointRounding.AwayFromZero);
+
+        return (rounded == 0 ? 0 : rounded).ToString("0.##", CultureInfo.InvariantCulture);
+    }
 
     /// <summary>A float of 0.3 reads back as 0.30000001; three decimals keep the table's own value.</summary>
     private static string Rate(float rate)

@@ -35,6 +35,9 @@ public sealed record GameTables(
 
     /// <summary>The level of every item that is a robot module (Config_RobotModule).</summary>
     public IReadOnlyDictionary<int, int> RobotModules { get; init; } = new Dictionary<int, int>();
+
+    /// <summary>The brewing barrel's quality thresholds and bottle size.</summary>
+    public BrewRules Brewing { get; init; } = BrewRules.Default;
 }
 
 /// <summary>One row of the item table, reduced to what the pieces ask about.</summary>
@@ -58,6 +61,7 @@ public sealed record GameTables(
 /// <param name="CutProduct">CutProductId, 0 for none.</param>
 /// <param name="PlantId">Config_Item.Plant, the plant table row a seed grows; 0 for anything that is not a seed.</param>
 /// <param name="Icon">WebIcon as the game writes it, a path the page can use as an image; empty for none.</param>
+/// <param name="UseTimes">Config_Item.UseTimes, how many uses a fresh item holds; the brew counts 0 or less as 1.</param>
 /// <param name="InFoodCodex">
 /// The item has a Food entry in the codex (CodexManager.IsInCodex: category 1 with InCodex set). Eating it unlocks the
 /// entry, which is how the game remembers what the player has tried.
@@ -82,7 +86,8 @@ public sealed record ItemRow(
     int CutProduct = 0,
     int PlantId = 0,
     string Icon = "",
-    bool InFoodCodex = false);
+    bool InFoodCodex = false,
+    int UseTimes = 1);
 
 /// <summary>A workbench recipe. MaterialList names one item id per unit, so an id can repeat.</summary>
 /// <param name="IsShredOnly">The game's IsShredOnlyRecipe: the recipe breaks its material down rather than using it.</param>

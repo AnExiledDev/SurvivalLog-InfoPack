@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0
+
+- Brewing under Used in: an item that goes in a brewing barrel now shows the drink a barrel of only that item makes and its quality, like `Brewed alone, quality 0.10`, and what each one adds to any brew, like `In a barrel: 10 satiety, +1 mood each; 3 per bottle`. Quality is the batch's total mood over its total satiety, so a high-mood item lifts a mix and a negative-mood one drags it down. The thresholds and bottle size include your brewing talents as they were when the world loaded.
+- Made for Survival Log 1.1.19131.
+
 ## 0.6.0
 
 Info Pack now tells you what the game wants from you, and how long your stats and food last:

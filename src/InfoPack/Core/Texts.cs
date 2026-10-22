@@ -73,7 +73,9 @@ public static class Texts
         Key("makeNow", new("can make {0} now", "现可制作 {0}")),
         Key("useBench", new("Workbench", "工作台")),
         Key("useCook", new("Cooking", "烹饪")),
-        Key("useBrew", new("Can be brewed", "可酿造")),
+        Key("useBrew", new("Brewed alone, quality {0}", "单独酿造，品质 {0}")),
+        Key("useBrewMix", new("In a barrel: {0} satiety, {1} mood each; {2} per bottle", "酒桶中：每个 {0} 饱腹、{1} 心情；每瓶 {2} 个")),
+        Key("useBrewMood", new("In a barrel: {0} mood each, no satiety", "酒桶中：每个 {0} 心情，不加饱腹")),
         Key("more", new("+{0} more", "另有 {0} 项")),
 
         Key("growTime", new("Grows in {0}", "生长时间 {0}")),

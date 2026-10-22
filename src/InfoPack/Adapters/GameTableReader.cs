@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GameCore.HotUpdate;
+using GameCore.HotUpdate.Battle.Logic;
 using InfoPack.Core;
 using Il2CppInts = Il2CppSystem.Collections.Generic.List<int>;
 
@@ -50,6 +51,7 @@ internal sealed class GameTableReader
             AidDemandItems = Guarded("relief request demands", () => AidDemandItems(config), new HashSet<int>()),
             TrapBait = Guarded("trap bait table", () => TrapBait(config), new Dictionary<int, string>()),
             RobotModules = Guarded("robot module table", () => RobotModules(config), new Dictionary<int, int>()),
+            Brewing = Guarded("brew settings", BrewSettings, BrewRules.Default),
         };
     }
 
@@ -133,7 +135,8 @@ internal sealed class GameTableReader
                 CutProduct: item.CutProductId,
                 PlantId: item.Plant,
                 Icon: item.WebIcon ?? "",
-                InFoodCodex: item.Category == FoodCategory && item.InCodex));
+                InFoodCodex: item.Category == FoodCategory && item.InCodex,
+                UseTimes: item.UseTimes));
         }
 
         return rows;
@@ -213,6 +216,14 @@ internal sealed class GameTableReader
         }
 
         return lists;
+    }
+
+    /// <summary>The game's own effective values, so a brewing talent the player has when the world loads counts.</summary>
+    private static BrewRules BrewSettings()
+    {
+        Furniture.GetEffectiveTierThresholds(out var low, out var high);
+
+        return new BrewRules(low, high, Furniture.GetEffectiveSatietyPerBottle());
     }
 
     /// <summary>The planning cards need both this and the buff table; a missing one is thrown so it is logged once.</summary>
