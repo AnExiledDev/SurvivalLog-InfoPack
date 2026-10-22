@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+
+- Dishes under Used in are sorted by what eating them gives in total (satiety, mood, energy, health and life added up), best first, so the three rows shown by default are the best dishes.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.0
 
 - Dishes under Used in: each dish an item cooks into now shows its cook time, like `Cooking, 15m`, and what eating it does on a second line, like `+30 Satiety, +5 Mood`.

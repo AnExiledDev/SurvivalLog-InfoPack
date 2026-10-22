@@ -11,7 +11,7 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
   - **Freshness**: how long until it spoils, coloured as it gets close, how long it keeps when fresh and what it rots into.
   - **Notes**: the scrap and brew quality lines below.
   - **At home**: the home count. Hold Ctrl to list which storages hold the item and how many each has.
-  - **Used in**: workbench recipes, dishes and brewing that use the item, with how many you can make now from what is at home. A dish shows its cook time and what eating it does. A brewable item shows the drink a barrel of only that item makes and its quality, and the satiety and mood each one adds to a brew (quality is total mood over total satiety). Up to three rows; hold Shift for all of them.
+  - **Used in**: workbench recipes, dishes and brewing that use the item, with how many you can make now from what is at home. A dish shows its cook time and what eating it does, and dishes are listed best first by their stats added up. A brewable item shows the drink a barrel of only that item makes and its quality, and the satiety and mood each one adds to a brew (quality is total mood over total satiety). Up to three rows; hold Shift for all of them.
   - **Growing**: for seeds, the grow time, harvest window, light need, cold resistance, yield and seed chance.
   - Shown while Shift is held: **Value** (trade value, weight, value and satiety per kg), **Made from** (recipes, plants and shredding that give the item), **Breaks down into** (shredding, cutting and rotting), **Fuel** (burn value, and how long one burns in a cooking pot, a heater and a fuel generator), **Found in** (furniture it turns up in while searching, and where) and **About** (the item's description). A `Shift: more` hint shows when there is more to see.
 - **What the game wants**: the food you are craving says `You're craving this`, and an item a relief request still needs says how many more, like `Relief request needs 3 more`, with a small gold star on its backpack slot. Food and drink you have never had say `Never tried`. A robot module shows its level and a bait item its kind of bait, under Used in.
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.1: Dishes under Used in are listed best first, by their stats added up. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.0: Dishes under Used in show their cook time and what eating them does, and fuel shows how long it burns in a cooking pot, a heater and a fuel generator. See [CHANGELOG.md](CHANGELOG.md).
 - 0.7.0: Brewable items show, under Used in, the drink and quality a barrel of only that item gives, and the satiety and mood each adds to a brew. See [CHANGELOG.md](CHANGELOG.md).
 - 0.6.0: Tooltips say when an item is the food you are craving, how many more a relief request needs (with a star on the slot), and when you have never tried a food. Robot modules show their level and bait its kind. Hover a HUD stat bar to see how fast it drops and when it runs out, and the satiety bar for how many days the food at home lasts. Items relief requests ask for are no longer marked as scrap. See [CHANGELOG.md](CHANGELOG.md).

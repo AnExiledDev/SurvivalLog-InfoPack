@@ -117,6 +117,24 @@ public class ItemWikiTests
     }
 
     [Fact]
+    public void Dishes_an_ingredient_goes_into_are_listed_by_the_total_of_their_stats_best_first()
+    {
+        var wiki = Wiki(Tables(
+            new[] { Item(Flour), Edible(Bread, 10f, 0f, 0f, 0f, 2f), Edible(Pie, 20f, 5f, 0f, 0f, 0f), Edible(BurntPie, 3f, -6f, 0f, 0f, 0f), Item(Mould) },
+            cooking: new[]
+            {
+                Recipe(1, normal: BurntPie, ingredients: new[] { Flour }),
+                Recipe(2, normal: Mould, ingredients: new[] { Flour }),
+                Recipe(3, normal: Bread, ingredients: new[] { Flour }),
+                Recipe(4, normal: Pie, ingredients: new[] { Flour }),
+            }));
+
+        Assert.Equal(
+            "[{\"k\":\"cook\",\"out\":400},{\"k\":\"cook\",\"out\":300},{\"k\":\"cook\",\"out\":900},{\"k\":\"cook\",\"out\":401}]",
+            Field(wiki, Flour, "use"));
+    }
+
+    [Fact]
     public void Made_from_lists_workbench_cooking_harvest_and_shredding_in_that_order()
     {
         var wiki = Wiki(Tables(

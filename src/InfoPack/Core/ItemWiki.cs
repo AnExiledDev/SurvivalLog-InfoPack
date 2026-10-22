@@ -131,11 +131,13 @@ public static class ItemWiki
         var uses = Uses(tables, items.Values);
         var sources = Sources(tables, items.Values);
         var foundIn = FoundIn(tables, text);
+        var statTotals = items.ToDictionary(pair => pair.Key, pair => Effects(pair.Value.Stats)?.Sum() ?? 0);
+        Comparison<ItemUse> compareUses = (left, right) => CompareUses(left, right, statTotals);
         var wiki = new SortedDictionary<int, WikiEntry>();
 
         foreach (var item in items.Values)
         {
-            var entry = Entry(item, tables, uses, sources, foundIn);
+            var entry = Entry(item, tables, uses, compareUses, sources, foundIn);
 
             if (!entry.IsEmpty) wiki[item.Id] = entry;
         }
@@ -163,6 +165,7 @@ public static class ItemWiki
         ItemRow item,
         GameTables tables,
         IReadOnlyDictionary<int, List<ItemUse>> uses,
+        Comparison<ItemUse> compareUses,
         IReadOnlyDictionary<int, List<ItemSource>> sources,
         IReadOnlyDictionary<int, List<LootSource>> foundIn)
     {
@@ -175,7 +178,7 @@ public static class ItemWiki
             spoils ? Math.Max(item.RotProduct, 0) : 0,
             Math.Max(item.Weight, 0),
             item.TradeValue,
-            Ordered(Find(uses, item.Id), CompareUses),
+            Ordered(Find(uses, item.Id), compareUses),
             Ordered(Find(sources, item.Id), CompareSources),
             ShredYields(tables, item.Id),
             Math.Max(item.CutProduct, 0),
@@ -397,11 +400,14 @@ public static class ItemWiki
         return ordered;
     }
 
-    /// <summary>Workbench recipes first, then cooking, then brewing; within a kind by what comes out.</summary>
-    private static int CompareUses(ItemUse left, ItemUse right) => (left, right) switch
+    /// <summary>
+    /// Workbench recipes first, then cooking, then brewing. Workbench recipes go by what comes out; dishes by what eating
+    /// them adds up to across all five stats, the best first, so the rows shown by default are the most filling ones.
+    /// </summary>
+    private static int CompareUses(ItemUse left, ItemUse right, IReadOnlyDictionary<int, double> statTotals) => (left, right) switch
     {
         (ItemUse.Bench a, ItemUse.Bench b) => Then(a.Product.CompareTo(b.Product), CompareNeeds(a.Needs, b.Needs)),
-        (ItemUse.Cook a, ItemUse.Cook b) => Then(a.Dish.CompareTo(b.Dish), a.Seconds.CompareTo(b.Seconds)),
+        (ItemUse.Cook a, ItemUse.Cook b) => Then(StatTotal(statTotals, b.Dish).CompareTo(StatTotal(statTotals, a.Dish)), Then(a.Dish.CompareTo(b.Dish), a.Seconds.CompareTo(b.Seconds))),
         _ => Rank(left).CompareTo(Rank(right)),
     };
 
@@ -445,6 +451,9 @@ public static class ItemWiki
     }
 
     private static int Then(int first, int second) => first != 0 ? first : second;
+
+    private static double StatTotal(IReadOnlyDictionary<int, double> statTotals, int itemId) =>
+        statTotals.TryGetValue(itemId, out var total) ? total : 0;
 
     /// <summary>The furniture rows of one name that drop one item, while the sources are gathered.</summary>
     private sealed class LootKind
