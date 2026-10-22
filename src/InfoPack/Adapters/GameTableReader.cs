@@ -39,7 +39,11 @@ internal sealed class GameTableReader
             Guarded("brew barrels", () => BrewProducts(config), new List<IReadOnlyList<int>>()),
             shredYields,
             Guarded("talent table", () => Talents(config), new List<TalentRow>()),
-            Guarded("buff table", () => BuffDurations(config), new Dictionary<int, float>()));
+            Guarded("buff table", () => BuffDurations(config), new Dictionary<int, float>()),
+            Guarded("plant table", () => Plants(config), new Dictionary<int, PlantRow>()),
+            Guarded("furniture loot", () => FurnitureLoot(config), new List<LootFurniture>()),
+            Guarded("loot groups", () => LootGroups(config), new Dictionary<int, IReadOnlyList<int>>()),
+            Guarded("furniture placements", () => Placements(config), new List<Placement>()));
     }
 
     private static List<ItemRow> Items(ConfigManager config, Il2CppSystem.Collections.Generic.Dictionary<int, Config_Item> table)
@@ -62,7 +66,14 @@ internal sealed class GameTableReader
                 IsSeed: item.Plant > 0,
                 IsTrap: item.Trap > 0,
                 PlacesFurniture: item.TargetFurnitureID > 0,
-                Stats: new[] { item.ValueDisplay1, item.ValueDisplay2, item.ValueDisplay3, item.ValueDisplay4, item.ValueDisplay5 }));
+                Stats: new[] { item.ValueDisplay1, item.ValueDisplay2, item.ValueDisplay3, item.ValueDisplay4, item.ValueDisplay5 },
+                Weight: item.weight,
+                ShelfLifeDays: item.Life,
+                RotProduct: First(item.It_Rot_Product_Id),
+                BurnValue: item.BurnValue,
+                CutProduct: item.CutProductId,
+                PlantId: item.Plant,
+                Icon: item.WebIcon ?? ""));
         }
 
         return rows;
@@ -102,7 +113,7 @@ internal sealed class GameTableReader
 
         foreach (var recipe in table.Values)
         {
-            if (recipe != null) recipes.Add(new ProductionRecipe(Ints(recipe.MaterialList), ConfigManager.IsShredOnlyRecipe(recipe)));
+            if (recipe != null) recipes.Add(new ProductionRecipe(Ints(recipe.MaterialList), ConfigManager.IsShredOnlyRecipe(recipe), First(recipe.ProductID), recipe.IsUseable));
         }
 
         return recipes;
@@ -117,7 +128,7 @@ internal sealed class GameTableReader
 
         foreach (var recipe in table.Values)
         {
-            if (recipe != null) recipes.Add(new CookingRecipe(recipe.ID, Ints(recipe.SpecificItems), recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID, recipe.FailItemID));
+            if (recipe != null) recipes.Add(new CookingRecipe(recipe.ID, Ints(recipe.SpecificItems), recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID, recipe.FailItemID, recipe.CookTime));
         }
 
         return recipes;
@@ -171,6 +182,68 @@ internal sealed class GameTableReader
         return durations;
     }
 
+    private static Dictionary<int, PlantRow> Plants(ConfigManager config)
+    {
+        var plants = new Dictionary<int, PlantRow>();
+        var table = config._Config_Plant_Dict ?? throw new InvalidOperationException("the game has no plant table loaded");
+
+        foreach (var plant in table.Values)
+        {
+            if (plant != null) plants[plant.ID] = new PlantRow(plant.ID, plant.GrowthTime, plant.HarvestTime, plant.LightNeed, plant.ColdResistance, Ints(plant.Gain), plant.Seed_Rate);
+        }
+
+        return plants;
+    }
+
+    /// <summary>The _P1 to _P4 groups are the loot the furniture holds for each playable character; all of them count.</summary>
+    private static List<LootFurniture> FurnitureLoot(ConfigManager config)
+    {
+        var furnitureWithLoot = new List<LootFurniture>();
+        var table = config._Config_Furniture_Dict ?? throw new InvalidOperationException("the game has no furniture table loaded");
+
+        foreach (var furniture in table.Values)
+        {
+            if (furniture == null) continue;
+
+            var groups = new List<int>();
+
+            foreach (var group in new[] { furniture.LootRandomGroupId, furniture.LootRandomGroupId_P1, furniture.LootRandomGroupId_P2, furniture.LootRandomGroupId_P3, furniture.LootRandomGroupId_P4 })
+            {
+                if (group > 0 && !groups.Contains(group)) groups.Add(group);
+            }
+
+            if (groups.Count > 0) furnitureWithLoot.Add(new LootFurniture(furniture.ID, groups));
+        }
+
+        return furnitureWithLoot;
+    }
+
+    private static Dictionary<int, IReadOnlyList<int>> LootGroups(ConfigManager config)
+    {
+        var groups = new Dictionary<int, IReadOnlyList<int>>();
+        var table = config._Config_RandomGroup_Dict ?? throw new InvalidOperationException("the game has no loot group table loaded");
+
+        foreach (var group in table.Values)
+        {
+            if (group != null) groups[group.ID] = Ints(group.IdList);
+        }
+
+        return groups;
+    }
+
+    private static List<Placement> Placements(ConfigManager config)
+    {
+        var placements = new List<Placement>();
+        var table = config._Config_GuidanceFurniture_Dict ?? throw new InvalidOperationException("the game has no furniture placement table loaded");
+
+        foreach (var placement in table.Values)
+        {
+            if (placement != null) placements.Add(new Placement(placement.FurnitureId, placement.MapPointID));
+        }
+
+        return placements;
+    }
+
     private static List<int> Ints(Il2CppInts? list)
     {
         var ints = new List<int>();
@@ -179,6 +252,9 @@ internal sealed class GameTableReader
 
         return ints;
     }
+
+    /// <summary>The game reads a one-entry list for these (the rot product, a recipe's product); 0 when it is empty.</summary>
+    private static int First(Il2CppInts? list) => list != null && list.Count > 0 ? list[0] : 0;
 
     private T Guarded<T>(string what, Func<T> read, T empty)
     {

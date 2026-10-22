@@ -7,7 +7,8 @@ using InfoPack.Core;
 namespace InfoPack.Adapters;
 
 /// <summary>
-/// The game's localised text: the stat wording its item tips use and the item descriptions. The page draws with
+/// The game's localised text: the stat wording its item tips use, item names and descriptions, and the names of
+/// furniture and places. The page draws with
 /// textContent, so any rich-text tags the game's strings carry are stripped rather than shown.
 /// </summary>
 internal sealed class GameTextReader : IGameText
@@ -70,6 +71,42 @@ internal sealed class GameTextReader : IGameText
         if (config == null || item == null) return null;
 
         return Clean(Translate(config, item.ItemDes1)) ?? Clean(item.ItemDes1_Local);
+    }
+
+    public string? ItemName(int itemId)
+    {
+        var config = GameSingleton.Existing<ConfigManager>();
+        var item = config?.Get_Config_Item(itemId);
+
+        if (config == null || item == null) return null;
+
+        return Clean(Translate(config, item.ItemName)) ?? Clean(item.ItemName_Local);
+    }
+
+    /// <summary>Looked up in the table itself: the game's Get_Config_Furniture logs an error for an id it lacks.</summary>
+    public string? FurnitureName(int furnitureId)
+    {
+        var config = GameSingleton.Existing<ConfigManager>();
+        var table = config?._Config_Furniture_Dict;
+
+        if (config == null || table == null || !table.ContainsKey(furnitureId)) return null;
+
+        var furniture = table[furnitureId];
+
+        return furniture == null ? null : Clean(Translate(config, furniture.Name)) ?? Clean(furniture.Name_Local);
+    }
+
+    /// <summary>Looked up in the table itself: the game's Get_Config_MapPoint logs an error for an id it lacks.</summary>
+    public string? PlaceName(int placeId)
+    {
+        var config = GameSingleton.Existing<ConfigManager>();
+        var table = config?._Config_MapPoint_Dict;
+
+        if (config == null || table == null || !table.ContainsKey(placeId)) return null;
+
+        var place = table[placeId];
+
+        return place == null ? null : Clean(Translate(config, place.Name)) ?? Clean(place.Name_Local);
     }
 
     private StatFormat Pair(Func<string> gain, Func<string> loss, string name)

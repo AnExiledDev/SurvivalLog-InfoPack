@@ -52,29 +52,38 @@ public class PageFactsTests
     [Fact]
     public void With_every_piece_on_the_page_gets_every_kind_of_fact()
     {
-        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan", "ui" }, Keys(Build(AllOn)));
+        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan", "items", "wiki", "ui" }, Keys(Build(AllOn)));
     }
 
     [Fact]
     public void A_piece_turned_off_sends_nothing_for_it()
     {
-        Assert.Equal(new[] { "ui" }, Keys(Build(AllOff)));
-        Assert.Equal(new[] { "scrap", "ui" }, Keys(Build(AllOff with { ScrapOnly = true })));
-        Assert.Equal(new[] { "brew", "ui" }, Keys(Build(AllOff with { AlcoholQuality = true })));
-        Assert.Equal(new[] { "stats", "desc", "dish", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
-        Assert.Equal(new[] { "plan", "ui" }, Keys(Build(AllOff with { PlanningBadges = true })));
+        Assert.Equal(new[] { "desc", "items", "wiki", "ui" }, Keys(Build(AllOff)));
+        Assert.Equal(new[] { "desc", "scrap", "items", "wiki", "ui" }, Keys(Build(AllOff with { ScrapOnly = true })));
+        Assert.Equal(new[] { "desc", "brew", "items", "wiki", "ui" }, Keys(Build(AllOff with { AlcoholQuality = true })));
+        Assert.Equal(new[] { "stats", "desc", "dish", "items", "wiki", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
+        Assert.Equal(new[] { "desc", "plan", "items", "wiki", "ui" }, Keys(Build(AllOff with { PlanningBadges = true })));
     }
 
     [Fact]
     public void Trade_stats_alone_still_gets_the_stat_lines()
     {
-        Assert.Equal(new[] { "stats", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
+        Assert.Equal(new[] { "stats", "desc", "items", "wiki", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
     }
 
     [Fact]
     public void Base_counts_need_no_facts_because_counts_travel_on_their_own()
     {
-        Assert.Equal(new[] { "ui" }, Keys(Build(AllOff with { BaseCounts = true })));
+        Assert.Equal(new[] { "desc", "items", "wiki", "ui" }, Keys(Build(AllOff with { BaseCounts = true })));
+    }
+
+    [Fact]
+    public void Every_tooltip_gets_the_item_wiki_with_every_piece_off()
+    {
+        var facts = Build(AllOff);
+
+        Assert.Equal(new[] { 20f, 3f, 0f, 0f, -1f }, facts.GetProperty("wiki").GetProperty("701").GetProperty("fx").EnumerateArray().Select(value => value.GetSingle()).ToArray());
+        Assert.Equal(JsonValueKind.Array, facts.GetProperty("items").GetProperty("701").ValueKind);
     }
 
     [Fact]
@@ -87,11 +96,11 @@ public class PageFactsTests
     }
 
     [Fact]
-    public void Descriptions_cover_food_ingredients_and_dishes_and_leave_the_rest_of_the_table_out()
+    public void Descriptions_cover_every_item_that_has_one()
     {
         var descriptions = Build(AllOn).GetProperty("desc");
 
-        Assert.Equal(new[] { "601", "602", "701" }, Keys(descriptions));
+        Assert.Equal(new[] { "101", "501", "601", "602", "701" }, Keys(descriptions));
         Assert.Equal("Plain rice.", descriptions.GetProperty("601").GetString());
         Assert.Equal("Salt, \"fine\".", descriptions.GetProperty("602").GetString());
     }

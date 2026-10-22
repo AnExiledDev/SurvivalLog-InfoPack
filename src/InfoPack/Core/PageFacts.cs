@@ -12,30 +12,29 @@ namespace InfoPack.Core;
 /// </summary>
 public static class PageFacts
 {
-    private const int CategoryFood = 1;
-
     /// <summary>
     /// {"stats":{id:text},"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id],
-    /// "plan":{talentId:badge},"ui":{key:text}}, with a key left out when its piece is off. "ui" is always there and holds the
-    /// page's own words in the language the game shows. Keys are in ascending id order so the same
-    /// tables always give the same text.
+    /// "plan":{talentId:badge},"items":{id:[name,icon]},"wiki":{id:{...}},"ui":{key:text}}, with a key left out when its
+    /// piece is off. "desc", "items", "wiki" and "ui" are always there, because every tooltip draws on them. "ui" holds the
+    /// page's own words in the language the game shows. Keys are in ascending id order so the same tables always give the
+    /// same text.
     /// </summary>
     public static string Build(GameTables tables, IGameText text, Features features)
     {
         var parts = new List<string>();
+        var wiki = ItemWiki.Build(tables, text);
 
         if (features.NeedsStats) parts.Add(Member("stats", TextObject(Stats(tables.Items, text.StatFormats()))));
 
-        if (features.CookingCodex)
-        {
-            parts.Add(Member("desc", TextObject(Descriptions(tables, text))));
-            parts.Add(Member("dish", NumberObject(Dishes(tables.Cooking))));
-        }
+        parts.Add(Member("desc", TextObject(Descriptions(tables.Items, text))));
 
+        if (features.CookingCodex) parts.Add(Member("dish", NumberObject(Dishes(tables.Cooking))));
         if (features.AlcoholQuality) parts.Add(Member("brew", BrewObject(BrewTiers.Map(tables.BrewProducts))));
         if (features.ScrapOnly) parts.Add(Member("scrap", "[" + string.Join(",", ScrapRule.ScrapOnly(tables).Select(Number)) + "]"));
         if (features.PlanningBadges) parts.Add(Member("plan", TextObject(PlanBadges.Map(tables.Talents, tables.BuffDurations))));
 
+        parts.Add(Member("items", WikiJson.Items(tables, text, wiki)));
+        parts.Add(Member("wiki", WikiJson.Wiki(wiki)));
         parts.Add(Member("ui", Ui(text.IsChinese())));
 
         return "{" + string.Join(",", parts) + "}";
@@ -64,26 +63,16 @@ public static class PageFacts
         return lines;
     }
 
-    /// <summary>
-    /// The description of every item the cooking window can show: food, anything the pot takes, every named ingredient
-    /// and every dish. The rest of the item table is left out to keep the message small.
-    /// </summary>
-    public static SortedDictionary<int, string> Descriptions(GameTables tables, IGameText text)
+    /// <summary>The description of every item that has one: the cooking window and every tooltip's about line show it.</summary>
+    public static SortedDictionary<int, string> Descriptions(IEnumerable<ItemRow> items, IGameText text)
     {
-        var cookingIds = new HashSet<int>(tables.Items.Where(item => item.Category == CategoryFood || item.IsEdible).Select(item => item.Id));
         var descriptions = new SortedDictionary<int, string>();
 
-        foreach (var recipe in tables.Cooking)
+        foreach (var item in items)
         {
-            cookingIds.UnionWith(recipe.SpecificItems);
-            cookingIds.UnionWith(new[] { recipe.NormalItemId, recipe.GoodItemId, recipe.PerfectItemId, recipe.FailItemId });
-        }
+            var description = item.Id > 0 ? text.Description(item.Id) : null;
 
-        foreach (var id in cookingIds)
-        {
-            var description = id > 0 ? text.Description(id) : null;
-
-            if (!string.IsNullOrWhiteSpace(description)) descriptions[id] = description.Trim();
+            if (!string.IsNullOrWhiteSpace(description)) descriptions[item.Id] = description.Trim();
         }
 
         return descriptions;
@@ -99,9 +88,7 @@ public static class PageFacts
 
         foreach (var recipe in recipes)
         {
-            var dish = new[] { recipe.NormalItemId, recipe.GoodItemId, recipe.PerfectItemId, recipe.FailItemId }.FirstOrDefault(id => id > 0);
-
-            if (recipe.Id > 0 && dish > 0) dishes[recipe.Id] = dish;
+            if (recipe.Id > 0 && recipe.Dish > 0) dishes[recipe.Id] = recipe.Dish;
         }
 
         return dishes;

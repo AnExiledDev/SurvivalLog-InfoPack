@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using InfoPack.Core;
 
 namespace InfoPack.Tests;
@@ -29,7 +30,11 @@ internal static class Rows
         IEnumerable<IReadOnlyList<int>>? brewProducts = null,
         IReadOnlyDictionary<int, IReadOnlyList<Yield>>? shredYields = null,
         IEnumerable<TalentRow>? talents = null,
-        IReadOnlyDictionary<int, float>? buffDurations = null) =>
+        IReadOnlyDictionary<int, float>? buffDurations = null,
+        IEnumerable<PlantRow>? plants = null,
+        IEnumerable<LootFurniture>? lootFurniture = null,
+        IReadOnlyDictionary<int, IReadOnlyList<int>>? lootGroups = null,
+        IEnumerable<Placement>? placements = null) =>
         new(
             new List<ItemRow>(items),
             new List<ProductionRecipe>(production ?? new ProductionRecipe[0]),
@@ -37,10 +42,17 @@ internal static class Rows
             new List<IReadOnlyList<int>>(brewProducts ?? new IReadOnlyList<int>[0]),
             shredYields ?? new Dictionary<int, IReadOnlyList<Yield>>(),
             new List<TalentRow>(talents ?? new TalentRow[0]),
-            buffDurations ?? new Dictionary<int, float>());
+            buffDurations ?? new Dictionary<int, float>(),
+            (plants ?? new PlantRow[0]).ToDictionary(plant => plant.Id),
+            new List<LootFurniture>(lootFurniture ?? new LootFurniture[0]),
+            lootGroups ?? new Dictionary<int, IReadOnlyList<int>>(),
+            new List<Placement>(placements ?? new Placement[0]));
 
     public static CookingRecipe Recipe(int id, int normal, int good = 0, int perfect = 0, int fail = 0, params int[] ingredients) =>
         new(id, ingredients, normal, good, perfect, fail);
+
+    /// <summary>A workbench recipe the game lists, making product out of one unit per material id.</summary>
+    public static ProductionRecipe Bench(int product, params int[] materials) => new(materials, IsShredOnly: false, product);
 }
 
 internal sealed class FakeText : IGameText
@@ -55,6 +67,9 @@ internal sealed class FakeText : IGameText
     };
 
     private readonly Dictionary<int, string> _descriptions = new();
+    private readonly Dictionary<int, string> _itemNames = new();
+    private readonly Dictionary<int, string> _furnitureNames = new();
+    private readonly Dictionary<int, string> _placeNames = new();
 
     public FakeText Describes(int itemId, string description)
     {
@@ -63,9 +78,36 @@ internal sealed class FakeText : IGameText
         return this;
     }
 
+    public FakeText Names(int itemId, string name)
+    {
+        _itemNames[itemId] = name;
+
+        return this;
+    }
+
+    public FakeText NamesFurniture(int furnitureId, string name)
+    {
+        _furnitureNames[furnitureId] = name;
+
+        return this;
+    }
+
+    public FakeText NamesPlace(int placeId, string name)
+    {
+        _placeNames[placeId] = name;
+
+        return this;
+    }
+
     public IReadOnlyList<StatFormat> StatFormats() => English;
 
     public string? Description(int itemId) => _descriptions.TryGetValue(itemId, out var description) ? description : null;
+
+    public string? ItemName(int itemId) => _itemNames.TryGetValue(itemId, out var name) ? name : null;
+
+    public string? FurnitureName(int furnitureId) => _furnitureNames.TryGetValue(furnitureId, out var name) ? name : null;
+
+    public string? PlaceName(int placeId) => _placeNames.TryGetValue(placeId, out var name) ? name : null;
 
     public bool Chinese { get; init; }
 
