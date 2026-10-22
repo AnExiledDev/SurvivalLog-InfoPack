@@ -15,6 +15,8 @@
   var WHERE_RETRY_MS = 2000;
   var COOKING_TIP_WIDTH = '300px';
   var LIST_ROWS = 3;
+  // Some materials go into hundreds of recipes; even with the detail key held the tooltip has to fit the window.
+  var DETAIL_LIST_ROWS = 12;
   // The game offsets its tooltips 15 page pixels from the cursor; EDGE keeps a moved one off the window's border.
   var CURSOR_GAP = 15;
   var EDGE = 4;
@@ -266,8 +268,8 @@
     dayShort: '{0}d', hourShort: '{0}h', minuteShort: '{0}m', kg: '{0} kg', g: '{0} g'
   };
 
-  // LightNeed as the plugin sends it; 0 says nothing worth a line.
-  var LIGHT_PHRASES = { 1: 'lightLow', 2: 'lightMid', 3: 'lightHigh' };
+  // LightNeed: 1 grows under cloud, 2 needs sun or a grow lamp, 0 grows in any light and needs no line.
+  var LIGHT_PHRASES = { 1: 'lightLow', 2: 'lightHigh' };
 
   function phrase(key) {
     return facts.ui[key] || ENGLISH[key] || key;
@@ -393,9 +395,11 @@
         return;
       }
 
-      if (LIST_SECTIONS[key] && !keys.detail && rows.length > LIST_ROWS) {
-        rows = rows.slice(0, LIST_ROWS).concat([{ parts: [say('more', rows.length - LIST_ROWS)], cls: 'slip-more' }]);
-        needsHint = true;
+      var shown = keys.detail ? DETAIL_LIST_ROWS : LIST_ROWS;
+
+      if (LIST_SECTIONS[key] && rows.length > shown) {
+        rows = rows.slice(0, shown).concat([{ parts: [say('more', rows.length - shown)], cls: 'slip-more' }]);
+        if (!keys.detail) needsHint = true;
       }
 
       sections.push({ key: key, title: SECTION_TITLES[key] ? say(SECTION_TITLES[key]) : '', rows: rows });
