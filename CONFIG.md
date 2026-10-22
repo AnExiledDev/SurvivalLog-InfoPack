@@ -12,6 +12,10 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 | `ScrapOnly` | `true` | Items only worth shredding get an `Only useful as scrap` line in their tooltip, a `Scrap` chip on their backpack slot and a `Scrap` tag in the pickup list. |
 | `CookingCodex` | `true` | Hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes. |
 | `PlanningBadges` | `true` | Cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like `3d` or `24h`. A card that takes effect once shows `1x`. Cards that last for good get no badge. |
+| `Wanted` | `true` | An item's tooltip says when it is the food you are craving, or how many more of it a relief request still needs. Items a relief request needs also get a star on their backpack slot. |
+| `NeverTried` | `true` | Food and drink you have never had get a `Never tried` line in their tooltip. |
+| `StatRates` | `true` | Hovering a stat bar on the HUD shows how much it drops per game hour and about how long until it is empty. The rate shows after about half a game hour of play. |
+| `FoodForecast` | `true` | Hovering the satiety bar on the HUD shows about how many days the food at home lasts you, from the satiety of every food item at home and how fast you get hungry. Spoiling and cooking are left out. |
 
 ## Tooltip
 

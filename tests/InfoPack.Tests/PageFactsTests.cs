@@ -52,29 +52,29 @@ public class PageFactsTests
     [Fact]
     public void With_every_piece_on_the_page_gets_every_kind_of_fact()
     {
-        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan", "items", "wiki", "ui" }, Keys(Build(AllOn)));
+        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOn)));
     }
 
     [Fact]
     public void A_piece_turned_off_sends_nothing_for_it()
     {
-        Assert.Equal(new[] { "desc", "items", "wiki", "ui" }, Keys(Build(AllOff)));
-        Assert.Equal(new[] { "desc", "scrap", "items", "wiki", "ui" }, Keys(Build(AllOff with { ScrapOnly = true })));
-        Assert.Equal(new[] { "desc", "brew", "items", "wiki", "ui" }, Keys(Build(AllOff with { AlcoholQuality = true })));
-        Assert.Equal(new[] { "stats", "desc", "dish", "items", "wiki", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
-        Assert.Equal(new[] { "desc", "plan", "items", "wiki", "ui" }, Keys(Build(AllOff with { PlanningBadges = true })));
+        Assert.Equal(new[] { "desc", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff)));
+        Assert.Equal(new[] { "desc", "scrap", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { ScrapOnly = true })));
+        Assert.Equal(new[] { "desc", "brew", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { AlcoholQuality = true })));
+        Assert.Equal(new[] { "stats", "desc", "dish", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
+        Assert.Equal(new[] { "desc", "plan", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { PlanningBadges = true })));
     }
 
     [Fact]
     public void Trade_stats_alone_still_gets_the_stat_lines()
     {
-        Assert.Equal(new[] { "stats", "desc", "items", "wiki", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
+        Assert.Equal(new[] { "stats", "desc", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
     }
 
     [Fact]
     public void Base_counts_need_no_facts_because_counts_travel_on_their_own()
     {
-        Assert.Equal(new[] { "desc", "items", "wiki", "ui" }, Keys(Build(AllOff with { BaseCounts = true })));
+        Assert.Equal(new[] { "desc", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { BaseCounts = true })));
     }
 
     [Fact]
@@ -161,6 +161,15 @@ public class PageFactsTests
     public void The_same_tables_always_give_the_same_text()
     {
         Assert.Equal(PageFacts.Build(World(), Text(), AllOn), PageFacts.Build(World(), Text(), AllOn));
+    }
+
+    [Fact]
+    public void Bait_shows_its_kind_in_the_players_language_and_skips_a_kind_with_no_text()
+    {
+        var text = new FakeText().Localises("Bait_Meat", " Meat ").Localises("Bait_Blank", "  ");
+        var bait = new Dictionary<int, string> { [11] = "Bait_Meat", [12] = "Bait_Meat", [13] = "Bait_Blank", [14] = "Bait_Missing" };
+
+        Assert.Equal(new Dictionary<int, string> { [11] = "Meat", [12] = "Meat" }, PageFacts.BaitKinds(bait, text));
     }
 
     [Fact]

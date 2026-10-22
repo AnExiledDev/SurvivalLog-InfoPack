@@ -14,6 +14,8 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
   - **Used in**: workbench recipes, dishes and brewing that use the item, with how many you can make now from what is at home. Up to three rows; hold Shift for all of them.
   - **Growing**: for seeds, the grow time, harvest window, light need, cold resistance, yield and seed chance.
   - Shown while Shift is held: **Value** (trade value, weight, value and satiety per kg), **Made from** (recipes, plants and shredding that give the item), **Breaks down into** (shredding, cutting and rotting), **Fuel** (burn value), **Found in** (furniture it turns up in while searching, and where) and **About** (the item's description). A `Shift: more` hint shows when there is more to see.
+- **What the game wants**: the food you are craving says `You're craving this`, and an item a relief request still needs says how many more, like `Relief request needs 3 more`, with a small gold star on its backpack slot. Food and drink you have never had say `Never tried`. A robot module shows its level and a bait item its kind of bait, under Used in.
+- **Stat bars**: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you. The numbers show after about half a game hour of play.
 - **Spoil badges**: food in backpack and storage slots that spoils within a day gets a small coloured corner.
 - **Tooltips stay on screen**: a tooltip that would run past an edge of the window is moved back inside it.
 - **Home counts**: item tooltips in the backpack, the trade window and the cooking window get a line `At home: N`: how many of that item are in your bag, in every storage at home (hidden ones included) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
@@ -62,10 +64,12 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 ## Known issues and limits
 
 - The ingredient lines under a recipe in the cooking window are the game's own and get no counts.
-- The scrap rule does not know about wishes, aid demands, robot modules or trap bait, so an item only those ask for can still be marked as scrap. Check before you shred something rare. Anything the game burns as fuel counts as useful and is never marked.
+- The scrap rule does not know about cravings, robot modules or trap bait, so an item only those ask for can still be marked as scrap. Items a relief request asks for are never marked. Check before you shred something rare. Anything the game burns as fuel counts as useful and is never marked.
 - Items on the trader's side that the game has not loaded yet get no lines in the trade tooltip. Items you sell can take a moment to show their lines the first time.
 - The brew panel shows the quality score only while a brew is being set up. Once the barrel is brewing it is hidden.
 - An emptied container still gets the plain outline every piece of furniture gets while Alt is held, and the outline when you point at it. Only the search colour goes.
+- A relief request that asks for an amount of any food or material, rather than one item, gets no line or star.
+- The food forecast counts only you, not other people at home, and leaves out spoiling and cooking. Cooked dishes in the codex are not marked `Never tried`.
 - The mod's own lines and tags follow the game's language, English or Simplified Chinese. The stat wording, item descriptions and brew tier names come from the game, in your language.
 
 ## Requirements
@@ -112,6 +116,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.6.0: Tooltips say when an item is the food you are craving, how many more a relief request needs (with a star on the slot), and when you have never tried a food. Robot modules show their level and bait its kind. Hover a HUD stat bar to see how fast it drops and when it runs out, and the satiety bar for how many days the food at home lasts. Items relief requests ask for are no longer marked as scrap. See [CHANGELOG.md](CHANGELOG.md).
 - 0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot. See [CHANGELOG.md](CHANGELOG.md).
 - 0.4.0: Settings can be changed on the Mod Manager's Mods screen without a restart; turning a feature off takes away what it drew. Works with Exiled's Toolkit 0.4.0 or newer, which is optional.
 - 0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.

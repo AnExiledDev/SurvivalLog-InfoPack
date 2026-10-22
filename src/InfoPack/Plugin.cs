@@ -14,7 +14,7 @@ namespace InfoPack;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.5.0";
+    private const string Version = "0.6.0";
 
     public override void Load()
     {
@@ -38,7 +38,19 @@ public sealed class Plugin : BasePlugin
         var planningBadges = Config.Bind("Features", "PlanningBadges", true,
             "When on (the default), cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like '3d' or '24h'. A card that takes effect once shows '1x'. Cards that last for good get no badge.\n" +
             "开启时（默认），生存规划界面的卡牌图片上会显示一个小角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。");
-        var featureSettings = new ConfigEntryBase[] { baseCounts, tradeStats, alcoholQuality, scrapOnly, cookingCodex, planningBadges };
+        var wanted = Config.Bind("Features", "Wanted", true,
+            "When on (the default), an item's tooltip says when it is the food you are craving, or how many more of it a relief request still needs. Items a relief request needs also get a star on their backpack slot.\n" +
+            "开启时（默认），如果物品正是你想吃的食物，或者救助委托还需要它，提示里会写明，并显示还差几个。救助委托需要的物品在背包格子上还会显示一颗星。");
+        var neverTried = Config.Bind("Features", "NeverTried", true,
+            "When on (the default), food and drink you have never had get a 'Never tried' line in their tooltip.\n" +
+            "开启时（默认），从没吃过的食物和饮品，提示里会多一行「从没尝过」。");
+        var statRates = Config.Bind("Features", "StatRates", true,
+            "When on (the default), hovering a stat bar on the HUD shows how much it drops per game hour and about how long until it is empty. The rate shows after about half a game hour of play.\n" +
+            "开启时（默认），悬停界面上的状态条，会显示它每个游戏小时下降多少，以及大约多久后耗尽。游戏内过去约半小时后才会显示。");
+        var foodForecast = Config.Bind("Features", "FoodForecast", true,
+            "When on (the default), hovering the satiety bar on the HUD shows about how many days the food at home lasts you. It counts the satiety of every food item at home against how fast you get hungry, and leaves out spoiling and cooking.\n" +
+            "开启时（默认），悬停界面上的饱腹条，会显示家中食物大约够你吃几天。按家中所有食物的饱腹值和你饿的速度估算，不计腐坏和烹饪。");
+        var featureSettings = new ConfigEntryBase[] { baseCounts, tradeStats, alcoholQuality, scrapOnly, cookingCodex, planningBadges, wanted, neverTried, statRates, foodForecast };
         var tooltip = new TooltipConfig(Config);
         var log = new InfoLog(Log, Path.Combine(Paths.BepInExRootPath, "info-pack.log"));
 
@@ -49,6 +61,10 @@ public sealed class Plugin : BasePlugin
             SpoilBadges = tooltip.SpoilBadges.Value,
             KeepOnScreen = tooltip.KeepOnScreen.Value,
             Tip = tooltip.Layout(),
+            Wanted = wanted.Value,
+            NeverTried = neverTried.Value,
+            StatRates = statRates.Value,
+            FoodForecast = foodForecast.Value,
         };
 
         var harmony = new Harmony(Guid);

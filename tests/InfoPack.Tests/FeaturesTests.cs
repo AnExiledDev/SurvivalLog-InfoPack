@@ -13,6 +13,10 @@ public class FeaturesTests
     {
         SpoilBadges = false,
         KeepOnScreen = false,
+        Wanted = false,
+        NeverTried = false,
+        StatRates = false,
+        FoodForecast = false,
         Tip = NoSections,
     };
 
@@ -57,6 +61,39 @@ public class FeaturesTests
         Assert.True((AllOff with { ScrapOnly = true }).IsAnyOn);
         Assert.True((AllOff with { CookingCodex = true }).IsAnyOn);
         Assert.True((AllOff with { PlanningBadges = true }).IsAnyOn);
+        Assert.True((AllOff with { Wanted = true }).IsAnyOn);
+        Assert.True((AllOff with { NeverTried = true }).IsAnyOn);
+        Assert.True((AllOff with { StatRates = true }).IsAnyOn);
+        Assert.True((AllOff with { FoodForecast = true }).IsAnyOn);
+    }
+
+    [Theory]
+    [InlineData("wanted")]
+    [InlineData("untried")]
+    [InlineData("rates")]
+    [InlineData("forecast")]
+    public void Each_live_toggle_reaches_the_page_under_its_own_flag(string flag)
+    {
+        var on = flag switch
+        {
+            "wanted" => AllOff with { Wanted = true },
+            "untried" => AllOff with { NeverTried = true },
+            "rates" => AllOff with { StatRates = true },
+            _ => AllOff with { FoodForecast = true },
+        };
+        var flags = JsonDocument.Parse(on.ToJson()).RootElement;
+
+        foreach (var other in new[] { "wanted", "untried", "rates", "forecast" }) Assert.Equal(other == flag, flags.GetProperty(other).GetBoolean());
+    }
+
+    [Fact]
+    public void Only_the_hud_toggles_measure_the_stats()
+    {
+        Assert.False(AllOff.NeedsLive);
+        Assert.False((AllOff with { Wanted = true }).NeedsDrain);
+        Assert.True((AllOff with { StatRates = true }).NeedsDrain);
+        Assert.True((AllOff with { FoodForecast = true }).NeedsDrain);
+        Assert.True((AllOff with { NeverTried = true }).NeedsLive);
     }
 
     [Fact]
@@ -72,7 +109,7 @@ public class FeaturesTests
     {
         var flags = JsonDocument.Parse(new Features(true, true, true, true, true, true).ToJson()).RootElement;
 
-        Assert.Equal(new[] { "counts", "stats", "brew", "scrap", "codex", "plan", "badges", "onScreen", "tip" }, flags.EnumerateObject().Select(member => member.Name));
+        Assert.Equal(new[] { "counts", "stats", "brew", "scrap", "codex", "plan", "badges", "onScreen", "wanted", "untried", "rates", "forecast", "tip" }, flags.EnumerateObject().Select(member => member.Name));
         Assert.Equal(new[] { "order", "modes", "detailKey", "whereKey" }, flags.GetProperty("tip").EnumerateObject().Select(member => member.Name));
     }
 

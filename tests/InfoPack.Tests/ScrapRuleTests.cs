@@ -142,4 +142,15 @@ public class ScrapRuleTests
 
         Assert.Equal(new[] { Gear }, ScrapRule.ScrapOnly(tables));
     }
+
+    [Fact]
+    public void An_item_a_relief_request_asks_for_is_not_scrap()
+    {
+        var tables = Tables(new[] { Junk(Battery, tradeValue: 4), Plain(Wire, tradeValue: 2) }, shredYields: BatteryShredsToTwoWire) with
+        {
+            AidDemandItems = new HashSet<int> { Battery },
+        };
+
+        Assert.Empty(ScrapRule.ScrapOnly(tables));
+    }
 }

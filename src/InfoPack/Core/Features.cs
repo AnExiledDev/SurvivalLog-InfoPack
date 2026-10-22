@@ -17,10 +17,28 @@ public sealed record Features(
 
     public TipLayout Tip { get; init; } = TipLayout.Default;
 
+    /// <summary>Tooltip lines and a backpack star for what your craving and accepted relief requests want.</summary>
+    public bool Wanted { get; init; } = true;
+
+    /// <summary>A tooltip line on food and drink you have never had.</summary>
+    public bool NeverTried { get; init; } = true;
+
+    /// <summary>How fast each HUD stat drops, and when it runs out, in the stat bar's tooltip.</summary>
+    public bool StatRates { get; init; } = true;
+
+    /// <summary>How many days the food at home lasts, in the satiety bar's tooltip.</summary>
+    public bool FoodForecast { get; init; } = true;
+
+    /// <summary>The stat drain is measured for the rates and for the forecast, which uses the satiety drain.</summary>
+    public bool NeedsDrain => StatRates || FoodForecast;
+
+    /// <summary>Anything that reads the save as it plays, beyond the home counts.</summary>
+    public bool NeedsLive => Wanted || NeverTried || NeedsDrain;
+
     /// <summary>Every piece is drawn by the page script, so with all of them off the mod has nothing to do.</summary>
     public bool IsAnyOn =>
         BaseCounts || TradeStats || AlcoholQuality || ScrapOnly || CookingCodex || PlanningBadges
-        || SpoilBadges || KeepOnScreen || Tip.ShowsAnySection;
+        || SpoilBadges || KeepOnScreen || Tip.ShowsAnySection || NeedsLive;
 
     /// <summary>The stat line is shown by two pieces: the trade tooltip and the cooking codex section.</summary>
     public bool NeedsStats => TradeStats || CookingCodex;
@@ -35,6 +53,10 @@ public sealed record Features(
         + ",\"plan\":" + Flag(PlanningBadges)
         + ",\"badges\":" + Flag(SpoilBadges)
         + ",\"onScreen\":" + Flag(KeepOnScreen)
+        + ",\"wanted\":" + Flag(Wanted)
+        + ",\"untried\":" + Flag(NeverTried)
+        + ",\"rates\":" + Flag(StatRates)
+        + ",\"forecast\":" + Flag(FoodForecast)
         + ",\"tip\":" + Tip.ToJson()
         + "}";
 

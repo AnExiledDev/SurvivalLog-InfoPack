@@ -22,7 +22,20 @@ public sealed record GameTables(
     IReadOnlyDictionary<int, PlantRow> Plants,
     IReadOnlyList<LootFurniture> LootFurniture,
     IReadOnlyDictionary<int, IReadOnlyList<int>> LootGroups,
-    IReadOnlyList<Placement> Placements);
+    IReadOnlyList<Placement> Placements)
+{
+    /// <summary>
+    /// Every item a relief request can ask for by name (Config_AidCommission demands and Config_AidDemandPool rows of
+    /// kind 0). Such an item has a use, so it never gets the scrap mark.
+    /// </summary>
+    public IReadOnlyCollection<int> AidDemandItems { get; init; } = new HashSet<int>();
+
+    /// <summary>The bait kind's text key (Config_TrapBait.Effect_Des) for every item a trap takes as bait.</summary>
+    public IReadOnlyDictionary<int, string> TrapBait { get; init; } = new Dictionary<int, string>();
+
+    /// <summary>The level of every item that is a robot module (Config_RobotModule).</summary>
+    public IReadOnlyDictionary<int, int> RobotModules { get; init; } = new Dictionary<int, int>();
+}
 
 /// <summary>One row of the item table, reduced to what the pieces ask about.</summary>
 /// <param name="Category">The game's ItemCategory number (0 None, 1 Food, 4 Electrical, 5 Daily goods, 9 Material).</param>
@@ -45,6 +58,10 @@ public sealed record GameTables(
 /// <param name="CutProduct">CutProductId, 0 for none.</param>
 /// <param name="PlantId">Config_Item.Plant, the plant table row a seed grows; 0 for anything that is not a seed.</param>
 /// <param name="Icon">WebIcon as the game writes it, a path the page can use as an image; empty for none.</param>
+/// <param name="InFoodCodex">
+/// The item has a Food entry in the codex (CodexManager.IsInCodex: category 1 with InCodex set). Eating it unlocks the
+/// entry, which is how the game remembers what the player has tried.
+/// </param>
 public sealed record ItemRow(
     int Id,
     int Category,
@@ -64,7 +81,8 @@ public sealed record ItemRow(
     int BurnValue = 0,
     int CutProduct = 0,
     int PlantId = 0,
-    string Icon = "");
+    string Icon = "",
+    bool InFoodCodex = false);
 
 /// <summary>A workbench recipe. MaterialList names one item id per unit, so an id can repeat.</summary>
 /// <param name="IsShredOnly">The game's IsShredOnlyRecipe: the recipe breaks its material down rather than using it.</param>
@@ -136,6 +154,9 @@ public interface IGameText
 
     /// <summary>The place's name (a Config_MapPoint id) in the player's language, or null when the game has none.</summary>
     string? PlaceName(int placeId);
+
+    /// <summary>The game's text for a localisation key in the player's language, or null when it has none.</summary>
+    string? LocalText(string key);
 
     /// <summary>True when the game shows Chinese. Anything unknown reads as English.</summary>
     bool IsChinese();

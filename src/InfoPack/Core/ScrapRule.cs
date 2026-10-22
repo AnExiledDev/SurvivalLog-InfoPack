@@ -15,7 +15,7 @@ public static class ScrapRule
     private const int CategoryDailyGoods = 5;
     private const int CategoryMaterial = 9;
 
-    /// <summary>Every item the scrap mark goes on.</summary>
+    /// <summary>Every item the scrap mark goes on. An item a relief request can ask for is never marked.</summary>
     public static SortedSet<int> ScrapOnly(GameTables tables)
     {
         var materials = RecipeMaterials(tables.Production, tables.Cooking);
@@ -24,6 +24,8 @@ public static class ScrapRule
 
         foreach (var item in tables.Items)
         {
+            if (tables.AidDemandItems.Contains(item.Id)) continue;
+
             var yields = tables.ShredYields.TryGetValue(item.Id, out var found) ? found : new List<Yield>();
 
             if (IsScrapOnly(item, materials.Contains(item.Id), ScrapValue(yields, tradeValues))) marked.Add(item.Id);

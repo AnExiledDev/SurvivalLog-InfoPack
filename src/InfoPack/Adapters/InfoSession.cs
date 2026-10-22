@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using GameCore.HotUpdate.Battle.Logic;
 using InfoPack.Core;
 using UnityEngine;
@@ -14,6 +16,9 @@ namespace InfoPack.Adapters;
 internal sealed class InfoSession
 {
     private const float CheckSeconds = 2f;
+    private const int DrainWindowSeconds = 4 * 3600;
+    private const int DrainMinimumSeconds = 1800;
+    private const int Satiety = 1;
 
     private Features _features;
     private readonly TipKeys _keys;
@@ -24,6 +29,12 @@ internal sealed class InfoSession
     private readonly CountRefresh _counts = new(CheckSeconds);
     private readonly FactsSchedule _factsSchedule = new(CheckSeconds);
     private readonly KeySync _keySync = new();
+    private readonly LiveReader _live;
+    private readonly CountRefresh _wanted = new(CheckSeconds);
+    private readonly CountRefresh _stats = new(CheckSeconds);
+    private readonly StatDrain _drain = new(DrainWindowSeconds, DrainMinimumSeconds);
+    private LiveLists? _lists;
+    private long _liveWorld;
     private string? _facts;
     private bool _isPageReady;
     private bool _hasSentFacts;
@@ -37,6 +48,7 @@ internal sealed class InfoSession
         _tables = tables;
         _text = text;
         _log = log;
+        _live = new LiveReader(log);
     }
 
     /// <summary>
@@ -64,6 +76,7 @@ internal sealed class InfoSession
         CheckFacts(now);
         SendFacts();
         SendCounts(now);
+        SendLive(now);
     }
 
     private void TakePageCommands()
@@ -102,6 +115,8 @@ internal sealed class InfoSession
         _isPageReady = true;
         _hasSentFacts = false;
         _counts.PageReloaded();
+        _wanted.PageReloaded();
+        _stats.PageReloaded();
         _factsSchedule.PageReloaded();
         _keySync.PageReloaded();
     }
@@ -180,7 +195,70 @@ internal sealed class InfoSession
         _facts = null;
         _hasSentFacts = false;
         _facts = PageFacts.Build(tables, _text, _features);
+        _lists = new LiveLists(
+            tables.Items.Select(item => item.Id).Distinct().ToList(),
+            tables.Items.Where(item => item.InFoodCodex).Select(item => item.Id).Distinct().ToList(),
+            FoodForecast.SatietyById(tables.Items));
         _log($"facts built from {tables.Items.Count} items ({_facts.Length} characters, language {key.Language ?? "unknown"}) in {timer.ElapsedMilliseconds} ms");
+    }
+
+    /// <summary>
+    /// The craving, the relief requests, the untried foods and the stat drain, on the count cadence. The drain keeps
+    /// measuring while its page pieces are on; a new world starts it over.
+    /// </summary>
+    private void SendLive(float now)
+    {
+        if (!_features.NeedsLive || _lists == null || !_wanted.IsDue(now)) return;
+
+        _wanted.Counted(now);
+
+        var world = GameSingleton.Existing<BattleLogicWorld>();
+
+        if (world == null) return;
+
+        var worldKey = world.Pointer.ToInt64();
+
+        if (worldKey != _liveWorld)
+        {
+            _liveWorld = worldKey;
+            _drain.Reset();
+            _live.Reset();
+        }
+
+        if (_features.Wanted || _features.NeverTried) SendWanted(world, _lists);
+
+        if (_features.NeedsDrain) SendStats(world, _lists);
+    }
+
+    private void SendWanted(BattleLogicWorld world, LiveLists lists)
+    {
+        var none = Array.Empty<int>();
+        var wish = _features.Wanted ? _live.WishItems(world, lists.ItemIds) : none;
+        var aid = _features.Wanted ? _live.AidNeeds(world, lists.ItemIds) : new SortedDictionary<int, int>();
+        var untried = _features.NeverTried ? _live.Untried(world, lists.FoodCodex) : none;
+        var json = Wanted.ToJson(wish, aid, untried);
+
+        if (_wanted.ShouldSend(json)) _page.Wanted(json);
+    }
+
+    private void SendStats(BattleLogicWorld world, LiveLists lists)
+    {
+        if (_live.Stats(world) is not { } reading) return;
+
+        _drain.Add(reading.Seconds, reading.Values);
+
+        var rates = _features.StatRates ? _drain.ToJson(LiveReader.HudStats) : "{}";
+        var days = _features.FoodForecast ? FoodDays(lists) : null;
+        var json = FoodForecast.StatsJson(rates, days);
+
+        if (_stats.ShouldSend(json)) _page.Stats(json);
+    }
+
+    private float? FoodDays(LiveLists lists)
+    {
+        var home = HomeItems.TryRead();
+
+        return home == null ? null : FoodForecast.Days(FoodForecast.Satiety(HomeCounts.Count(home), lists.Satiety), _drain.PerHour(Satiety));
     }
 
     private void SendCounts(float now)
@@ -197,4 +275,7 @@ internal sealed class InfoSession
 
         if (_counts.ShouldSend(counts)) _page.Counts(counts);
     }
+
+    /// <summary>What the live pieces are matched against, taken from the tables when the facts are built.</summary>
+    private sealed record LiveLists(IReadOnlyList<int> ItemIds, IReadOnlyList<int> FoodCodex, IReadOnlyDictionary<int, float> Satiety);
 }

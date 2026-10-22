@@ -1,5 +1,5 @@
 Name: Info Pack
-Summary: Turns Survival Log's item tooltips into a small wiki: effects, freshness, home counts, what an item is used in and made from, growing info and where it is found, with more on Shift. Also shows trade stats, brew quality, scrap-only loot and how long planning cards last. Every section can be set to show always, on Shift or never.
+Summary: Turns Survival Log's item tooltips into a small wiki: effects, freshness, home counts, what an item is used in and made from, and where it is found. Flags the food you crave, what relief requests still need and food you never tried. HUD stat bars show how fast they drop and how long the food at home lasts. Trade stats and brew quality too.
 
 Description (BBCode):
 Survival Log knows a lot it never shows you. Info Pack adds that information to the game's own tooltips and windows, in the game's own style. It only shows things; it never changes an item, a stat or a save.
@@ -8,6 +8,8 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 [list]
 [*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's own lines, split into sections: Effects (green for gains, red for losses), Freshness (time left, shelf life, what it rots into), At home, Used in (with how many you can make now), and Growing for seeds. Hold Shift for Value, Made from, Breaks down into, Fuel, Found in and About. Sections with nothing to say are left out.[/*]
 [*][b]Where is it?[/b]: hold Ctrl over an item to see which storages at home hold it and how many each has.[/*]
+[*][b]What the game wants[/b]: the food you are craving says "You're craving this", and an item a relief request still needs says how many more, with a gold star on its backpack slot. Food and drink you have never had say "Never tried". Robot modules show their level and bait its kind.[/*]
+[*][b]Stat bars[/b]: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you.[/*]
 [*][b]Spoil badges[/b]: food that spoils within a day gets a small coloured corner on its slot.[/*]
 [*][b]Tooltips stay on screen[/b]: tall tooltips no longer run off the bottom of the window.[/*]
 [*][b]Home counts[/b]: item tooltips in the backpack, trade and cooking windows show "At home: N", counting your bag, every storage at home and the workbench drawer.[/*]
@@ -28,7 +30,9 @@ Works in English and Chinese.
 
 [size=5]Known issues[/size]
 [list]
-[*]The scrap rule does not know about wishes, aid demands, robot modules or trap bait. Check before you shred something rare.[/*]
+[*]The scrap rule does not know about cravings, robot modules or trap bait. Check before you shred something rare. Items a relief request asks for are never marked.[/*]
+[*]A relief request that asks for an amount of any food or material, rather than one item, gets no line or star.[/*]
+[*]The food forecast counts only you, not other people at home, and leaves out spoiling and cooking.[/*]
 [*]The brew panel score shows only while a brew is being set up, not once it is brewing.[/*]
 [*]Ingredient lines under a recipe in the cooking window get no home counts.[/*]
 [/list]
@@ -63,6 +67,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.6.0: Tooltips say when an item is the food you are craving, how many more a relief request needs (with a star on the slot), and when you have never tried a food. Robot modules show their level and bait its kind. Hover a HUD stat bar to see how fast it drops and when it runs out, and the satiety bar for how many days the food at home lasts. Items relief requests ask for are no longer marked as scrap.[/*]
 [*]0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot.[/*]
 [*]0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.[/*]
 [*]0.3.1: The mod's own tooltip lines and tags now show in Chinese when the game is in Chinese, and the setting descriptions use the same words. Built for game version 1.1.18902.[/*]
@@ -83,6 +88,8 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 [list]
 [*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏：「效果」（增加为绿色，减少为红色）、「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）、「家中」、「用途」（以及现在能做几份）和种子的「种植」。按住 Shift 可查看「价值」、「获取方式」、「可分解为」、「燃料」、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
 [*][b]放在哪里[/b]：在物品上按住 Ctrl，可以看到家里哪些储物家具放着它，以及各有多少。[/*]
+[*][b]游戏想要什么[/b]：你正想吃的食物会显示「正想吃这个」；救助委托还需要的物品会显示还差几个，背包格子上还有一颗金色星星。从没吃过的食物和饮品会显示「从没尝过」。机器人模块显示等级，诱饵显示种类。[/*]
+[*][b]状态条[/b]：悬停界面上的状态条，可以看到它每个游戏小时下降多少，以及大约多久后耗尽。饱腹条还会显示家中食物大约够你吃几天。[/*]
 [*][b]腐败角标[/b]：一天内就会腐败的食物，格子上会显示一个彩色小角标。[/*]
 [*][b]提示不出屏幕[/b]：变高的提示不会再超出窗口底部。[/*]
 [*][b]家中数量[/b]：背包、交易和烹饪界面的物品提示会显示「家中共有：N」，统计背包、家里所有储物家具和工作台抽屉里的数量。[/*]
@@ -103,7 +110,9 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 
 [size=5]已知问题[/size]
 [list]
-[*]回收规则不了解愿望、援助需求、机器人模块和陷阱诱饵。粉碎稀有物品前请先确认。[/*]
+[*]回收规则不了解想吃的食物、机器人模块和陷阱诱饵。粉碎稀有物品前请先确认。救助委托要的物品不会被标记。[/*]
+[*]要求任意某类食物或材料数量的救助委托，不会显示提示行或星星。[/*]
+[*]食物预估只算你自己，不算家里的其他人，也不计腐坏和烹饪。[/*]
 [*]酿酒面板的分数只在准备酿造时显示，开始酿造后就不再显示。[/*]
 [*]烹饪界面里菜谱下方的食材行不显示家中数量。[/*]
 [/list]

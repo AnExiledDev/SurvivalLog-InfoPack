@@ -63,6 +63,13 @@ internal sealed class GameTextReader : IGameText
         }
     }
 
+    public string? LocalText(string key)
+    {
+        var config = GameSingleton.Existing<ConfigManager>();
+
+        return config == null ? null : Clean(Translate(config, key));
+    }
+
     public string? Description(int itemId)
     {
         var config = GameSingleton.Existing<ConfigManager>();

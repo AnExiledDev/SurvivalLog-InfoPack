@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0
+
+Info Pack now tells you what the game wants from you, and how long your stats and food last:
+
+- Craving: the tooltip of the food you are craving says `You're craving this`.
+- Relief requests: an item a relief request still needs says how many more, like `Relief request needs 3 more`, and gets a small gold star on its backpack slot.
+- Never tried: food and drink you have never had say `Never tried`.
+- Robot modules and trap bait: a robot module's tooltip shows its level, and a bait item shows what kind of bait it is, under Used in.
+- Stat bars: hovering a stat bar on the HUD shows how much it drops per game hour and about how long until it is empty. It shows after about half a game hour of play.
+- Food forecast: hovering the satiety bar also shows about how many days the food at home lasts you.
+
+Other changes:
+
+- Items a relief request asks for are no longer marked as scrap.
+- New Features settings: `Wanted`, `NeverTried`, `StatRates` and `FoodForecast`, all on by default.
+- Made for Survival Log 1.1.19131.
+
 ## 0.5.0
 
 Item tooltips work like a small wiki now. Below the game's own lines, Info Pack adds one tidy block split into sections, each with a short heading:

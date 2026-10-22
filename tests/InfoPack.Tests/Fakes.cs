@@ -70,6 +70,7 @@ internal sealed class FakeText : IGameText
     private readonly Dictionary<int, string> _itemNames = new();
     private readonly Dictionary<int, string> _furnitureNames = new();
     private readonly Dictionary<int, string> _placeNames = new();
+    private readonly Dictionary<string, string> _localTexts = new();
 
     public FakeText Describes(int itemId, string description)
     {
@@ -92,6 +93,13 @@ internal sealed class FakeText : IGameText
         return this;
     }
 
+    public FakeText Localises(string key, string text)
+    {
+        _localTexts[key] = text;
+
+        return this;
+    }
+
     public FakeText NamesPlace(int placeId, string name)
     {
         _placeNames[placeId] = name;
@@ -108,6 +116,8 @@ internal sealed class FakeText : IGameText
     public string? FurnitureName(int furnitureId) => _furnitureNames.TryGetValue(furnitureId, out var name) ? name : null;
 
     public string? PlaceName(int placeId) => _placeNames.TryGetValue(placeId, out var name) ? name : null;
+
+    public string? LocalText(string key) => _localTexts.TryGetValue(key, out var text) ? text : null;
 
     public bool Chinese { get; init; }
 

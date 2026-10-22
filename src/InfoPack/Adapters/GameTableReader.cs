@@ -13,6 +13,8 @@ namespace InfoPack.Adapters;
 /// </summary>
 internal sealed class GameTableReader
 {
+    private const int FoodCategory = 1;
+
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
 
@@ -43,7 +45,64 @@ internal sealed class GameTableReader
             Guarded("plant table", () => Plants(config), new Dictionary<int, PlantRow>()),
             Guarded("furniture loot", () => FurnitureLoot(config), new List<LootFurniture>()),
             Guarded("loot groups", () => LootGroups(config), new Dictionary<int, IReadOnlyList<int>>()),
-            Guarded("furniture placements", () => Placements(config), new List<Placement>()));
+            Guarded("furniture placements", () => Placements(config), new List<Placement>()))
+        {
+            AidDemandItems = Guarded("relief request demands", () => AidDemandItems(config), new HashSet<int>()),
+            TrapBait = Guarded("trap bait table", () => TrapBait(config), new Dictionary<int, string>()),
+            RobotModules = Guarded("robot module table", () => RobotModules(config), new Dictionary<int, int>()),
+        };
+    }
+
+    /// <summary>The items a fixed request names (a demand of kind 0) and the items a drawn request can name (pool rows of kind 0).</summary>
+    private static HashSet<int> AidDemandItems(ConfigManager config)
+    {
+        var items = new HashSet<int>();
+        var commissions = config._Config_AidCommission_Dict ?? throw new InvalidOperationException("the game has no relief request table loaded");
+        var pool = config._Config_AidDemandPool_Dict ?? throw new InvalidOperationException("the game has no relief demand pool loaded");
+
+        foreach (var commission in commissions.Values)
+        {
+            var ids = Ints(commission?.DemandItemIds);
+            var kinds = Ints(commission?.DemandKinds);
+
+            for (var i = 0; i < ids.Count; i++)
+            {
+                if (ids[i] > 0 && (i >= kinds.Count || kinds[i] == AidDemand.ItemKind)) items.Add(ids[i]);
+            }
+        }
+
+        foreach (var row in pool.Values)
+        {
+            if (row != null && row.Kind == AidDemand.ItemKind && row.ItemId > 0) items.Add(row.ItemId);
+        }
+
+        return items;
+    }
+
+    private static Dictionary<int, string> TrapBait(ConfigManager config)
+    {
+        var bait = new Dictionary<int, string>();
+        var table = config._Config_TrapBait_Dict ?? throw new InvalidOperationException("the game has no trap bait table loaded");
+
+        foreach (var row in table.Values)
+        {
+            if (row != null && !string.IsNullOrEmpty(row.Effect_Des)) bait[row.ID] = row.Effect_Des;
+        }
+
+        return bait;
+    }
+
+    private static Dictionary<int, int> RobotModules(ConfigManager config)
+    {
+        var modules = new Dictionary<int, int>();
+        var table = config._Config_RobotModule_Dict ?? throw new InvalidOperationException("the game has no robot module table loaded");
+
+        foreach (var row in table.Values)
+        {
+            if (row != null) modules[row.ID] = row.Level;
+        }
+
+        return modules;
     }
 
     private static List<ItemRow> Items(ConfigManager config, Il2CppSystem.Collections.Generic.Dictionary<int, Config_Item> table)
@@ -73,7 +132,8 @@ internal sealed class GameTableReader
                 BurnValue: item.BurnValue,
                 CutProduct: item.CutProductId,
                 PlantId: item.Plant,
-                Icon: item.WebIcon ?? ""));
+                Icon: item.WebIcon ?? "",
+                InFoodCodex: item.Category == FoodCategory && item.InCodex));
         }
 
         return rows;

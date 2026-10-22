@@ -54,6 +54,12 @@ internal sealed class WebPage
     public void Instance(long itemId, int configId) =>
         Call("setInstance(" + JsText.Literal(itemId.ToString(CultureInfo.InvariantCulture)) + "," + configId.ToString(CultureInfo.InvariantCulture) + ")");
 
+    /// <summary>What the craving and the relief requests want, and the foods never tried.</summary>
+    public void Wanted(string json) => Call("setWanted(" + json + ")");
+
+    /// <summary>How fast the HUD stats drop and how long the food at home lasts.</summary>
+    public void Stats(string json) => Call("setStats(" + json + ")");
+
     /// <summary>Which of the detail and breakdown keys are held.</summary>
     public void Keys(string json) => Call("setKeys(" + json + ")");
 

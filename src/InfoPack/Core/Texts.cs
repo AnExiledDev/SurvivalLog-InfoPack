@@ -100,6 +100,14 @@ public static class Texts
         Key("hintMore", new("{0}: more", "{0}：更多")),
         Key("hintWhere", new("{0}: where", "{0}：存放位置")),
 
+        Key("wantWish", new("You're craving this", "正想吃这个")),
+        Key("wantAid", new("Relief request needs {0} more", "救助委托还需 {0} 个")),
+        Key("untried", new("Never tried", "从没尝过")),
+        Key("useRobot", new("Robot module, level {0}", "机器人模块，{0} 级")),
+        Key("useBait", new("Trap bait: {0}", "陷阱诱饵：{0}")),
+        Key("rate", new("-{0} per hour, empty in about {1}", "每小时 -{0}，约 {1} 后耗尽")),
+        Key("forecast", new("Food at home lasts you about {0}", "家中食物约够你吃 {0}")),
+
         Key("dayShort", new("{0}d", "{0}天")),
         Key("hourShort", new("{0}h", "{0}小时")),
         Key("minuteShort", new("{0}m", "{0}分钟")),

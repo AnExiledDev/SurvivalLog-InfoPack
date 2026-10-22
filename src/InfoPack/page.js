@@ -69,11 +69,18 @@
     '.slip-plan{position:absolute;right:3px;bottom:3px;font-size:12px;font-weight:700;line-height:15px;padding:0 5px;border-radius:3px;letter-spacing:0;pointer-events:none;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.6)}',
     '.slip-plan-timed{color:#1a1a1a;background:#ffc83a;border:1px solid rgba(255,235,180,.6)}',
     '.slip-plan-once{color:#0d1f27;background:#6ec6e6;border:1px solid rgba(205,240,255,.6)}',
-    '.card.locked .slip-plan{opacity:.45}'
+    '.card.locked .slip-plan{opacity:.45}',
+    '.slip-wanted{position:absolute;top:1px;left:3px;font-size:12px;line-height:12px;color:#ffc83a;text-shadow:0 1px 2px rgba(0,0,0,.9);pointer-events:none;z-index:4}',
+    '.slip-rate{margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.18);font-size:12px;line-height:1.5;color:#ccc}'
   ].join('\n');
 
   // Everything Info Pack draws, so a change of settings can take it all away again.
-  var DRAWN = '.slip-tip, .slip-brew, .slip-scrap, .slip-spoil, .slip-tag, .slip-plan';
+  var DRAWN = '.slip-tip, .slip-brew, .slip-scrap, .slip-spoil, .slip-tag, .slip-plan, .slip-wanted, .slip-rate';
+
+  // The HUD bars by the icon the game gives each (CoreUI1's attrList), as the AttrName the plugin measures: a drumstick
+  // for satiety, a brain for mood, a bolt for energy, a heart for life.
+  var HUD_STATS = [['\uD83C\uDF56', '1'], ['\uD83E\uDDE0', '2'], ['\u26A1', '3'], ['\u2764', '5']];
+  var SATIETY = '1';
 
   // PlanBadges.OneOffBadge on the plugin side: a badge with this text gets the one-off colour, any other the timed one.
   var ONE_OFF_BADGE = '1x';
@@ -103,7 +110,9 @@
 
   var features = null;
   var tipSettings = readTipSettings(null);
-  var facts = { desc: {}, dish: {}, brew: {}, scrap: {}, plan: {}, ui: {}, items: {}, wiki: {} };
+  var facts = { desc: {}, dish: {}, brew: {}, scrap: {}, plan: {}, bait: {}, robot: {}, ui: {}, items: {}, wiki: {} };
+  var wanted = { wish: {}, aid: {}, untried: {} };
+  var stats = { rates: {}, food: null };
   var counts = {};
   var hasCounts = false;
   var keys = { detail: false, where: false };
@@ -179,8 +188,30 @@
     (data.scrap || []).forEach(function (id) { scrap[id] = true; });
     facts = {
       desc: data.desc || {}, dish: data.dish || {}, brew: data.brew || {}, scrap: scrap, plan: data.plan || {},
-      ui: data.ui || {}, items: data.items || {}, wiki: data.wiki || {}
+      bait: data.bait || {}, robot: data.robot || {}, ui: data.ui || {}, items: data.items || {}, wiki: data.wiki || {}
     };
+  }
+
+  function idSet(ids) {
+    var set = {};
+
+    (ids || []).forEach(function (id) { set[id] = true; });
+
+    return set;
+  }
+
+  // What the craving and the relief requests want, and the foods never tried, by config id.
+  function setWanted(data) {
+    data = data || {};
+    wanted = { wish: idSet(data.wish), aid: data.aid || {}, untried: idSet(data.untried) };
+    repaint();
+  }
+
+  // rates: {stat: [drop per game hour, hours left]}; food: the days the food at home lasts, when known.
+  function setStats(data) {
+    data = data || {};
+    stats = { rates: data.rates || {}, food: data.food > 0 || data.food === 0 ? data.food : null };
+    repaint();
   }
 
   function setCounts(data) {
@@ -265,6 +296,9 @@
     satietyPerKg: '{0} satiety per kg',
     makeBench: 'Workbench: {0}', makeCook: 'Cooking: {0}', makePlant: 'Harvest of {0}', makeShred: 'Shredding {0}',
     fuelBurn: 'Burn value {0}', hintMore: '{0}: more', hintWhere: '{0}: where',
+    wantWish: "You're craving this", wantAid: 'Relief request needs {0} more', untried: 'Never tried',
+    useRobot: 'Robot module, level {0}', useBait: 'Trap bait: {0}', rate: '-{0} per hour, empty in about {1}',
+    forecast: 'Food at home lasts you about {0}',
     dayShort: '{0}d', hourShort: '{0}h', minuteShort: '{0}m', kg: '{0} kg', g: '{0} g'
   };
 
@@ -469,6 +503,9 @@
 
     if (features.brew && tier) rows.push({ parts: [say('brew', tier[0], tier[1])] });
     if (isScrap(context.id)) rows.push({ parts: [say('scrap')], cls: 'slip-warn' });
+    if (features.wanted && wanted.wish[context.id]) rows.push({ parts: [say('wantWish')], cls: 'slip-good' });
+    if (features.wanted && wanted.aid[context.id] > 0) rows.push({ parts: [say('wantAid', wanted.aid[context.id])], cls: 'slip-good' });
+    if (features.untried && wanted.untried[context.id]) rows.push({ parts: [say('untried')], cls: 'slip-good' });
 
     return rows;
   }
@@ -510,10 +547,17 @@
     return times === Infinity ? null : times;
   }
 
-  // Recipes you could make right now come first, so the three rows shown by default are the useful ones.
+  // Recipes you could make right now come first, then a robot module's level and a bait's kind, so the three rows
+  // shown by default are the useful ones.
   function usedInRows(context) {
     var ready = [];
+    var other = [];
     var rest = [];
+    var level = facts.robot[context.id];
+    var bait = facts.bait[context.id];
+
+    if (level > 0) other.push({ parts: [say('useRobot', level)] });
+    if (bait) other.push({ parts: [say('useBait', bait)] });
 
     (context.wiki.use || []).forEach(function (use) {
       if (use.k === 'bench' && use.out > 0) {
@@ -531,7 +575,7 @@
       }
     });
 
-    return ready.concat(rest);
+    return ready.concat(other, rest);
   }
 
   function growRows(context) {
@@ -921,6 +965,7 @@
 
         setChip(cells[i], doc, isScrap(item.cfgId) && !(item.useTimesMax > 1), 'slip-scrap', say('scrapChip'));
         setSpoilBadge(cells[i], doc, spoilLevel(item));
+        setChip(cells[i], doc, !!(features.wanted && wanted.aid[item.cfgId] > 0), 'slip-wanted', '\u2605');
       }
     }
   }
@@ -1229,6 +1274,60 @@
     if (badge.textContent !== text) badge.textContent = text;
   }
 
+  // ===== HUD stat bars =====
+
+  // Each bar's hover box gets how fast the stat drops and when it runs out, and the satiety bar how long the food at
+  // home lasts. The rows follow attrList; a mismatch (a redraw in flight) waits for the next poll.
+  function patchHud(win, doc) {
+    var setup = vueSetup(doc);
+    var list = setup && setup.state ? setup.state.attrList : null;
+    var tips = doc.querySelectorAll('.status-row > .progress-bar-wrapper > .status-tooltip');
+
+    if (!list || tips.length !== list.length) return;
+
+    for (var i = 0; i < tips.length; i++) setRateLines(tips[i], doc, hudLines(hudStat(list[i] && list[i].attrIcon)));
+  }
+
+  function hudStat(icon) {
+    for (var i = 0; icon && i < HUD_STATS.length; i++) {
+      if (String(icon).indexOf(HUD_STATS[i][0]) >= 0) return HUD_STATS[i][1];
+    }
+
+    return '';
+  }
+
+  function hudLines(stat) {
+    var lines = [];
+    var rate = stats.rates[stat];
+
+    if (!stat) return lines;
+    if (features.rates && rate && rate[0] > 0) lines.push(say('rate', trimNumber(rate[0], 1), formatSeconds(rate[1] * 3600)));
+    if (features.forecast && stat === SATIETY && stats.food !== null) lines.push(say('forecast', formatDays(stats.food)));
+
+    return lines;
+  }
+
+  // Appended after the game's own lines in the hover box; the game sets those by text, so its updates leave ours alone.
+  function setRateLines(tip, doc, lines) {
+    var box = tip.querySelector(':scope > .slip-rate');
+    var text = lines.join('\n');
+
+    if (!lines.length) {
+      if (box) box.remove();
+
+      return;
+    }
+
+    if (!box) {
+      box = doc.createElement('div');
+      box.className = 'slip-rate';
+      box.style.whiteSpace = 'pre-line';
+      tip.appendChild(box);
+    }
+
+    if (box.textContent !== text) box.textContent = text;
+  }
+
   // ===== Finding the pages =====
 
   // The item tooltips always get the block; which sections it shows is the player's choice in the tooltip settings.
@@ -1243,7 +1342,8 @@
     { pattern: /Cooking\.html/, isOn: function () { return features.codex; }, patch: patchCooking },
     { pattern: /BrewPanel\.html/, isOn: function () { return features.brew; }, patch: patchBrew },
     { pattern: /ItemPickup\.html/, isOn: function () { return features.scrap; }, patch: function (win, doc) { patchPickup(doc); } },
-    { pattern: /RogueSelect\.html/, isOn: function () { return features.plan; }, patch: patchPlanningPage }
+    { pattern: /RogueSelect\.html/, isOn: function () { return features.plan; }, patch: patchPlanningPage },
+    { pattern: /CoreUI1\.html/, isOn: function () { return features.rates || features.forecast; }, patch: patchHud }
   ];
 
   // The game's pages are same-origin iframes of this document, created and dropped whenever the game likes.
@@ -1285,7 +1385,7 @@
 
   window.__slinfopack = {
     setFeatures: setFeatures, setFacts: setFacts, setCounts: setCounts, setInstance: setInstance,
-    setKeys: setKeys, setWhere: setWhere
+    setKeys: setKeys, setWhere: setWhere, setWanted: setWanted, setStats: setStats
   };
   send('ready');
 })();

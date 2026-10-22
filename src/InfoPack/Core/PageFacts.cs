@@ -14,8 +14,9 @@ public static class PageFacts
 {
     /// <summary>
     /// {"stats":{id:text},"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id],
-    /// "plan":{talentId:badge},"items":{id:[name,icon]},"wiki":{id:{...}},"ui":{key:text}}, with a key left out when its
-    /// piece is off. "desc", "items", "wiki" and "ui" are always there, because every tooltip draws on them. "ui" holds the
+    /// "plan":{talentId:badge},"bait":{id:text},"robot":{id:level},"items":{id:[name,icon]},"wiki":{id:{...}},
+    /// "ui":{key:text}}, with a key left out when its piece is off. "desc", "bait", "robot", "items", "wiki" and "ui" are
+    /// always there, because every tooltip draws on them. "ui" holds the
     /// page's own words in the language the game shows. Keys are in ascending id order so the same tables always give the
     /// same text.
     /// </summary>
@@ -33,6 +34,8 @@ public static class PageFacts
         if (features.ScrapOnly) parts.Add(Member("scrap", "[" + string.Join(",", ScrapRule.ScrapOnly(tables).Select(Number)) + "]"));
         if (features.PlanningBadges) parts.Add(Member("plan", TextObject(PlanBadges.Map(tables.Talents, tables.BuffDurations))));
 
+        parts.Add(Member("bait", TextObject(BaitKinds(tables.TrapBait, text))));
+        parts.Add(Member("robot", NumberObject(new SortedDictionary<int, int>(tables.RobotModules.ToDictionary(pair => pair.Key, pair => pair.Value)))));
         parts.Add(Member("items", WikiJson.Items(tables, text, wiki)));
         parts.Add(Member("wiki", WikiJson.Wiki(wiki)));
         parts.Add(Member("ui", Ui(text.IsChinese())));
@@ -47,6 +50,22 @@ public static class PageFacts
     /// <summary>{configId:count} in ascending id order, so equal counts always give equal text.</summary>
     public static string Counts(IReadOnlyDictionary<int, int> counts) =>
         NumberObject(new SortedDictionary<int, int>(counts.ToDictionary(pair => pair.Key, pair => pair.Value)));
+
+    /// <summary>The kind of bait each bait item is, in the player's language. A kind the game has no text for is left out.</summary>
+    public static SortedDictionary<int, string> BaitKinds(IReadOnlyDictionary<int, string> trapBait, IGameText text)
+    {
+        var kinds = new SortedDictionary<int, string>();
+        var cache = new Dictionary<string, string?>();
+
+        foreach (var pair in trapBait)
+        {
+            if (!cache.TryGetValue(pair.Value, out var kind)) cache[pair.Value] = kind = text.LocalText(pair.Value);
+
+            if (!string.IsNullOrWhiteSpace(kind)) kinds[pair.Key] = kind.Trim();
+        }
+
+        return kinds;
+    }
 
     /// <summary>The stat line of every item that changes a stat.</summary>
     public static SortedDictionary<int, string> Stats(IEnumerable<ItemRow> items, IReadOnlyList<StatFormat> formats)
