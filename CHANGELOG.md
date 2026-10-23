@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.9
+
+- Fixed: on the workbench and in other mods' panels, an item with nothing to show until Shift was held got a tooltip with an empty middle. It now shows the item's name and the Shift hint only.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.8
 
 - Shorter tooltips: only Effects and Freshness show at first. Holding Shift or Ctrl shows the rest (At home, Used in, Growing and the notes now wait for the key too). Ctrl still adds the per-storage list. Each section can be set back to `Always` in the settings.

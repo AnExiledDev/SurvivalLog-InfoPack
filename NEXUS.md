@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.9: No more empty tooltips on the workbench for items with nothing to show until Shift is held.[/*]
 [*]0.8.8: Tooltips are shorter: only Effects and Freshness show until you hold Shift or Ctrl.[/*]
 [*]0.8.7: Item tooltips show in Storage Hub's panel too.[/*]
 [*]0.8.6: The cooking screen's tooltips start with the name in gold above the details, with no plain copy of the stats.[/*]

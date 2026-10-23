@@ -79,6 +79,9 @@
     '.slip-subchips .slip-chip svg{width:10px;height:10px}',
     '.slip-key{display:inline-block;font-size:10px;font-weight:700;line-height:15px;color:#f0e8d8;background:linear-gradient(180deg,rgba(92,78,60,.95),rgba(60,50,38,.95));border:1px solid rgba(220,188,120,.4);border-radius:3px;padding:0 5px;box-shadow:0 1px 0 rgba(0,0,0,.6)}',
     '.slip-hint{margin-top:8px;padding-top:6px;border-top:1px solid rgba(220,188,120,.11);text-align:right}',
+    // Our own box with nothing above the key hint: the name, then the hint, with no empty space ruled off between.
+    '.slip-own-tip>.slip-tip.slip-hint-only{min-width:0;margin-top:4px;padding-top:0;border-top:0}',
+    '.slip-hint-only>.slip-hint{margin-top:0;padding-top:0;border-top:0}',
     '.tooltip.slip-own-fresh>.tooltip-shelf-life{display:none}',
     // A fixed tooltip of auto width narrows near the right border, so its size would change as it is moved there;
     // sized by its content it measures the same wherever keepOnScreen puts it.
@@ -754,6 +757,7 @@
 
     box.__slipKey = key;
     box.textContent = '';
+    box.classList.toggle('slip-hint-only', !model.sections.length);
     model.sections.forEach(function (section) { box.appendChild(sectionElement(doc, section)); });
 
     if (model.hint) {
