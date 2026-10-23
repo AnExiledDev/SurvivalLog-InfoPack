@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.13
+
+- Other mods' item rows can add a line under the item's name on Info Pack's tooltip. Neighbor Basket uses it to show the progress an item adds.
+- Made for Survival Log 1.1.19611.
+
 ## 0.8.12
 
 - Effects chips use the game's own effect numbers on the Backpack and Trade tooltips.

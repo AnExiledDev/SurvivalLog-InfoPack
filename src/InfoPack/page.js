@@ -113,6 +113,7 @@
     // A station's own item tooltip, for an item the station page has nothing to say about; it copies their look.
     '.slip-own-tip{position:fixed;display:none;z-index:2147483600;pointer-events:none;width:max-content;max-width:309px;padding:10px 12px;color:#cbbfa8;font-size:12px;line-height:1.5;text-align:left}',
     '.slip-own-name{color:#ffc83a;font-weight:bold;font-size:14px;text-shadow:0 0 12px rgba(255,200,58,.25)}',
+    '.slip-own-note{display:none;margin-top:2px;color:#b5e09a;font-size:11.75px;font-weight:700;white-space:pre-line}',
     '.slip-scrap{position:absolute;bottom:5px;left:3px;font-size:10px;font-weight:700;color:#c9a94f;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.12);padding:0 5px;border-radius:8px;line-height:13px;text-shadow:0 1px 2px rgba(0,0,0,.85);box-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;z-index:4}',
     '.slip-spoil{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 13px 13px 0;pointer-events:none;z-index:2;filter:drop-shadow(0 0 1px rgba(0,0,0,.7))}',
     '.slip-spoil-red{border-color:transparent #ef5350 transparent transparent}',
@@ -1577,12 +1578,14 @@
     own.id = 'slip-own-tip';
     own.className = 'slip-own-tip';
     addElement(doc, own, 'div', 'slip-own-name');
+    addElement(doc, own, 'div', 'slip-own-note');
     doc.body.appendChild(own);
 
     return own;
   }
 
-  function drawOwnTip(win, doc, configId, model) {
+  // note is the tagged row's data-slip-note, shown under the name; the station bags have none.
+  function drawOwnTip(win, doc, configId, model, note) {
     var own = doc.getElementById('slip-own-tip');
 
     if (!model) {
@@ -1599,6 +1602,7 @@
 
     if (name.textContent !== text) name.textContent = text;
 
+    drawNote(doc, own, note);
     askWhere(configId);
 
     if (!drawBlock(doc, own, model)) {
@@ -1619,6 +1623,7 @@
   // nothing when this mod is not installed. data-slip-name="<item name>" does the same for a mod that only knows the
   // name, and data-slip-tip="<words>" shows just those words in the same box (Crafting Hub's buttons). A name that
   // matches no item falls back to the element's words.
+  // data-slip-note="<words>" on a tagged row adds those words under the item's name (Neighbor Basket's progress line).
   var TAGGED = '[data-slip-item],[data-slip-name],[data-slip-tip]';
 
   function patchTagged(win, doc) {
@@ -1721,19 +1726,47 @@
 
     addStyle(doc);
 
-    if (isShown && !hover.configId) return drawOwnText(win, doc, hover.text);
+    var note = isShown ? hoveredNote(win, doc) : '';
+
+    if (isShown && !hover.configId) return drawOwnText(win, doc, hover.text, note);
 
     var model = isShown ? tipModel(hover.configId, { live: null, withEffects: true }) : null;
     var known = facts.items[hover.configId];
 
     // An item with nothing more to say still shows its name.
-    if (model && !model.sections.length && !model.hint) return drawOwnText(win, doc, known && known[0] ? known[0] : hover.text);
+    if (model && !model.sections.length && !model.hint) return drawOwnText(win, doc, known && known[0] ? known[0] : hover.text, note);
 
-    drawOwnTip(win, doc, isShown ? hover.configId : 0, model);
+    drawOwnTip(win, doc, isShown ? hover.configId : 0, model, note);
+  }
+
+  // The note of the tagged row under the cursor, read on every draw: the mod that drew the row may have drawn it
+  // again since the cursor arrived, with new words.
+  function hoveredNote(win, doc) {
+    var pointer = win.__slipPointer;
+    var under = pointer && pointer.isKnown ? doc.elementFromPoint(pointer.x, pointer.y) : null;
+    var row = under && under.closest ? under.closest(TAGGED) : null;
+
+    return row ? row.getAttribute('data-slip-note') || '' : '';
+  }
+
+  function drawNote(doc, own, note) {
+    var line = own.querySelector(':scope > .slip-own-note');
+
+    if (!line) {
+      line = doc.createElement('div');
+      line.className = 'slip-own-note';
+      own.querySelector(':scope > .slip-own-name').after(line);
+    }
+
+    if (line.textContent !== (note || '')) line.textContent = note || '';
+
+    var display = note ? 'block' : 'none';
+
+    if (line.style.display !== display) line.style.display = display;
   }
 
   // The words alone, in the box an item tooltip uses.
-  function drawOwnText(win, doc, text) {
+  function drawOwnText(win, doc, text, note) {
     if (!text) return drawOwnTip(win, doc, 0, null);
 
     var own = ownTip(doc);
@@ -1741,6 +1774,7 @@
 
     if (name.textContent !== text) name.textContent = text;
 
+    drawNote(doc, own, note);
     drawBlock(doc, own, null);
     if (own.style.display !== 'block') own.style.display = 'block';
 
@@ -1915,8 +1949,8 @@
   window.__slinfopack = {
     setFeatures: setFeatures, setFacts: setFacts, setCounts: setCounts, setInstance: setInstance,
     setKeys: setKeys, setWhere: setWhere, setWanted: setWanted, setStats: setStats,
-    // Other mods check this before leaving their data-slip-tip and data-slip-name tooltips to this mod.
-    tags: ['item', 'name', 'tip']
+    // Other mods check this before leaving their data-slip-tip, data-slip-name and data-slip-note tooltips to this mod.
+    tags: ['item', 'name', 'tip', 'note']
   };
   send('ready');
 })();
