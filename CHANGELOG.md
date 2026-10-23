@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.6
+
+- On the cooking screen, recipe and food tooltips now open with the name in gold, with the game's other lines (ingredients, what is missing, click hints) dimmed under it. The game's plain stat line is left out because the Effects section already shows those stats.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.5
 
 - Fixed: holding Shift or Ctrl did not expand or change a tooltip on Storage Hub's Home tab.

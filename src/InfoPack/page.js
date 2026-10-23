@@ -84,6 +84,11 @@
     // sized by its content it measures the same wherever keepOnScreen puts it.
     '.tooltip:has(>.slip-tip){width:max-content;max-width:309px}',
     '#recipeTooltip:has(>.slip-tip){width:max-content}',
+    // The cooking page writes its recipe and item tooltips as plain lines; with our block below them, our header
+    // stands in for those lines and the page's own text is kept but not shown.
+    '#recipeTooltip.slip-headed{font-size:0}',
+    '.slip-head{display:flex;flex-direction:column;gap:1px;font-size:11.75px;line-height:1.45;color:#a89a82;text-align:left;white-space:normal}',
+    '.slip-head>.slip-own-name{margin-bottom:2px}',
     '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip),#tooltip:has(>.slip-tip){width:max-content;max-width:309px}',
     // These pages write their lines as one text with line breaks; the workbench's tip is markup, where it would add blank lines.
     '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip){white-space:pre-line}',
@@ -105,7 +110,7 @@
   ].join('\n');
 
   // Everything Info Pack draws, so a change of settings can take it all away again.
-  var DRAWN = '.slip-tip, .slip-brew, .slip-scrap, .slip-spoil, .slip-tag, .slip-plan, .slip-wanted, .slip-rate, .slip-own-tip';
+  var DRAWN = '.slip-tip, .slip-head, .slip-brew, .slip-scrap, .slip-spoil, .slip-tag, .slip-plan, .slip-wanted, .slip-rate, .slip-own-tip';
 
   // The HUD bars by the icon the game gives each (CoreUI1's attrList), as the AttrName the plugin measures: a drumstick
   // for satiety, a brain for mood, a bolt for energy, a heart for life.
@@ -208,6 +213,7 @@
 
       doc.querySelectorAll(DRAWN).forEach(function (el) { el.remove(); });
       doc.querySelectorAll('.slip-own-fresh').forEach(function (el) { el.classList.remove('slip-own-fresh'); });
+      doc.querySelectorAll('.slip-headed').forEach(function (el) { el.classList.remove('slip-headed'); });
     }
   }
 
@@ -1174,7 +1180,7 @@
     var text = '';
 
     for (var node = tip.firstChild; node; node = node.nextSibling) {
-      if (!(node.nodeType === 1 && node.classList.contains('slip-tip'))) text += node.textContent;
+      if (!(node.nodeType === 1 && (node.classList.contains('slip-tip') || node.classList.contains('slip-head')))) text += node.textContent;
     }
 
     return text;
@@ -1214,7 +1220,7 @@
     for (var i = 0; i < state.lastRecipes.length; i++) {
       var recipe = state.lastRecipes[i];
 
-      if (recipe && recipe.name === firstLine && facts.dish[recipe.recipeId]) return { dish: facts.dish[recipe.recipeId] };
+      if (recipe && recipe.name === firstLine && facts.dish[recipe.recipeId]) return { dish: facts.dish[recipe.recipeId], effectText: recipe.effectText };
     }
 
     return null;
@@ -1231,15 +1237,63 @@
   function drawCookingTip(win, doc, tip) {
     var isShown = tip.style.display === 'block';
     var configId = features && features.codex ? cookingConfigId(tip.__slipSubject) : 0;
-    var isDrawn = drawBlock(doc, tip, configId > 0 ? tipModel(configId, { live: null, withEffects: true }) : null);
+    var model = configId > 0 ? tipModel(configId, { live: null, withEffects: true }) : null;
+    var isDrawn = drawBlock(doc, tip, model);
     var width = isDrawn ? COOKING_TIP_WIDTH : '';
 
     if (tip.style.maxWidth !== width) tip.style.maxWidth = width;
+
+    drawCookingHead(doc, tip, isDrawn ? headLines(tip.__slipBase || '', tip.__slipSubject, model) : null);
 
     if (!isShown) return;
 
     askWhere(configId);
     keepOnScreen(win, tip);
+  }
+
+  // The page's lines as our header: the name first, then the rest, without the effect line when the block's EFFECTS
+  // section already shows those stats.
+  function headLines(text, subject, model) {
+    var lines = text.split('\n').map(function (line) { return line.trim(); }).filter(function (line) { return !!line; });
+    var hasEffects = model.sections.some(function (section) { return section.key === 'effects'; });
+    var effectText = subject && subject.effectText ? String(subject.effectText).trim() : '';
+
+    if (!lines.length) return null;
+
+    return {
+      name: lines[0],
+      rest: lines.slice(1).filter(function (line) { return !(hasEffects && line === effectText); })
+    };
+  }
+
+  // Only rebuilt when its lines change: each rebuild is a change the tooltip's watcher sees and answers by drawing again.
+  function drawCookingHead(doc, tip, lines) {
+    var head = tip.querySelector(':scope > .slip-head');
+    var isHeaded = !!lines;
+
+    if (tip.classList.contains('slip-headed') !== isHeaded) tip.classList.toggle('slip-headed', isHeaded);
+
+    if (!lines) {
+      if (head) head.remove();
+
+      return;
+    }
+
+    var key = JSON.stringify(lines);
+
+    if (head && head.__slipKey === key && tip.firstChild === head) return;
+
+    if (!head) {
+      head = doc.createElement('div');
+      head.className = 'slip-head';
+    }
+
+    head.__slipKey = key;
+    head.textContent = '';
+    addElement(doc, head, 'div', 'slip-own-name').textContent = lines.name;
+    lines.rest.forEach(function (line) { addElement(doc, head, 'div', '').textContent = line; });
+
+    if (tip.firstChild !== head) tip.insertBefore(head, tip.firstChild);
   }
 
   // ===== Brew panel =====
