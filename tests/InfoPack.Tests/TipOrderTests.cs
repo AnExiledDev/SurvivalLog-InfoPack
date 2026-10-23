@@ -72,8 +72,8 @@ public class TipOrderTests
         var always = Default.Where(section => TipSections.DefaultMode(section) == SectionMode.Always);
         var detail = Default.Where(section => TipSections.DefaultMode(section) == SectionMode.Detail);
 
-        Assert.Equal(new[] { Effects, Fresh, Notes, Home, UsedIn, Grow }, always);
-        Assert.Equal(new[] { Value, MadeFrom, Breaks, Fuel, FoundIn, About }, detail);
+        Assert.Equal(new[] { Effects, Fresh }, always);
+        Assert.Equal(new[] { Notes, Home, UsedIn, Grow, Value, MadeFrom, Breaks, Fuel, FoundIn, About }, detail);
     }
 
     [Theory]

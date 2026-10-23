@@ -29,8 +29,8 @@ internal sealed class TooltipConfig
             "Hold this key over an item to see the sections set to Detail, and every row of long lists. The tooltip shows a hint naming the key when there is more to see. Either side of Shift, Ctrl or Alt works.\n" +
             "在物品上按住此键，可查看设为 Detail 的栏目以及长列表的全部内容。有更多内容时，提示底部会显示此键的名称。Shift、Ctrl、Alt 左右两侧都可以。");
         WhereKey = config.Bind(Section, "WhereKey", KeyCode.LeftControl,
-            "Hold this key over an item to see which storages at home hold it and how many each one has, under the home count. Either side of Shift, Ctrl or Alt works.\n" +
-            "在物品上按住此键，会在家中数量下方列出家里哪些储物家具放着这件物品，以及各有多少。Shift、Ctrl、Alt 左右两侧都可以。");
+            "Hold this key over an item to see the whole tooltip, as DetailKey does, and which storages at home hold it and how many each one has, under the home count. Either side of Shift, Ctrl or Alt works.\n" +
+            "在物品上按住此键，会像 DetailKey 一样显示完整提示，并在家中数量下方列出家里哪些储物家具放着这件物品，以及各有多少。Shift、Ctrl、Alt 左右两侧都可以。");
         KeepOnScreen = config.Bind(Section, "KeepOnScreen", true,
             "When on (the default), a tooltip that would run past an edge of the window, such as a tall one near the bottom, is moved back inside it.\n" +
             "开启时（默认），会超出窗口边缘的物品提示（例如靠近底部的长提示）会被移回窗口内。");
@@ -64,8 +64,8 @@ internal sealed class TooltipConfig
         var defaultMode = TipSections.DefaultMode(section).ToString();
 
         return config.Bind(Section, section.ToString(), defaultMode, new ConfigDescription(
-            $"When item tooltips show {shown.En}. Always: every time. Detail: only while DetailKey is held. Off: never. {defaultMode} by default.\n" +
-            $"物品提示何时显示{shown.Zh}。Always：一直显示。Detail：仅在按住 DetailKey 时显示。Off：不显示。默认为 {defaultMode}。",
+            $"When item tooltips show {shown.En}. Always: every time. Detail: only while DetailKey or WhereKey is held. Off: never. {defaultMode} by default.\n" +
+            $"物品提示何时显示{shown.Zh}。Always：一直显示。Detail：仅在按住 DetailKey 或 WhereKey 时显示。Off：不显示。默认为 {defaultMode}。",
             new AcceptableValueList<string>(SectionModes.Choices), Advanced));
     }
 

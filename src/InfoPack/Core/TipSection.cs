@@ -54,8 +54,8 @@ public static class TipSections
     /// <summary>What a short tooltip shows; the rest waits for the detail key.</summary>
     public static SectionMode DefaultMode(TipSection section) => section switch
     {
-        TipSection.Effects or TipSection.Fresh or TipSection.Notes or TipSection.Home or TipSection.UsedIn or TipSection.Grow => SectionMode.Always,
-        TipSection.Value or TipSection.MadeFrom or TipSection.Breaks or TipSection.Fuel or TipSection.FoundIn or TipSection.About => SectionMode.Detail,
+        TipSection.Effects or TipSection.Fresh => SectionMode.Always,
+        TipSection.Notes or TipSection.Home or TipSection.UsedIn or TipSection.Grow or TipSection.Value or TipSection.MadeFrom or TipSection.Breaks or TipSection.Fuel or TipSection.FoundIn or TipSection.About => SectionMode.Detail,
         _ => throw new ArgumentOutOfRangeException(nameof(section), section, null),
     };
 

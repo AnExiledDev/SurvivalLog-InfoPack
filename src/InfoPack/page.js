@@ -137,7 +137,7 @@
   };
   var DEFAULT_ORDER = ['effects', 'fresh', 'notes', 'home', 'usedin', 'grow', 'value', 'madefrom', 'breaks', 'fuel', 'foundin', 'about'];
   var DEFAULT_MODES = {
-    effects: 'always', fresh: 'always', notes: 'always', home: 'always', usedin: 'always', grow: 'always',
+    effects: 'always', fresh: 'always', notes: 'detail', home: 'detail', usedin: 'detail', grow: 'detail',
     value: 'detail', madefrom: 'detail', breaks: 'detail', fuel: 'detail', foundin: 'detail', about: 'detail'
   };
   // Lists that can run long: three rows and "+N more" until the detail key is held.

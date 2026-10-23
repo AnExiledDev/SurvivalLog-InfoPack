@@ -27,16 +27,16 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 | `SpoilBadges` | `true` | Food in backpack and storage slots that spoils within a day gets a small coloured corner. |
 | `Order` | `Effects, Fresh, Notes, Home, UsedIn, Grow, Value, MadeFrom, Breaks, Fuel, FoundIn, About` | The order of the sections in the Info Pack part of item tooltips, as section names separated by commas. A section left out keeps its usual place after the ones named; an unknown or repeated name is ignored. |
 
-One setting per section says when it shows: `Always`, `Detail` (only while `DetailKey` is held) or `Off`. A section with nothing to say about an item is never drawn.
+One setting per section says when it shows: `Always`, `Detail` (only while `DetailKey` or `WhereKey` is held) or `Off`. A section with nothing to say about an item is never drawn.
 
 | Setting | Default | Section |
 | --- | --- | --- |
 | `Effects` | `Always` | Effects: what the item does to satiety, mood, energy, health and life. |
 | `Fresh` | `Always` | Freshness: time left before the item spoils, how long it keeps when fresh and what it rots into. |
-| `Notes` | `Always` | Info Pack's short notes, like `Only useful as scrap` and a brewed drink's quality. |
-| `Home` | `Always` | At home: how many you have at home, with the per-storage list while `WhereKey` is held. Needs `BaseCounts`. |
-| `UsedIn` | `Always` | Used in: workbench recipes, dishes and brewing that use the item. |
-| `Grow` | `Always` | Growing, for seeds: grow time, harvest window, light need, cold resistance, yield and seed chance. |
+| `Notes` | `Detail` | Info Pack's short notes, like `Only useful as scrap` and a brewed drink's quality. |
+| `Home` | `Detail` | At home: how many you have at home, with the per-storage list while `WhereKey` is held. Needs `BaseCounts`. |
+| `UsedIn` | `Detail` | Used in: workbench recipes, dishes and brewing that use the item. |
+| `Grow` | `Detail` | Growing, for seeds: grow time, harvest window, light need, cold resistance, yield and seed chance. |
 | `Value` | `Detail` | Value: trade value, weight, trade value per kg and satiety per kg. |
 | `MadeFrom` | `Detail` | Made from: the recipes, plants and shredding that give the item. |
 | `Breaks` | `Detail` | Breaks down into: what shredding, cutting or rotting turns the item into. |

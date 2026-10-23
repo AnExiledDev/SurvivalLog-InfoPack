@@ -31,7 +31,7 @@ Every piece has its own setting, so you can turn off the ones you don't want. Th
 There are no buttons. Everything shows up in tooltips and windows the game already has. Two keys, both changeable in the settings:
 
 - **Shift** (`DetailKey`): hold it over an item to see the sections set to show on Shift, and every row of long lists.
-- **Ctrl** (`WhereKey`): hold it over an item to see which storages at home hold it.
+- **Ctrl** (`WhereKey`): hold it over an item to see the whole tooltip too, plus which storages at home hold it.
 
 Either side of Shift, Ctrl or Alt works. Which sections show always, only on Shift or never, and their order, are settings too (see [CONFIG.md](CONFIG.md)).
 
@@ -102,7 +102,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.7 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.8 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.8: Tooltips are shorter: only Effects and Freshness show until you hold Shift or Ctrl.
 - 0.8.7: Item tooltips show in Storage Hub's panel too.
 - 0.8.6: The cooking screen's tooltips start with the name in gold above the details, with no plain copy of the stats.
 - 0.8.5: Shift and Ctrl work on Home tab tooltips; Crafting Hub's buttons and materials get tooltips. See [CHANGELOG.md](CHANGELOG.md).

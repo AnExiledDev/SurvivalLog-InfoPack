@@ -6,7 +6,7 @@ Survival Log knows a lot it never shows you. Info Pack adds that information to 
 
 [size=5]Main features[/size]
 [list]
-[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's own lines, split into sections: Effects (green for gains, red for losses), Freshness (time left, shelf life, what it rots into), At home, Used in (with how many you can make now, and each dish's cook time and what eating it does, best dishes first), and Growing for seeds. Hold Shift for Value, Made from, Breaks down into, Fuel (with how long it burns in a cooking pot, heater or generator), Found in and About. Sections with nothing to say are left out.[/*]
+[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's own lines, split into sections. Effects (green for gains, red for losses) and Freshness (time left, shelf life, what it rots into) show at once. Hold Shift or Ctrl for the rest: At home, Used in (with how many you can make now, and each dish's cook time and what eating it does, best dishes first), Growing for seeds, Value, Made from, Breaks down into, Fuel (with how long it burns in a cooking pot, heater or generator), Found in and About. Sections with nothing to say are left out.[/*]
 [*][b]Where is it?[/b]: hold Ctrl over an item to see which storages at home hold it and how many each has.[/*]
 [*][b]What the game wants[/b]: the food you are craving says "You're craving this", and an item a relief request still needs says how many more, with a gold star on its backpack slot. Food and drink you have never had say "Never tried". Robot modules show their level and bait its kind.[/*]
 [*][b]Stat bars[/b]: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you.[/*]
@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.8: Tooltips are shorter: only Effects and Freshness show until you hold Shift or Ctrl.[/*]
 [*]0.8.7: Item tooltips show in Storage Hub's panel too.[/*]
 [*]0.8.6: The cooking screen's tooltips start with the name in gold above the details, with no plain copy of the stats.[/*]
 [*]0.8.5: Shift and Ctrl work on Home tab tooltips; Crafting Hub's buttons and materials get tooltips.[/*]
@@ -96,7 +97,7 @@ Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信
 
 [size=5]主要功能[/size]
 [list]
-[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏：「效果」（增加为绿色，减少为红色）、「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）、「家中」、「用途」（以及现在能做几份、每道菜的烹饪时间和食用效果，效果最好的菜排在前面）和种子的「种植」。按住 Shift 可查看「价值」、「获取方式」、「可分解为」、「燃料」（以及在灶具、取暖器和发电机中能烧多久）、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
+[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏。「效果」（增加为绿色，减少为红色）和「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）直接显示。按住 Shift 或 Ctrl 可查看其余各栏：「家中」、「用途」（以及现在能做几份、每道菜的烹饪时间和食用效果，效果最好的菜排在前面）、种子的「种植」、「价值」、「获取方式」、「可分解为」、「燃料」（以及在灶具、取暖器和发电机中能烧多久）、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
 [*][b]放在哪里[/b]：在物品上按住 Ctrl，可以看到家里哪些储物家具放着它，以及各有多少。[/*]
 [*][b]游戏想要什么[/b]：你正想吃的食物会显示「正想吃这个」；救助委托还需要的物品会显示还差几个，背包格子上还有一颗金色星星。从没吃过的食物和饮品会显示「从没尝过」。机器人模块显示等级，诱饵显示种类。[/*]
 [*][b]状态条[/b]：悬停界面上的状态条，可以看到它每个游戏小时下降多少，以及大约多久后耗尽。饱腹条还会显示家中食物大约够你吃几天。[/*]

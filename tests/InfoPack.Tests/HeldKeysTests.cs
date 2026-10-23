@@ -56,9 +56,19 @@ public class HeldKeysTests
     [Fact]
     public void The_page_reads_each_key_under_its_own_name()
     {
+        var keys = JsonDocument.Parse(new HeldKeys(true, false).ToJson()).RootElement;
+
+        Assert.True(keys.GetProperty("detail").GetBoolean());
+        Assert.False(keys.GetProperty("where").GetBoolean());
+    }
+
+    // Holding Ctrl or Shift both open the full tooltip; Ctrl still adds the per-storage list.
+    [Fact]
+    public void Holding_the_breakdown_key_opens_the_full_tooltip_too()
+    {
         var keys = JsonDocument.Parse(new HeldKeys(false, true).ToJson()).RootElement;
 
-        Assert.False(keys.GetProperty("detail").GetBoolean());
+        Assert.True(keys.GetProperty("detail").GetBoolean());
         Assert.True(keys.GetProperty("where").GetBoolean());
     }
 

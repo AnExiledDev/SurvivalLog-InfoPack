@@ -3,8 +3,8 @@ namespace InfoPack.Core;
 /// <summary>Whether the detail key and the breakdown key are held this frame.</summary>
 public readonly record struct HeldKeys(bool Detail, bool Where)
 {
-    /// <summary>The argument of the page's setKeys call.</summary>
-    public string ToJson() => "{\"detail\":" + Flag(Detail) + ",\"where\":" + Flag(Where) + "}";
+    /// <summary>The argument of the page's setKeys call. The breakdown key opens the full tooltip as well, so either key does.</summary>
+    public string ToJson() => "{\"detail\":" + Flag(Detail || Where) + ",\"where\":" + Flag(Where) + "}";
 
     private static string Flag(bool isHeld) => isHeld ? "true" : "false";
 }

@@ -131,7 +131,8 @@ public class FeaturesTests
         Assert.True(flags.GetProperty("badges").GetBoolean());
         Assert.True(flags.GetProperty("onScreen").GetBoolean());
         Assert.Equal(SectionKeys, tip.GetProperty("order").EnumerateArray().Select(key => key.GetString()));
-        Assert.Equal("always", tip.GetProperty("modes").GetProperty("usedin").GetString());
+        Assert.Equal("always", tip.GetProperty("modes").GetProperty("fresh").GetString());
+        Assert.Equal("detail", tip.GetProperty("modes").GetProperty("usedin").GetString());
         Assert.Equal("detail", tip.GetProperty("modes").GetProperty("value").GetString());
         Assert.Equal("Shift", tip.GetProperty("detailKey").GetString());
         Assert.Equal("Ctrl", tip.GetProperty("whereKey").GetString());
