@@ -62,7 +62,9 @@
     // sized by its content it measures the same wherever keepOnScreen puts it.
     '.tooltip:has(>.slip-tip){width:max-content;max-width:300px}',
     '#recipeTooltip:has(>.slip-tip){width:max-content}',
-    '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip),#tooltip:has(>.slip-tip){width:max-content;max-width:300px;white-space:pre-line}',
+    '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip),#tooltip:has(>.slip-tip){width:max-content;max-width:300px}',
+    // These pages write their lines as one text with line breaks; the workbench's tip is markup, where it would add blank lines.
+    '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip){white-space:pre-line}',
     // A station's own item tooltip, for an item the station page has nothing to say about; it copies their look.
     '.slip-own-tip{position:fixed;display:none;z-index:5000;pointer-events:none;width:max-content;max-width:300px;padding:8px 10px;background:rgba(30,24,22,.96);border:1px solid rgba(251,176,52,.5);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.8);color:#e8e2d6;font-size:12px;line-height:1.5;text-align:left}',
     '.slip-own-name{color:#fbb034;font-weight:bold}',
