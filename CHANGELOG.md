@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.2
+
+- Item tooltips now work while a station is open: the fuel generator, heater, brewing barrel, workbench, shredder, compressor, dye vat, material rack and rat cage. Items the station shows no tooltip for get one of their own.
+- The HUD stat bar lines (how fast a stat drops, when it runs out, how long the food at home lasts) also show when the Stats UI mod replaces the game's stat tooltip.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.1
 
 - Dishes under Used in are sorted by what eating them gives in total (satiety, mood, energy, health and life added up), best first, so the three rows shown by default are the best dishes.

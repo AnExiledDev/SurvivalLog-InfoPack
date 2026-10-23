@@ -1,5 +1,5 @@
 // Info Pack's web half. Runs in Root.html, the document every game page iframe sits in. It only reads: it adds a
-// small wiki block to the game's own item tooltips (backpack and storage, trade, shop bag, cooking), keeps those
+// small wiki block to the game's own item tooltips (backpack and storage, trade, shop bag, cooking, every station's bag), keeps those
 // tooltips inside the window, puts Scrap chips and spoil corners on backpack slots, a tag on the pickup list, a quality
 // readout on the brew panel and duration badges on Survival Planning cards, all in the game's own tooltip palette.
 // The tooltip block is split into sections (effects, freshness, home count, recipes, sources...) that the player
@@ -14,6 +14,8 @@
   var INSTANCE_RETRY_MS = 3000;
   var WHERE_RETRY_MS = 2000;
   var COOKING_TIP_WIDTH = '300px';
+  // The station pages show an item's tooltip half a second after the cursor stops on it; ours waits as long.
+  var STATION_TIP_DELAY_MS = 500;
   var LIST_ROWS = 3;
   // Some materials go into hundreds of recipes; even with the detail key held the tooltip has to fit the window.
   var DETAIL_LIST_ROWS = 12;
@@ -60,6 +62,10 @@
     // sized by its content it measures the same wherever keepOnScreen puts it.
     '.tooltip:has(>.slip-tip){width:max-content;max-width:300px}',
     '#recipeTooltip:has(>.slip-tip){width:max-content}',
+    '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip),#tooltip:has(>.slip-tip){width:max-content;max-width:300px;white-space:pre-line}',
+    // A station's own item tooltip, for an item the station page has nothing to say about; it copies their look.
+    '.slip-own-tip{position:fixed;display:none;z-index:5000;pointer-events:none;width:max-content;max-width:300px;padding:8px 10px;background:rgba(30,24,22,.96);border:1px solid rgba(251,176,52,.5);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.8);color:#e8e2d6;font-size:12px;line-height:1.5;text-align:left}',
+    '.slip-own-name{color:#fbb034;font-weight:bold}',
     '.slip-scrap{position:absolute;bottom:5px;left:3px;font-size:10px;font-weight:700;color:#c9a94f;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.12);padding:0 5px;border-radius:8px;line-height:13px;text-shadow:0 1px 2px rgba(0,0,0,.85);box-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;z-index:4}',
     '.slip-spoil{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 13px 13px 0;pointer-events:none;z-index:2;filter:drop-shadow(0 0 1px rgba(0,0,0,.7))}',
     '.slip-spoil-red{border-color:transparent #ef5350 transparent transparent}',
@@ -75,7 +81,7 @@
   ].join('\n');
 
   // Everything Info Pack draws, so a change of settings can take it all away again.
-  var DRAWN = '.slip-tip, .slip-brew, .slip-scrap, .slip-spoil, .slip-tag, .slip-plan, .slip-wanted, .slip-rate';
+  var DRAWN = '.slip-tip, .slip-brew, .slip-scrap, .slip-spoil, .slip-tag, .slip-plan, .slip-wanted, .slip-rate, .slip-own-tip';
 
   // The HUD bars by the icon the game gives each (CoreUI1's attrList), as the AttrName the plugin measures: a drumstick
   // for satiety, a brain for mood, a bolt for energy, a heart for life.
@@ -1322,18 +1328,179 @@
     if (badge.textContent !== text) badge.textContent = text;
   }
 
+  // ===== Station bags =====
+
+  // Every station page (generator, heater, brewing barrel, dye vat, shredder, compressor, rat cage, material rack,
+  // workbench...) draws the player's bag with the game's shared webui-bag.js: each item is a .item whose id is the
+  // item's instance id. The pages show their own small tooltip for some items and none for others, under different
+  // ids. The block goes into the page's tooltip while it shows the hovered item, and into a tooltip of ours when the
+  // page shows none.
+  var STATION_TIPS = ['itemTooltip', 'itemTip', 'recipeTooltip', 'fuelTooltip', 'tooltip'];
+  var VUE_OR_OWN_PAGES = /(BackpackUI|TradeUI|ShopUI|Cooking)\.html/;
+
+  function isStationPage(win, src) {
+    return typeof win.createBagDragCoordinator === 'function' && !VUE_OR_OWN_PAGES.test(src);
+  }
+
+  function patchStation(win, doc) {
+    if (!win.__slipStation) watchStation(win, doc);
+
+    drawStationTip(win, doc);
+  }
+
+  function watchStation(win, doc) {
+    var hover = { id: '', since: 0, isPressed: false };
+    var redraw = function () {
+      try {
+        drawStationTip(win, doc);
+      } catch (e) {
+        diag('station tooltip', e);
+      }
+    };
+
+    win.__slipStation = hover;
+    trackPointer(win, doc);
+    doc.addEventListener('mouseover', function (e) {
+      var item = e.target && e.target.closest ? e.target.closest('.item') : null;
+      var id = item && /^\d+$/.test(item.id) ? item.id : '';
+
+      if (id !== hover.id) {
+        hover.id = id;
+        hover.since = Date.now();
+        redraw();
+        if (id) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+      }
+    }, true);
+    doc.addEventListener('mouseout', function (e) {
+      if (e.relatedTarget) return;
+
+      hover.id = '';
+      redraw();
+    }, true);
+    doc.addEventListener('mousedown', function () { hover.isPressed = true; redraw(); }, true);
+    doc.addEventListener('mouseup', function () { hover.isPressed = false; hover.since = Date.now(); }, true);
+    doc.addEventListener('mousemove', function () {
+      var own = doc.getElementById('slip-own-tip');
+
+      if (own && own.style.display === 'block') keepOnScreen(win, own);
+    }, true);
+
+    STATION_TIPS.forEach(function (id) {
+      var tip = doc.getElementById(id);
+
+      if (tip) watchTooltip(win, tip, 'station tooltip observer', redraw);
+    });
+  }
+
+  function drawStationTip(win, doc) {
+    var hover = win.__slipStation;
+    var configId = hover && hover.id && !hover.isPressed ? configOfInstance(hover.id) : 0;
+    var model = configId > 0 ? tipModel(configId, { live: null, withEffects: true }) : null;
+    var pageTip = null;
+
+    STATION_TIPS.forEach(function (id) {
+      var tip = doc.getElementById(id);
+      var isShown = !!tip && tip.style.display === 'block' && !tip.classList.contains('kin-mode');
+
+      if (isShown && !pageTip && model) {
+        pageTip = tip;
+      } else if (tip) {
+        drawBlock(doc, tip, null);
+      }
+    });
+
+    if (pageTip) {
+      askWhere(configId);
+      drawBlock(doc, pageTip, model);
+      keepOnScreen(win, pageTip);
+    }
+
+    var isOwn = !pageTip && !!model && Date.now() - hover.since >= STATION_TIP_DELAY_MS;
+
+    drawOwnTip(win, doc, isOwn ? configId : 0, isOwn ? model : null);
+  }
+
+  function drawOwnTip(win, doc, configId, model) {
+    var own = doc.getElementById('slip-own-tip');
+
+    if (!model) {
+      if (own && own.style.display !== 'none') own.style.display = 'none';
+
+      return;
+    }
+
+    if (!own) {
+      own = doc.createElement('div');
+      own.id = 'slip-own-tip';
+      own.className = 'slip-own-tip';
+      addElement(doc, own, 'div', 'slip-own-name');
+      doc.body.appendChild(own);
+    }
+
+    var known = facts.items[configId];
+    var name = own.querySelector(':scope > .slip-own-name');
+    var text = known && known[0] ? known[0] : '';
+
+    if (name.textContent !== text) name.textContent = text;
+
+    askWhere(configId);
+
+    if (!drawBlock(doc, own, model)) {
+      own.style.display = 'none';
+
+      return;
+    }
+
+    if (own.style.display !== 'block') own.style.display = 'block';
+
+    keepOnScreen(win, own);
+  }
+
   // ===== HUD stat bars =====
 
   // Each bar's hover box gets how fast the stat drops and when it runs out, and the satiety bar how long the food at
   // home lasts. The rows follow attrList; a mismatch (a redraw in flight) waits for the next poll.
   function patchHud(win, doc) {
+    watchStatsUi(win, doc);
+
     var setup = vueSetup(doc);
     var list = setup && setup.state ? setup.state.attrList : null;
     var tips = doc.querySelectorAll('.status-row > .progress-bar-wrapper > .status-tooltip');
 
     if (!list || tips.length !== list.length) return;
 
-    for (var i = 0; i < tips.length; i++) setRateLines(tips[i], doc, hudLines(hudStat(list[i] && list[i].attrIcon)));
+    for (var i = 0; i < tips.length; i++) {
+      var lines = hudLines(hudStat(list[i] && list[i].attrIcon));
+      // Stats UI hides the game's box and opens its own in the same bar while the cursor is on it.
+      var other = tips[i].parentNode.querySelector(':scope > .stui-stat-tip');
+
+      setRateLines(tips[i], doc, lines);
+      if (other) setRateLines(other, doc, lines);
+    }
+  }
+
+  // Stats UI builds a new box each time its numbers change, so ours is put back into the new one before it is drawn.
+  function watchStatsUi(win, doc) {
+    if (win.__slipStatsUi || !doc.body) return;
+
+    win.__slipStatsUi = true;
+    new win.MutationObserver(function (records) {
+      for (var r = 0; r < records.length; r++) {
+        for (var n = 0; n < records[r].addedNodes.length; n++) {
+          var node = records[r].addedNodes[n];
+
+          if (node.nodeType === 1 && node.classList.contains('stui-stat-tip')) {
+            try {
+              patchHud(win, doc);
+            } catch (e) {
+              diag('stats ui tooltip', e);
+            }
+
+            return;
+          }
+        }
+      }
+    }).observe(doc.body, { childList: true, subtree: true });
   }
 
   function hudStat(icon) {
@@ -1391,7 +1558,8 @@
     { pattern: /BrewPanel\.html/, isOn: function () { return features.brew; }, patch: patchBrew },
     { pattern: /ItemPickup\.html/, isOn: function () { return features.scrap; }, patch: function (win, doc) { patchPickup(doc); } },
     { pattern: /RogueSelect\.html/, isOn: function () { return features.plan; }, patch: patchPlanningPage },
-    { pattern: /CoreUI1\.html/, isOn: function () { return features.rates || features.forecast; }, patch: patchHud }
+    { pattern: /CoreUI1\.html/, isOn: function () { return features.rates || features.forecast; }, patch: patchHud },
+    { pattern: /\.html/, isOn: always, isFor: isStationPage, patch: patchStation }
   ];
 
   // The game's pages are same-origin iframes of this document, created and dropped whenever the game likes.
@@ -1420,6 +1588,7 @@
 
     if (!win || !doc) return diag('page access', 'cannot reach ' + src);
     if (doc.readyState === 'loading') return;
+    if (page.isFor && !page.isFor(win, src)) return;
 
     try {
       addStyle(doc);
