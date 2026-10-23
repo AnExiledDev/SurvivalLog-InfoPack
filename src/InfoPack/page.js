@@ -83,6 +83,21 @@
     '.slip-own-tip>.slip-tip.slip-hint-only{min-width:0;margin-top:4px;padding-top:0;border-top:0}',
     '.slip-hint-only>.slip-hint{margin-top:0;padding-top:0;border-top:0}',
     '.tooltip.slip-own-fresh>.tooltip-shelf-life{display:none}',
+    // The game's own stat rows and home stock lines say what our Effects and At home sections say, so while ours
+    // show, theirs are hidden. Stat rows are the ones whose value is coloured; the uses row is not and stays.
+    '.tooltip.slip-own-effects .tooltip-attr:has(>.value.pos),.tooltip.slip-own-effects .tooltip-attr:has(>.value.neg){display:none}',
+    '.tooltip.slip-own-effects .tooltip-attrs:not(:has(>.tooltip-attr>.value:not(.pos):not(.neg))){display:none}',
+    '.tooltip.slip-own-home .tooltip-home,.tooltip.slip-own-home .tooltip-where,.tooltip.slip-own-home .tooltip-home-hint{display:none}',
+    // What the game still shows above our block, in our type and colours.
+    '.tooltip:has(>.slip-tip)>.tooltip-category,.tooltip:has(>.slip-tip)>.tooltip-des{font-size:11.75px;color:#a89a82}',
+    '.tooltip:has(>.slip-tip) .tooltip-attrs{min-width:0;padding:0}',
+    '.tooltip:has(>.slip-tip) .tooltip-attr{font-size:11.75px;line-height:1.5}',
+    '.tooltip:has(>.slip-tip) .tooltip-attr .label,.tooltip:has(>.slip-tip) .tooltip-where-row .label{color:#a89a82;font-weight:normal}',
+    '.tooltip:has(>.slip-tip) .tooltip-attr .value,.tooltip:has(>.slip-tip) .tooltip-where-row .value{color:#f0e8d8;font-weight:700;font-variant-numeric:tabular-nums}',
+    '.tooltip:has(>.slip-tip) .tooltip-attr .value.pos{color:#b5e09a}',
+    '.tooltip:has(>.slip-tip) .tooltip-attr .value.neg{color:#ff9a90}',
+    '.tooltip:has(>.slip-tip) .tooltip-home{font-size:11.75px;color:#b5e09a;border-top:1px solid rgba(220,188,120,.16)}',
+    '.tooltip:has(>.slip-tip) .tooltip-home-hint{font-size:11px;color:#8f826c}',
     // A fixed tooltip of auto width narrows near the right border, so its size would change as it is moved there;
     // sized by its content it measures the same wherever keepOnScreen puts it.
     '.tooltip:has(>.slip-tip){width:max-content;max-width:309px}',
@@ -220,7 +235,9 @@
 
   function clearPage(doc) {
     doc.querySelectorAll(DRAWN).forEach(function (el) { el.remove(); });
-    doc.querySelectorAll('.slip-own-fresh').forEach(function (el) { el.classList.remove('slip-own-fresh'); });
+    ['slip-own-fresh', 'slip-own-effects', 'slip-own-home'].forEach(function (name) {
+      doc.querySelectorAll('.' + name).forEach(function (el) { el.classList.remove(name); });
+    });
     doc.querySelectorAll('.slip-headed').forEach(function (el) { el.classList.remove('slip-headed'); });
   }
 
@@ -456,11 +473,12 @@
 
   // The whole block as plain data: sections in the player's order, each only when its mode lets it show and it has
   // something to say, plus the hint line. Drawing compares this against what is on screen, so it is rebuilt freely.
-  // page: { live: {days, expired, polluted} or null, withEffects }.
+  // page: { live: {days, expired, polluted} or null, withEffects, stats: the page's own stat values or null }.
   function tipModel(configId, page) {
     var wiki = facts.wiki[configId] || {};
     var context = { id: configId, wiki: wiki, page: page, isRotInFresh: isOpen(tipSettings.modes.fresh) && wiki.rot > 0 };
     var sections = [];
+    var owned = {};
     var needsHint = false;
 
     tipSettings.order.forEach(function (key) {
@@ -468,6 +486,8 @@
       var rows = mode === 'always' || mode === 'detail' ? sectionRows(key, context) : [];
 
       if (!rows.length) return;
+
+      owned[key] = true;
 
       if (!isOpen(mode)) {
         needsHint = true;
@@ -487,6 +507,9 @@
 
     return {
       sections: sections,
+      // Sections the game also shows on its own tooltips: ours stand in for theirs whenever ours is on for the item,
+      // shown now or waiting for the detail key.
+      owns: { effects: owned.effects === true, home: owned.home === true },
       hint: needsHint && !keys.detail ? say('hintMore', tipSettings.detailKey) : '',
       isOwnFresh: isOpen(tipSettings.modes.fresh) && liveDaysLeft(page) > 0 && !page.live.expired && !page.live.polluted
     };
@@ -519,13 +542,25 @@
 
     if (!context.page.withEffects) return [];
 
-    (context.wiki.fx || []).forEach(function (value, i) {
+    var own = Array.isArray(context.page.stats) ? context.page.stats : null;
+
+    (own || context.wiki.fx || []).forEach(function (value, i) {
+      value = own ? gameStat(value) : value;
+
       if (!value || !STATS[i]) return;
 
       chips.push({ stat: i, text: signed(value), name: keys.detail ? say(STATS[i].phrase) : '', isGain: value > 0 });
     });
 
     return chips.length ? [{ chips: chips }] : [];
+  }
+
+  // A stat as the game's bag and trade tooltips round it: down to a whole number, with anything between 0 and 1 as 1.
+  function gameStat(value) {
+    var n = Number(value) || 0;
+    var whole = Math.floor(n);
+
+    return n > 0 && whole === 0 ? 1 : whole;
   }
 
   // Under a day is red and under three amber; anything longer is still fresh.
@@ -851,10 +886,17 @@
     return el;
   }
 
-  // The block's live freshness line replaces the game's own shelf-life line, which says the same in plainer type.
-  // Only touched when it changes: re-adding a class still counts as a change to the tooltip's watcher.
-  function setOwnFresh(tip, isOwn) {
-    if (tip.classList.contains('slip-own-fresh') !== isOwn) tip.classList.toggle('slip-own-fresh', isOwn);
+  // The block's live freshness line replaces the game's own shelf-life line, which says the same in plainer type, and
+  // its Effects and At home sections the game's stat rows and home stock lines. Only touched when it changes:
+  // re-adding a class still counts as a change to the tooltip's watcher.
+  function setOwned(tip, model) {
+    setClass(tip, 'slip-own-fresh', !!(model && model.isOwnFresh));
+    setClass(tip, 'slip-own-effects', !!(model && model.owns.effects));
+    setClass(tip, 'slip-own-home', !!(model && model.owns.home));
+  }
+
+  function setClass(el, className, isOn) {
+    if (el.classList.contains(className) !== isOn) el.classList.toggle(className, isOn);
   }
 
   // ===== Keeping a tooltip on screen =====
@@ -981,7 +1023,7 @@
 
     askWhere(configId);
     drawBlock(doc, tip, model);
-    setOwnFresh(tip, !!(model && model.isOwnFresh));
+    setOwned(tip, model);
     keepOnScreen(win, tip);
   }
 
@@ -1036,7 +1078,7 @@
       var item = hover && hover.visible ? hover.item : null;
       var live = item ? { days: item.shelfLifeDays, expired: !!item.isExpired, polluted: !!item.polluted } : null;
 
-      drawVueTip(win, doc, tip, item ? item.cfgId : 0, { live: live, withEffects: true });
+      drawVueTip(win, doc, tip, item ? item.cfgId : 0, { live: live, withEffects: true, stats: item ? item.vd : null });
     });
 
     try {
@@ -1126,7 +1168,7 @@
         configId = isShelf ? item.id : configOfInstance(item.id);
       }
 
-      drawVueTip(win, doc, tip, configId, { live: null, withEffects: !isShelf || !!features.stats });
+      drawVueTip(win, doc, tip, configId, { live: null, withEffects: !isShelf || !!features.stats, stats: item ? item.vd : null });
     });
   }
 

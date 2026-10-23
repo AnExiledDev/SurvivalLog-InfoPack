@@ -40,7 +40,7 @@ Works in English and Chinese.
 
 [size=5]Requirements[/size]
 [list]
-[*]Survival Log 1.1.19131. A game update can break it until the mod is updated.[/*]
+[*]Survival Log 1.1.19611. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
 [*]Optional: [url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.[/*]
 [/list]
@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.12: Tooltips use the game's own effect numbers, and hide the game's effect and home lines where Info Pack shows them.[/*]
 [*]0.8.11: The At home count shows on every tooltip again, without holding Shift.[/*]
 [*]0.8.10: What is in the neighbor's basket no longer counts as at home.[/*]
 [*]0.8.9: No more empty tooltips on the workbench for items with nothing to show until Shift is held.[/*]
@@ -134,7 +135,7 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 
 [size=5]前置要求[/size]
 [list]
-[*]Survival Log 1.1.19131。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
+[*]Survival Log 1.1.19611。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
 [*]可选：[url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效；没装的话，改动在下次启动游戏时生效。[/*]
 [/list]

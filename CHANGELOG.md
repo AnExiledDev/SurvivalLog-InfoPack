@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.12
+
+- Effects chips use the game's own effect numbers on the Backpack and Trade tooltips.
+- When Info Pack shows its Effects or At home section, the game's own effect rows and home lines on the same tooltip are hidden. With a section set to Off, the game's lines show as before.
+- The game's category, description and uses rows are restyled to match Info Pack's sections.
+- Made for Survival Log 1.1.19611.
+
 ## 0.8.11
 
 - The At home section shows on every tooltip again, without holding Shift or Ctrl. Ctrl still adds the per-storage list.

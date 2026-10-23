@@ -76,7 +76,7 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 
 ## Requirements
 
-- Survival Log 1.1.19131. Built for this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.19611. Built for this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Not together with ItemTotals, unless you turn off `BaseCounts` (see [Replaces ItemTotals](#replaces-itemtotals)).
 - Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.
@@ -102,7 +102,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.11 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.12 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.12: Tooltips use the game's own effect numbers, and hide the game's effect and home lines where Info Pack shows them.
 - 0.8.11: The At home count shows on every tooltip again, without holding Shift.
 - 0.8.10: What is in the neighbor's basket no longer counts as at home.
 - 0.8.9: No more empty tooltips on the workbench for items with nothing to show until Shift is held.
