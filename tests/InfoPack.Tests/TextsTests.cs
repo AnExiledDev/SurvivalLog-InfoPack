@@ -42,7 +42,6 @@ public class TextsTests
         { "useBench", "Workbench" },
         { "useCook", "Cooking" },
         { "useCookTime", "Cooking, {0}" },
-        { "dishStat", "{0} {1}" },
         { "useBrew", "Brewed alone, quality {0}" },
         { "useBrewMix", "In a barrel: {0} satiety, {1} mood each; {2} per bottle" },
         { "useBrewMood", "In a barrel: {0} mood each, no satiety" },

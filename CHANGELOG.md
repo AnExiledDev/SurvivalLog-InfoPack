@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.3
+
+- New tooltip look, matching New Loop Plus, More Rewards and Cooking Hub: a warm brown panel with an amber line along the top, amber section headings, and round green and red stat chips.
+- Freshness shows a bar of how much fresh time is left, coloured green, amber or red.
+- Dishes under Used in show their stats as chips instead of a line of text.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.2
 
 - Item tooltips now work while a station is open: the fuel generator, heater, brewing barrel, workbench, shredder, compressor, dye vat, material rack and rat cage. Items the station shows no tooltip for get one of their own.

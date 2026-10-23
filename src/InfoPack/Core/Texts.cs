@@ -74,7 +74,6 @@ public static class Texts
         Key("useBench", new("Workbench", "工作台")),
         Key("useCook", new("Cooking", "烹饪")),
         Key("useCookTime", new("Cooking, {0}", "烹饪，{0}")),
-        Key("dishStat", new("{0} {1}", "{1} {0}")),
         Key("useBrew", new("Brewed alone, quality {0}", "单独酿造，品质 {0}")),
         Key("useBrewMix", new("In a barrel: {0} satiety, {1} mood each; {2} per bottle", "酒桶中：每个 {0} 饱腹、{1} 心态；每瓶 {2} 个")),
         Key("useBrewMood", new("In a barrel: {0} mood each, no satiety", "酒桶中：每个 {0} 心态，不加饱腹")),

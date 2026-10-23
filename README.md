@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.3: A new look for the tooltip: a warm brown panel, amber section headings, round stat chips, a freshness bar and stat chips under each dish. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.2: Tooltips work while a station is open (generator, heater, brewing barrel, workbench and the rest), and the HUD stat bar lines also show in the Stats UI mod's tooltip. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.1: Dishes under Used in are listed best first, by their stats added up. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.0: Dishes under Used in show their cook time and what eating them does, and fuel shows how long it burns in a cooking pot, a heater and a fuel generator. See [CHANGELOG.md](CHANGELOG.md).

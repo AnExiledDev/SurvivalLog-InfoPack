@@ -24,50 +24,72 @@
   var EDGE = 4;
   var SECONDS_PER_DAY = 86400;
 
-  // The block takes the game's tooltip look: its 12px text, #aaa for secondary lines, its green and red for gains
-  // and losses, and thin dividers like the trade tooltip's description line. Section headers are small capitals so
-  // the eye can jump between them. The chip, tag and spoil corner copy the backpack's own slot badges.
+  // The tooltip takes the look of the other Exiled mods (New Loop Plus, More Rewards, Cooking Hub): a warm brown
+  // panel with an amber line along its top, amber section headings with a bar before and a fading line after, and
+  // round green and red stat chips. The game's own tooltip is restyled only while it holds our block.
+  var PANEL = 'background:radial-gradient(ellipse at 12% 0%,rgba(150,100,40,.28),transparent 60%),linear-gradient(180deg,#3a3129,#2b241d 55%,#221c16);' +
+    'border:1px solid rgba(220,188,120,.3);border-radius:5px;box-shadow:0 18px 50px rgba(0,0,0,.75),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,230,180,.08)';
+  var HAIRLINE = "content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:5px 5px 0 0;background:linear-gradient(90deg,transparent 8%,#ffc83a 50%,transparent 92%);opacity:.75;pointer-events:none";
+  var HOSTS = ['.tooltip', '#recipeTooltip', '#itemTooltip', '#itemTip', '#fuelTooltip', '#tooltip'];
+  var HOST_PANEL = HOSTS.map(function (host) { return host + ':has(>.slip-tip)'; }).join(',');
+  var HOST_LINE = HOSTS.map(function (host) { return host + ':has(>.slip-tip)::before'; }).join(',');
+
   var CSS = [
-    '.slip-tip{display:flex;flex-direction:column;min-width:190px;max-width:280px;margin-top:3px;padding-top:7px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;line-height:1.45;font-weight:normal;color:#c9c9c9;text-align:left;white-space:normal}',
+    HOST_PANEL + ',.slip-own-tip{' + PANEL + '}',
+    HOST_LINE + ',.slip-own-tip::before{' + HAIRLINE + '}',
+    '.slip-tip{display:flex;flex-direction:column;min-width:190px;max-width:289px;margin-top:5px;padding-top:8px;border-top:1px solid rgba(220,188,120,.16);font-size:11.75px;line-height:1.5;font-weight:normal;color:#cbbfa8;text-align:left;white-space:normal}',
     '.slip-sec{display:flex;flex-direction:column;gap:2px}',
-    '.slip-sec+.slip-sec{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.07)}',
-    '.slip-h{font-size:10px;font-weight:700;line-height:14px;letter-spacing:.08em;text-transform:uppercase;color:#8e97a8}',
+    '.slip-sec+.slip-sec{margin-top:7px;padding-top:7px;border-top:1px solid rgba(220,188,120,.11)}',
+    '.slip-h{display:flex;align-items:center;gap:7px;margin-bottom:3px;font-size:10.5px;font-weight:700;line-height:14px;letter-spacing:2.2px;text-transform:uppercase;color:#ffc83a;text-shadow:0 0 10px rgba(255,200,58,.35)}',
+    ".slip-h::before{content:'';flex:none;width:3px;height:11px;background:#ffc83a;box-shadow:0 0 6px rgba(255,200,58,.35)}",
+    ".slip-h::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,200,58,.25),transparent)}",
     '.slip-row{display:flex;align-items:baseline;gap:8px}',
     '.slip-txt{flex:1 1 auto;min-width:0;overflow-wrap:break-word}',
-    '.slip-meta{flex:none;font-size:11px;color:#8a8f99;white-space:nowrap}',
-    '.slip-subline{display:block;font-size:11px;line-height:1.35;color:#8a8f99}',
-    '.slip-where{padding-left:10px;color:#aaa}',
-    '.slip-dim{color:#8a8f99}',
-    '.slip-good{color:#66bb6a}',
-    '.slip-bad{color:#ef5350}',
-    '.slip-amber{color:#e8a33a}',
-    '.slip-fresh{color:#9ccc65}',
-    '.slip-warn{color:#c9a94f}',
-    '.slip-more{font-size:11px;color:#8a8f99}',
-    '.slip-about{color:#b9b9b9;line-height:1.5}',
-    '.slip-ref{color:#e2e2e2}',
-    '.slip-ico{display:inline-block;width:16px;height:16px;object-fit:contain;vertical-align:-4px;margin-right:3px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}',
-    '.slip-noico{background:rgba(255,255,255,.08);border-radius:3px}',
-    '.slip-n{color:#aaa;margin-left:3px}',
-    '.slip-chips{display:flex;flex-wrap:wrap;gap:4px}',
-    '.slip-chip{display:inline-flex;align-items:center;gap:3px;padding:0 6px 0 4px;border:1px solid;border-radius:9px;font-size:12px;font-weight:700;line-height:17px;font-variant-numeric:tabular-nums}',
+    '.slip-meta{flex:none;font-size:11px;color:#8f826c;white-space:nowrap}',
+    '.slip-subline{display:block;font-size:11px;line-height:1.35;color:#a89a82}',
+    '.slip-where{padding-left:10px;color:#a89a82}',
+    '.slip-dim{color:#a89a82}',
+    '.slip-good{color:#b5e09a}',
+    '.slip-bad{color:#ff9a90}',
+    '.slip-amber{color:#ffc83a}',
+    '.slip-fresh{color:#b5e09a}',
+    '.slip-warn{color:#e0b070}',
+    '.slip-more{font-size:11px;color:#a89a82}',
+    '.slip-about{color:#a89a82;line-height:1.5}',
+    '.slip-ref{color:#f0e8d8;font-weight:600}',
+    '.slip-ico{display:inline-block;width:18px;height:18px;object-fit:contain;vertical-align:-5px;margin-right:4px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}',
+    '.slip-noico{background:rgba(255,240,210,.08);border-radius:3px}',
+    '.slip-n{color:#a89a82;margin-left:3px}',
+    // How much of an item's fresh life is left, coloured like the line beside it.
+    '.slip-barrow{align-items:center}',
+    '.slip-barrow>.slip-txt{flex:none;font-weight:700}',
+    '.slip-track{flex:1 1 60px;height:6px;border-radius:3px;background:rgba(10,6,2,.55);border:1px solid rgba(0,0,0,.4);overflow:hidden}',
+    '.slip-fill{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#8cc56a,#b5e09a);box-shadow:0 0 8px rgba(140,197,106,.45)}',
+    '.slip-amber .slip-fill{background:linear-gradient(90deg,#e8a91c,#ffd25a);box-shadow:0 0 8px rgba(255,200,58,.35)}',
+    '.slip-bad .slip-fill{background:linear-gradient(90deg,#c8372d,#ff6b5e);box-shadow:0 0 8px rgba(255,107,94,.5)}',
+    '.slip-chips{display:flex;flex-wrap:wrap;gap:5px}',
+    '.slip-chip{display:inline-flex;align-items:center;gap:4px;padding:0 8px 0 6px;border:1px solid;border-radius:10px;font-size:11.75px;font-weight:700;line-height:18px;font-variant-numeric:tabular-nums}',
     '.slip-chip svg{width:12px;height:12px;flex:none}',
-    '.slip-chip-name{font-weight:600}',
-    '.slip-up{color:#7fd67a;background:rgba(102,187,106,.13);border-color:rgba(102,187,106,.35)}',
-    '.slip-down{color:#f07a76;background:rgba(239,83,80,.13);border-color:rgba(239,83,80,.35)}',
-    '.slip-key{display:inline-block;font-size:10px;line-height:14px;color:#9aa3b5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:0 4px}',
-    '.slip-hint{margin-top:7px;text-align:right}',
+    '.slip-chip-name{font-weight:500;opacity:.85}',
+    '.slip-up{color:#b5e09a;background:rgba(140,197,106,.14);border-color:rgba(140,197,106,.4)}',
+    '.slip-down{color:#ff9a90;background:rgba(255,107,94,.13);border-color:rgba(255,107,94,.4)}',
+    // A recipe's stats under its name: the same chips, smaller.
+    '.slip-subchips{gap:4px;margin-top:2px}',
+    '.slip-subchips .slip-chip{font-size:10.5px;line-height:15px;padding:0 6px 0 4px;gap:3px}',
+    '.slip-subchips .slip-chip svg{width:10px;height:10px}',
+    '.slip-key{display:inline-block;font-size:10px;font-weight:700;line-height:15px;color:#f0e8d8;background:linear-gradient(180deg,rgba(92,78,60,.95),rgba(60,50,38,.95));border:1px solid rgba(220,188,120,.4);border-radius:3px;padding:0 5px;box-shadow:0 1px 0 rgba(0,0,0,.6)}',
+    '.slip-hint{margin-top:8px;padding-top:6px;border-top:1px solid rgba(220,188,120,.11);text-align:right}',
     '.tooltip.slip-own-fresh>.tooltip-shelf-life{display:none}',
     // A fixed tooltip of auto width narrows near the right border, so its size would change as it is moved there;
     // sized by its content it measures the same wherever keepOnScreen puts it.
-    '.tooltip:has(>.slip-tip){width:max-content;max-width:300px}',
+    '.tooltip:has(>.slip-tip){width:max-content;max-width:309px}',
     '#recipeTooltip:has(>.slip-tip){width:max-content}',
-    '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip),#tooltip:has(>.slip-tip){width:max-content;max-width:300px}',
+    '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip),#tooltip:has(>.slip-tip){width:max-content;max-width:309px}',
     // These pages write their lines as one text with line breaks; the workbench's tip is markup, where it would add blank lines.
     '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip){white-space:pre-line}',
     // A station's own item tooltip, for an item the station page has nothing to say about; it copies their look.
-    '.slip-own-tip{position:fixed;display:none;z-index:5000;pointer-events:none;width:max-content;max-width:300px;padding:8px 10px;background:rgba(30,24,22,.96);border:1px solid rgba(251,176,52,.5);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.8);color:#e8e2d6;font-size:12px;line-height:1.5;text-align:left}',
-    '.slip-own-name{color:#fbb034;font-weight:bold}',
+    '.slip-own-tip{position:fixed;display:none;z-index:5000;pointer-events:none;width:max-content;max-width:309px;padding:10px 12px;color:#cbbfa8;font-size:12px;line-height:1.5;text-align:left}',
+    '.slip-own-name{color:#ffc83a;font-weight:bold;font-size:14px;text-shadow:0 0 12px rgba(255,200,58,.25)}',
     '.slip-scrap{position:absolute;bottom:5px;left:3px;font-size:10px;font-weight:700;color:#c9a94f;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.12);padding:0 5px;border-radius:8px;line-height:13px;text-shadow:0 1px 2px rgba(0,0,0,.85);box-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;z-index:4}',
     '.slip-spoil{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 13px 13px 0;pointer-events:none;z-index:2;filter:drop-shadow(0 0 1px rgba(0,0,0,.7))}',
     '.slip-spoil-red{border-color:transparent #ef5350 transparent transparent}',
@@ -79,7 +101,7 @@
     '.slip-plan-once{color:#0d1f27;background:#6ec6e6;border:1px solid rgba(205,240,255,.6)}',
     '.card.locked .slip-plan{opacity:.45}',
     '.slip-wanted{position:absolute;top:1px;left:3px;font-size:12px;line-height:12px;color:#ffc83a;text-shadow:0 1px 2px rgba(0,0,0,.9);pointer-events:none;z-index:4}',
-    '.slip-rate{margin-top:6px;padding-top:5px;border-top:1px dashed rgba(255,255,255,.18);font-size:12px;line-height:1.5;color:#ccc}'
+    '.slip-rate{margin-top:6px;padding-top:5px;border-top:1px solid rgba(220,188,120,.22);font-size:12px;line-height:1.5;color:#cbbfa8}'
   ].join('\n');
 
   // Everything Info Pack draws, so a change of settings can take it all away again.
@@ -296,7 +318,7 @@
     statSatiety: 'Satiety', statMood: 'Mood', statEnergy: 'Energy', statHealth: 'Health', statLife: 'Life',
     freshLeft: '{0} left', freshBase: 'Keeps {0} when fresh', freshRots: 'Rots into {0}', spoiled: 'Spoiled',
     homeCount: '{0} at home', where: '{0}: {1}', whereNone: 'None stored at home',
-    makeNow: 'can make {0} now', useBench: 'Workbench', useCook: 'Cooking', useCookTime: 'Cooking, {0}', dishStat: '{0} {1}', useBrew: 'Brewed alone, quality {0}',
+    makeNow: 'can make {0} now', useBench: 'Workbench', useCook: 'Cooking', useCookTime: 'Cooking, {0}', useBrew: 'Brewed alone, quality {0}',
     useBrewMix: 'In a barrel: {0} satiety, {1} mood each; {2} per bottle', useBrewMood: 'In a barrel: {0} mood each, no satiety',
     more: '+{0} more',
     growTime: 'Grows in {0}', growHarvest: 'Harvest within {0}', growLight: 'Light: {0}', lightLow: 'low',
@@ -457,8 +479,9 @@
     };
   }
 
-  // Rows are { chips } or { parts, cls, meta, metaCls, sub }: parts are text and item references, meta sits on the
-  // right in small type, sub is a second, quieter line.
+  // Rows are { chips } or { parts, cls, meta, metaCls, sub, subChips, bar }: parts are text and item references, meta
+  // sits on the right in small type, sub is a second, quieter line, subChips a line of small stat chips, and bar (0 to
+  // 1) draws a bar before the text.
   function sectionRows(key, context) {
     switch (key) {
       case 'effects': return effectRows(context);
@@ -499,7 +522,7 @@
     var live = context.page.live;
     var days = liveDaysLeft(context.page);
 
-    if (days > 0 && !live.expired) rows.push({ parts: [say('freshLeft', formatDays(days))], cls: days < 1 ? 'slip-bad' : days < 3 ? 'slip-amber' : 'slip-fresh' });
+    if (days > 0 && !live.expired) rows.push({ parts: [say('freshLeft', formatDays(days))], cls: days < 1 ? 'slip-bad' : days < 3 ? 'slip-amber' : 'slip-fresh', bar: wiki.life > 0 ? Math.min(1, days / wiki.life) : null });
     else if (days === 0 || (live && live.expired && wiki.life > 0)) rows.push({ parts: [say('spoiled')], cls: 'slip-bad' });
 
     if (wiki.life > 0) rows.push({ parts: [say('freshBase', formatDays(wiki.life))], cls: 'slip-dim' });
@@ -580,7 +603,7 @@
           metaCls: times > 0 ? 'slip-good' : 'slip-dim'
         });
       } else if (use.k === 'cook' && use.out > 0) {
-        rest.push({ parts: [itemRef(use.out)], meta: use.t > 0 ? say('useCookTime', formatSeconds(use.t)) : say('useCook'), metaCls: 'slip-dim', sub: dishStats(use.out) });
+        rest.push({ parts: [itemRef(use.out)], meta: use.t > 0 ? say('useCookTime', formatSeconds(use.t)) : say('useCook'), metaCls: 'slip-dim', subChips: dishChips(use.out) });
       } else if (use.k === 'brew') {
         rest.push.apply(rest, brewRows(use));
       }
@@ -589,16 +612,16 @@
     return ready.concat(other, rest);
   }
 
-  // What eating the dish does, the way the effects section words it: "+30 Satiety, +5 Mood".
-  function dishStats(dishId) {
+  // What eating the dish does, as the effects section's chips without the stat names.
+  function dishChips(dishId) {
     var fx = (facts.wiki[dishId] || {}).fx || [];
-    var stats = [];
+    var chips = [];
 
     fx.forEach(function (value, i) {
-      if (value && STATS[i]) stats.push(say('dishStat', signed(value), say(STATS[i].phrase)));
+      if (value && STATS[i]) chips.push({ stat: i, text: signed(value), name: '', isGain: value > 0 });
     });
 
-    return stats.join(', ');
+    return chips;
   }
 
   // The drink a barrel of only this item makes, then what the item adds to any batch. An item with no satiety cannot
@@ -752,10 +775,10 @@
     return el;
   }
 
-  function chipRow(doc, chips) {
+  function chipRow(doc, chips, className) {
     var row = doc.createElement('div');
 
-    row.className = 'slip-chips';
+    row.className = className || 'slip-chips';
     chips.forEach(function (chip) {
       var el = addElement(doc, row, 'span', 'slip-chip ' + (chip.isGain ? 'slip-up' : 'slip-down'));
 
@@ -773,10 +796,17 @@
     var el = doc.createElement('div');
     var text = addElement(doc, el, 'span', 'slip-txt');
 
-    el.className = 'slip-row' + (row.cls ? ' ' + row.cls : '');
+    el.className = 'slip-row' + (row.cls ? ' ' + row.cls : '') + (row.bar != null ? ' slip-barrow' : '');
+
+    if (row.bar != null) {
+      addElement(doc, addElement(doc, el, 'span', 'slip-track'), 'span', 'slip-fill').style.width = Math.round(row.bar * 100) + '%';
+      el.appendChild(text);
+    }
+
     row.parts.forEach(function (part) { text.appendChild(typeof part === 'string' ? doc.createTextNode(part) : refElement(doc, part)); });
 
     if (row.sub) addElement(doc, text, 'span', 'slip-subline').textContent = row.sub;
+    if (row.subChips && row.subChips.length) text.appendChild(chipRow(doc, row.subChips, 'slip-chips slip-subchips'));
     if (row.meta) addElement(doc, el, 'span', 'slip-meta' + (row.metaCls ? ' ' + row.metaCls : '')).textContent = row.meta;
 
     return el;
