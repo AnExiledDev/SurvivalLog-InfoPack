@@ -34,7 +34,7 @@ One setting per section says when it shows: `Always`, `Detail` (only while `Deta
 | `Effects` | `Always` | Effects: what the item does to satiety, mood, energy, health and life. |
 | `Fresh` | `Always` | Freshness: time left before the item spoils, how long it keeps when fresh and what it rots into. |
 | `Notes` | `Detail` | Info Pack's short notes, like `Only useful as scrap` and a brewed drink's quality. |
-| `Home` | `Detail` | At home: how many you have at home, with the per-storage list while `WhereKey` is held. Needs `BaseCounts`. |
+| `Home` | `Always` | At home: how many you have at home, with the per-storage list while `WhereKey` is held. Needs `BaseCounts`. |
 | `UsedIn` | `Detail` | Used in: workbench recipes, dishes and brewing that use the item. |
 | `Grow` | `Detail` | Growing, for seeds: grow time, harvest window, light need, cold resistance, yield and seed chance. |
 | `Value` | `Detail` | Value: trade value, weight, trade value per kg and satiety per kg. |

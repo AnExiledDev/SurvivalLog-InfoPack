@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.11: The At home count shows on every tooltip again, without holding Shift.[/*]
 [*]0.8.10: What is in the neighbor's basket no longer counts as at home.[/*]
 [*]0.8.9: No more empty tooltips on the workbench for items with nothing to show until Shift is held.[/*]
 [*]0.8.8: Tooltips are shorter: only Effects and Freshness show until you hold Shift or Ctrl.[/*]

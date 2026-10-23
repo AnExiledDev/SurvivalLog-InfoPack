@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.11
+
+- The At home section shows on every tooltip again, without holding Shift or Ctrl. Ctrl still adds the per-storage list.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.10
 
 - At home counts, Used in counts and the days of food on the satiety bar leave out what is staged in the neighbor's basket.
