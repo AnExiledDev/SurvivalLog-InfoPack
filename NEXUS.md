@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.5: Shift and Ctrl work on Home tab tooltips; Crafting Hub's buttons and materials get tooltips.[/*]
 [*]0.8.4: Item tooltips show on Storage Hub's Home tab too, beside a station or the bag.[/*]
 [*]0.8.3: A new look for the tooltip: a warm brown panel, amber section headings, round stat chips, a freshness bar and stat chips under each dish. Talents count in fuel and brew numbers right after a save loads.[/*]
 [*]0.8.2: Tooltips work while a station is open (generator, heater, brewing barrel, workbench and the rest), and the HUD stat bar lines also show in the Stats UI mod's tooltip.[/*]

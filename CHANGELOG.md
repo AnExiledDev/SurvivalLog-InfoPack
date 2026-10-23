@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.5
+
+- Fixed: holding Shift or Ctrl did not expand or change a tooltip on Storage Hub's Home tab.
+- Other mods can now show a tooltip on any button or label, plain text or an item found by its name. Crafting Hub uses this for its materials, bell and amount buttons.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.4
 
 - Item tooltips show when you hover an item on Storage Hub's Home tab, beside a station or the bag. Other mods can get the same tooltip on their own item lists.

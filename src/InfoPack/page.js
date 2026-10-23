@@ -1464,6 +1464,20 @@
     drawOwnTip(win, doc, isOwn ? configId : 0, isOwn ? model : null);
   }
 
+  function ownTip(doc) {
+    var own = doc.getElementById('slip-own-tip');
+
+    if (own) return own;
+
+    own = doc.createElement('div');
+    own.id = 'slip-own-tip';
+    own.className = 'slip-own-tip';
+    addElement(doc, own, 'div', 'slip-own-name');
+    doc.body.appendChild(own);
+
+    return own;
+  }
+
   function drawOwnTip(win, doc, configId, model) {
     var own = doc.getElementById('slip-own-tip');
 
@@ -1473,13 +1487,7 @@
       return;
     }
 
-    if (!own) {
-      own = doc.createElement('div');
-      own.id = 'slip-own-tip';
-      own.className = 'slip-own-tip';
-      addElement(doc, own, 'div', 'slip-own-name');
-      doc.body.appendChild(own);
-    }
+    own = ownTip(doc);
 
     var known = facts.items[configId];
     var name = own.querySelector(':scope > .slip-own-name');
@@ -1504,68 +1512,135 @@
 
   // Any element with data-slip-item="<config id>", on any of the game's pages, gets our own tooltip after the same
   // short wait as the station bags. Other mods (Storage Hub's Home tab) tag their item rows this way; the tag does
-  // nothing when this mod is not installed.
-  function patchTagged(win, doc) {
-    if (win.__slipTagged || !doc.body) return;
+  // nothing when this mod is not installed. data-slip-name="<item name>" does the same for a mod that only knows the
+  // name, and data-slip-tip="<words>" shows just those words in the same box (Crafting Hub's buttons). A name that
+  // matches no item falls back to the element's words.
+  var TAGGED = '[data-slip-item],[data-slip-name],[data-slip-tip]';
 
-    var hover = { configId: 0, since: 0, isPressed: false };
-    var redraw = function () {
-      try {
-        drawTaggedTip(win, doc);
-      } catch (e) {
-        diag('tagged tooltip', e);
-      }
-    };
+  function patchTagged(win, doc) {
+    if (win.__slipTagged) {
+      // Held keys and late breakdown rows change what the tooltip says, so a shown one is drawn again each poll.
+      if (isTaggedHover(win)) redrawTagged(win, doc);
+
+      return;
+    }
+
+    if (!doc.body) return;
+
+    var hover = { configId: 0, text: '', since: 0, isPressed: false };
+    var redraw = function () { redrawTagged(win, doc); };
 
     win.__slipTagged = hover;
     trackPointer(win, doc);
     doc.addEventListener('mouseover', function (e) {
-      var row = e.target && e.target.closest ? e.target.closest('[data-slip-item]') : null;
-      var configId = row ? parseInt(row.getAttribute('data-slip-item'), 10) || 0 : 0;
+      var row = e.target && e.target.closest ? e.target.closest(TAGGED) : null;
+      var configId = row ? taggedItem(row) : 0;
+      var text = row && !configId ? row.getAttribute('data-slip-tip') || '' : '';
 
-      if (configId === hover.configId) return;
+      if (configId === hover.configId && text === hover.text) return;
 
-      var wasTagged = hover.configId > 0;
+      var wasTagged = isTaggedHover(win);
 
       hover.configId = configId;
+      hover.text = text;
       hover.since = Date.now();
-      if (configId || wasTagged) redraw();
-      if (configId) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+      if (configId || text || wasTagged) redraw();
+      if (configId || text) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
     }, true);
     doc.addEventListener('mouseout', function (e) {
-      if (e.relatedTarget || !hover.configId) return;
+      if (e.relatedTarget || !isTaggedHover(win)) return;
 
       hover.configId = 0;
+      hover.text = '';
       redraw();
     }, true);
     doc.addEventListener('mousedown', function () {
       hover.isPressed = true;
-      if (hover.configId) redraw();
+      if (isTaggedHover(win)) redraw();
     }, true);
     doc.addEventListener('mouseup', function () {
       hover.isPressed = false;
       hover.since = Date.now();
-      if (hover.configId) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+      if (isTaggedHover(win)) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
     }, true);
     win.addEventListener('blur', function () { hover.isPressed = false; }, true);
     doc.addEventListener('mousemove', function () {
       var own = doc.getElementById('slip-own-tip');
 
-      if (hover.configId && own && own.style.display === 'block') keepOnScreen(win, own);
+      if (isTaggedHover(win) && own && own.style.display === 'block') keepOnScreen(win, own);
     }, true);
   }
 
+  function redrawTagged(win, doc) {
+    try {
+      drawTaggedTip(win, doc);
+    } catch (e) {
+      diag('tagged tooltip', e);
+    }
+  }
+
+  function taggedItem(row) {
+    var configId = parseInt(row.getAttribute('data-slip-item'), 10) || 0;
+    var name = row.getAttribute('data-slip-name');
+
+    return configId || (name ? itemByName(name) : 0);
+  }
+
+  // Item names as the facts give them, for tags that only carry a name. Built again when new facts arrive.
+  var namesFor = null;
+  var idsByName = {};
+
+  function itemByName(name) {
+    if (namesFor !== facts.items) {
+      namesFor = facts.items;
+      idsByName = {};
+      Object.keys(facts.items).forEach(function (id) {
+        var known = facts.items[id];
+        var key = known && known[0] ? String(known[0]).toLowerCase() : '';
+
+        if (key && !idsByName[key]) idsByName[key] = parseInt(id, 10) || 0;
+      });
+    }
+
+    return idsByName[String(name).toLowerCase()] || 0;
+  }
+
   function isTaggedHover(win) {
-    return !!(win.__slipTagged && win.__slipTagged.configId > 0);
+    var hover = win.__slipTagged;
+
+    return !!(hover && (hover.configId > 0 || hover.text));
   }
 
   function drawTaggedTip(win, doc) {
     var hover = win.__slipTagged;
-    var isShown = hover.configId > 0 && !hover.isPressed && Date.now() - hover.since >= STATION_TIP_DELAY_MS;
-    var model = isShown ? tipModel(hover.configId, { live: null, withEffects: true }) : null;
+    var isShown = isTaggedHover(win) && !hover.isPressed && Date.now() - hover.since >= STATION_TIP_DELAY_MS;
 
     addStyle(doc);
+
+    if (isShown && !hover.configId) return drawOwnText(win, doc, hover.text);
+
+    var model = isShown ? tipModel(hover.configId, { live: null, withEffects: true }) : null;
+    var known = facts.items[hover.configId];
+
+    // An item with nothing more to say still shows its name.
+    if (model && !model.sections.length && !model.hint) return drawOwnText(win, doc, known && known[0] ? known[0] : hover.text);
+
     drawOwnTip(win, doc, isShown ? hover.configId : 0, model);
+  }
+
+  // The words alone, in the box an item tooltip uses.
+  function drawOwnText(win, doc, text) {
+    if (!text) return drawOwnTip(win, doc, 0, null);
+
+    var own = ownTip(doc);
+    var name = own.querySelector(':scope > .slip-own-name');
+
+    if (name.textContent !== text) name.textContent = text;
+
+    drawBlock(doc, own, null);
+    if (own.style.display !== 'block') own.style.display = 'block';
+
+    keepOnScreen(win, own);
   }
 
   // ===== HUD stat bars =====
@@ -1726,7 +1801,9 @@
 
   window.__slinfopack = {
     setFeatures: setFeatures, setFacts: setFacts, setCounts: setCounts, setInstance: setInstance,
-    setKeys: setKeys, setWhere: setWhere, setWanted: setWanted, setStats: setStats
+    setKeys: setKeys, setWhere: setWhere, setWanted: setWanted, setStats: setStats,
+    // Other mods check this before leaving their data-slip-tip and data-slip-name tooltips to this mod.
+    tags: ['item', 'name', 'tip']
   };
   send('ready');
 })();

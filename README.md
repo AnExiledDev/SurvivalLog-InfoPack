@@ -102,7 +102,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.4 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.5 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -118,7 +118,8 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
-- 0.8.4: Item tooltips show on Storage Hub's Home tab too, beside a station or the bag. See [CHANGELOG.md](CHANGELOG.md).
+- 0.8.5: Shift and Ctrl work on Home tab tooltips; Crafting Hub's buttons and materials get tooltips. See [CHANGELOG.md](CHANGELOG.md).
+- 0.8.4: Item tooltips show on Storage Hub's Home tab too, beside a station or the bag.
 - 0.8.3: A new look for the tooltip: a warm brown panel, amber section headings, round stat chips, a freshness bar and stat chips under each dish. Talents count in fuel and brew numbers right after a save loads. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.2: Tooltips work while a station is open (generator, heater, brewing barrel, workbench and the rest), and the HUD stat bar lines also show in the Stats UI mod's tooltip. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.1: Dishes under Used in are listed best first, by their stats added up. See [CHANGELOG.md](CHANGELOG.md).
