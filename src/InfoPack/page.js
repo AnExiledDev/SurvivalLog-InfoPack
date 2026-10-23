@@ -1458,6 +1458,9 @@
 
     var isOwn = !pageTip && !!model && Date.now() - hover.since >= STATION_TIP_DELAY_MS;
 
+    // A tagged row (another mod's list) owns our tooltip while the cursor is on it.
+    if (isTaggedHover(win)) return;
+
     drawOwnTip(win, doc, isOwn ? configId : 0, isOwn ? model : null);
   }
 
@@ -1495,6 +1498,74 @@
     if (own.style.display !== 'block') own.style.display = 'block';
 
     keepOnScreen(win, own);
+  }
+
+  // ===== Other mods' item rows =====
+
+  // Any element with data-slip-item="<config id>", on any of the game's pages, gets our own tooltip after the same
+  // short wait as the station bags. Other mods (Storage Hub's Home tab) tag their item rows this way; the tag does
+  // nothing when this mod is not installed.
+  function patchTagged(win, doc) {
+    if (win.__slipTagged || !doc.body) return;
+
+    var hover = { configId: 0, since: 0, isPressed: false };
+    var redraw = function () {
+      try {
+        drawTaggedTip(win, doc);
+      } catch (e) {
+        diag('tagged tooltip', e);
+      }
+    };
+
+    win.__slipTagged = hover;
+    trackPointer(win, doc);
+    doc.addEventListener('mouseover', function (e) {
+      var row = e.target && e.target.closest ? e.target.closest('[data-slip-item]') : null;
+      var configId = row ? parseInt(row.getAttribute('data-slip-item'), 10) || 0 : 0;
+
+      if (configId === hover.configId) return;
+
+      var wasTagged = hover.configId > 0;
+
+      hover.configId = configId;
+      hover.since = Date.now();
+      if (configId || wasTagged) redraw();
+      if (configId) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+    }, true);
+    doc.addEventListener('mouseout', function (e) {
+      if (e.relatedTarget || !hover.configId) return;
+
+      hover.configId = 0;
+      redraw();
+    }, true);
+    doc.addEventListener('mousedown', function () {
+      hover.isPressed = true;
+      if (hover.configId) redraw();
+    }, true);
+    doc.addEventListener('mouseup', function () {
+      hover.isPressed = false;
+      hover.since = Date.now();
+      if (hover.configId) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+    }, true);
+    win.addEventListener('blur', function () { hover.isPressed = false; }, true);
+    doc.addEventListener('mousemove', function () {
+      var own = doc.getElementById('slip-own-tip');
+
+      if (hover.configId && own && own.style.display === 'block') keepOnScreen(win, own);
+    }, true);
+  }
+
+  function isTaggedHover(win) {
+    return !!(win.__slipTagged && win.__slipTagged.configId > 0);
+  }
+
+  function drawTaggedTip(win, doc) {
+    var hover = win.__slipTagged;
+    var isShown = hover.configId > 0 && !hover.isPressed && Date.now() - hover.since >= STATION_TIP_DELAY_MS;
+    var model = isShown ? tipModel(hover.configId, { live: null, withEffects: true }) : null;
+
+    addStyle(doc);
+    drawOwnTip(win, doc, isShown ? hover.configId : 0, model);
   }
 
   // ===== HUD stat bars =====
@@ -1615,6 +1686,8 @@
       for (var p = 0; p < PAGES.length; p++) {
         if (PAGES[p].pattern.test(src) && PAGES[p].isOn()) patchFrame(frames[i], PAGES[p], src);
       }
+
+      watchTagged(frames[i]);
     }
   }
 
@@ -1637,6 +1710,16 @@
     } catch (e) {
       diag(String(page.pattern), e);
     }
+  }
+
+  // Every page gets the tagged-row watcher, patched by this mod or not; it costs nothing until a tagged row shows.
+  function watchTagged(frame) {
+    try {
+      var win = frame.contentWindow;
+      var doc = frame.contentDocument;
+
+      if (win && doc && doc.readyState !== 'loading') patchTagged(win, doc);
+    } catch (e) {}
   }
 
   setInterval(repaint, POLL_MS);

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.4
+
+- Item tooltips show when you hover an item on Storage Hub's Home tab, beside a station or the bag. Other mods can get the same tooltip on their own item lists.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.3
 
 - New tooltip look, matching New Loop Plus, More Rewards and Cooking Hub: a warm brown panel with an amber line along the top, amber section headings, and round green and red stat chips.
