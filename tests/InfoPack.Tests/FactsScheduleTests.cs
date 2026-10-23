@@ -81,4 +81,15 @@ public class FactsScheduleTests
 
         Assert.True(schedule.IsDue(10.5f));
     }
+
+    [Fact]
+    public void Facts_built_before_the_player_exists_are_built_again_once_it_does()
+    {
+        var schedule = new FactsSchedule(2f);
+
+        schedule.Building(English with { HasPlayer = false });
+
+        Assert.False(schedule.NeedsBuild(English with { HasPlayer = false }));
+        Assert.True(schedule.NeedsBuild(English));
+    }
 }

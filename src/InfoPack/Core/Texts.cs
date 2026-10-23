@@ -9,14 +9,12 @@ public readonly record struct Phrase(string En, string Zh)
 }
 
 /// <summary>
-/// The words the page script puts on screen. {0}, {1} and so on are filled in by the page: the home count, the brew
+/// The words the page script puts on screen. {0}, {1} and so on are filled in by the page: the brew
 /// tier and how many tiers there are, the brew panel's score, tier names and where each tier starts, or a tooltip
 /// line's number, time or name. The Chinese uses the game's own words where it has them.
 /// </summary>
 public static class Texts
 {
-    public static readonly Phrase Home = new("At home: {0}", "家中共有：{0}");
-
     public static readonly Phrase BrewQuality = new("Brew quality: {0} of {1}", "酿造品质：第 {0} 档，共 {1} 档");
 
     public static readonly Phrase ScrapOnly = new("Only useful as scrap", "只适合回收");
@@ -37,7 +35,6 @@ public static class Texts
     /// <summary>Each phrase under the key the page script reads it by.</summary>
     public static IReadOnlyList<KeyValuePair<string, Phrase>> ByPageKey { get; } = new[]
     {
-        Key("home", Home),
         Key("brew", BrewQuality),
         Key("scrap", ScrapOnly),
         Key("scrapChip", ScrapChip),

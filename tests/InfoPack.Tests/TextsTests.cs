@@ -10,7 +10,6 @@ public class TextsTests
     /// <summary>The phrase keys the tooltip page asks for, each with the English the page falls back to.</summary>
     public static TheoryData<string, string> PagePhrases() => new()
     {
-        { "home", "At home: {0}" },
         { "brew", "Brew quality: {0} of {1}" },
         { "scrap", "Only useful as scrap" },
         { "scrapChip", "Scrap" },

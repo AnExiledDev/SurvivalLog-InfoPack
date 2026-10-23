@@ -3,7 +3,9 @@ namespace InfoPack.Core;
 /// <summary>What the facts were built from: a loaded world, and the language its descriptions are in.</summary>
 /// <param name="World">Identifies the loaded world; a new save gives a new one.</param>
 /// <param name="Language">The game's language key, or null when it could not be read.</param>
-public readonly record struct FactsKey(long World, string? Language);
+/// <param name="HasPlayer">Whether the player exists yet. Talents are read from the player, so facts built before it
+/// spawns are built again once it does.</param>
+public readonly record struct FactsKey(long World, string? Language, bool HasPlayer = true);
 
 /// <summary>
 /// When the facts are looked at again and when they are built anew. The world and language are only checked every

@@ -185,8 +185,8 @@ public class PageFactsTests
         var english = JsonDocument.Parse(PageFacts.Build(World(), Text(), AllOff)).RootElement.GetProperty("ui");
         var chinese = JsonDocument.Parse(PageFacts.Build(World(), new FakeText { Chinese = true }, AllOff)).RootElement.GetProperty("ui");
 
-        Assert.Equal(Texts.Home.En, english.GetProperty("home").GetString());
-        Assert.Equal(Texts.Home.Zh, chinese.GetProperty("home").GetString());
+        Assert.Equal(Texts.BrewQuality.En, english.GetProperty("brew").GetString());
+        Assert.Equal(Texts.BrewQuality.Zh, chinese.GetProperty("brew").GetString());
         Assert.Equal(Texts.ScrapChip.Zh, chinese.GetProperty("scrapChip").GetString());
     }
 

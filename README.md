@@ -16,13 +16,13 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
   - Shown while Shift is held: **Value** (trade value, weight, value and satiety per kg), **Made from** (recipes, plants and shredding that give the item), **Breaks down into** (shredding, cutting and rotting), **Fuel** (burn value, and how long one burns in a cooking pot, a heater and a fuel generator), **Found in** (furniture it turns up in while searching, and where) and **About** (the item's description). A `Shift: more` hint shows when there is more to see.
 - **What the game wants**: the food you are craving says `You're craving this`, and an item a relief request still needs says how many more, like `Relief request needs 3 more`, with a small gold star on its backpack slot. Food and drink you have never had say `Never tried`. A robot module shows its level and a bait item its kind of bait, under Used in.
 - **Stat bars**: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you. The numbers show after about half a game hour of play.
-- **Spoil badges**: food in backpack and storage slots that spoils within a day gets a small coloured corner.
+- **Spoil badges**: food in backpack and storage slots that is about to spoil gets a small coloured corner: red when it spoils within a day, amber when it spoils within three days and half its shelf life is gone.
 - **Tooltips stay on screen**: a tooltip that would run past an edge of the window is moved back inside it.
-- **Home counts**: item tooltips in the backpack, the trade window and the cooking window get a line `At home: N`: how many of that item are in your bag, in every storage at home (hidden ones included) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
+- **Home counts**: item tooltips in the backpack, storage, trade and cooking windows get an **At home** section: how many of that item are in your bag, in every storage at home (hidden ones included) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
 - **Trade stats**: in the trade window, the tooltip of an item on the trader's shelf says what it does to satiety, mood, energy, health and life, in the game's own wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
 - **Brew quality**: the tooltip of a brewed drink says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, before it starts, the brew panel shows the batch's quality score and the score each better tier starts at, for example `Quality 0.62: Normal from 0.40, Strong from 0.80`.
 - **Scrap only**: items only worth breaking down get a line `Only useful as scrap` in their tooltips, a small `Scrap` chip on their backpack slots and a `Scrap` tag in the pickup list.
-- **Cooking codex**: in the cooking window, hovering an ingredient adds its description and stats to the game's tooltip. Hovering a recipe does the same for the dish it makes.
+- **Cooking codex**: in the cooking window, hovering an ingredient adds its description and stats to the game's tooltip. Hovering a recipe does the same for the dish it makes. Turned off, the cooking window's tooltips stay as the game draws them.
 - **Planning badges**: on the Survival Planning screen, each card's picture gets a badge in its corner. A timed card shows how long it lasts in an amber badge, like `3d` (days), `24h` (hours) or `90m` (minutes). A card that takes effect once, like an airdrop, shows `1x` in a blue badge. Cards that last for good get no badge, so you can tell them apart at a glance.
 - **A log file**: what the mod did and anything that went wrong is written to `BepInEx\info-pack.log`.
 
@@ -39,7 +39,7 @@ Info Pack adds no data to your save and does not edit game files. You can remove
 
 ## Replaces ItemTotals
 
-The home count does the job of the separate ItemTotals mod. If you have ItemTotals installed, remove `ItemTotals.dll` from `BepInEx\plugins`, or item tooltips will show two count lines: ItemTotals' `Total: N` and this mod's `At home: N`. If you would rather keep ItemTotals, set `BaseCounts` to `false` instead (see [CONFIG.md](CONFIG.md)).
+The home count does the job of the separate ItemTotals mod. If you have ItemTotals installed, remove `ItemTotals.dll` from `BepInEx\plugins`, or item tooltips will show two count lines: ItemTotals' `Total: N` and this mod's **At home** section. If you would rather keep ItemTotals, set `BaseCounts` to `false` instead (see [CONFIG.md](CONFIG.md)).
 
 ## How it works
 
@@ -102,7 +102,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.5.0 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.3 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -118,7 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
-- 0.8.3: A new look for the tooltip: a warm brown panel, amber section headings, round stat chips, a freshness bar and stat chips under each dish. See [CHANGELOG.md](CHANGELOG.md).
+- 0.8.3: A new look for the tooltip: a warm brown panel, amber section headings, round stat chips, a freshness bar and stat chips under each dish. Talents count in fuel and brew numbers right after a save loads. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.2: Tooltips work while a station is open (generator, heater, brewing barrel, workbench and the rest), and the HUD stat bar lines also show in the Stats UI mod's tooltip. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.1: Dishes under Used in are listed best first, by their stats added up. See [CHANGELOG.md](CHANGELOG.md).
 - 0.8.0: Dishes under Used in show their cook time and what eating them does, and fuel shows how long it burns in a cooking pot, a heater and a fuel generator. See [CHANGELOG.md](CHANGELOG.md).

@@ -5,6 +5,9 @@
 - New tooltip look, matching New Loop Plus, More Rewards and Cooking Hub: a warm brown panel with an amber line along the top, amber section headings, and round green and red stat chips.
 - Freshness shows a bar of how much fresh time is left, coloured green, amber or red.
 - Dishes under Used in show their stats as chips instead of a line of text.
+- Fixed: fuel burn times and brew rules ignored your talents when a save was loaded before your character appeared.
+- Fixed: polluted food showed its time left twice.
+- Fixed: station tooltips could stay hidden after letting go of the mouse outside the window.
 - Made for Survival Log 1.1.19131.
 
 ## 0.8.2

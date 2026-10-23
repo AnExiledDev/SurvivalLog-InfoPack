@@ -21,8 +21,8 @@ public sealed class Plugin : BasePlugin
         if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
 
         var baseCounts = Config.Bind("Features", "BaseCounts", true,
-            "When on (the default), item tooltips in the backpack, trade and cooking windows get an 'At home: N' line counting that item in your backpack, every storage at home and the workbench drawer. Turn it off if you also use the ItemTotals mod, so tooltips don't show two counts.\n" +
-            "开启时（默认），背包、交易和烹饪界面的物品提示会多一行「家中共有：N」，显示这件物品在背包、家里所有储物家具和工作台抽屉里一共有多少。如果同时装了 ItemTotals 模组，请关闭此项，免得提示里出现两行数量。");
+            "When on (the default), item tooltips in the backpack, storage, trade and cooking windows get an 'At home' section with how many of that item are in your backpack, every storage at home and the workbench drawer. Turn it off if you also use the ItemTotals mod, so tooltips don't show two counts.\n" +
+            "开启时（默认），背包、储物、交易和烹饪界面的物品提示会多一栏「家中」，显示这件物品在背包、家里所有储物家具和工作台抽屉里一共有多少。如果同时装了 ItemTotals 模组，请关闭此项，免得提示里出现两行数量。");
         var tradeStats = Config.Bind("Features", "TradeStats", true,
             "When on (the default), the tooltip of an item on the trader's shelf in the trade window shows what it does to satiety, mood, energy, health and life.\n" +
             "开启时（默认），交易界面里对方货架上物品的提示会显示它对饱腹、心态、精力、健康和生命的影响。");
@@ -33,8 +33,8 @@ public sealed class Plugin : BasePlugin
             "When on (the default), items only worth shredding get an 'Only useful as scrap' line in their tooltip, a 'Scrap' chip on their backpack slot and a 'Scrap' tag in the pickup list.\n" +
             "开启时（默认），只值得粉碎的物品会在提示里多一行「只适合回收」，在背包格子上显示「回收」角标，并在拾取列表里带上「回收」标记。");
         var cookingCodex = Config.Bind("Features", "CookingCodex", true,
-            "When on (the default), hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes.\n" +
-            "开启时（默认），在烹饪界面悬停食材，提示里会加上它的描述和属性；悬停菜谱，则加上做出的菜肴的描述和属性。");
+            "When on (the default), hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes. Turning it off leaves the cooking window's tooltips as the game draws them, with no Info Pack block.\n" +
+            "开启时（默认），在烹饪界面悬停食材，提示里会加上它的描述和属性；悬停菜谱，则加上做出的菜肴的描述和属性。关闭后，烹饪界面的提示恢复游戏原样，不再显示 Info Pack 的内容。");
         var planningBadges = Config.Bind("Features", "PlanningBadges", true,
             "When on (the default), cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like '3d' or '24h'. A card that takes effect once shows '1x'. Cards that last for good get no badge.\n" +
             "开启时（默认），生存规划界面的卡牌图片上会显示一个小角标。有时限的卡牌显示持续时间，例如「3d」或「24h」；只生效一次的卡牌显示「1x」。永久生效的卡牌没有角标。");

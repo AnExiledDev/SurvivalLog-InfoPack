@@ -35,8 +35,8 @@ internal sealed class TooltipConfig
             "When on (the default), a tooltip that would run past an edge of the window, such as a tall one near the bottom, is moved back inside it.\n" +
             "开启时（默认），会超出窗口边缘的物品提示（例如靠近底部的长提示）会被移回窗口内。");
         SpoilBadges = config.Bind(Section, "SpoilBadges", true,
-            "When on (the default), food in backpack and storage slots that spoils within a day gets a small coloured corner.\n" +
-            "开启时（默认），背包和储物格子里一天内就会腐败的食物会显示一个彩色小角标。");
+            "When on (the default), food in backpack and storage slots gets a small coloured corner when it is about to spoil: red when it spoils within a day, amber when it spoils within three days and half its shelf life is gone.\n" +
+            "开启时（默认），背包和储物格子里快要腐败的食物会显示一个彩色小角标：一天内腐败为红色，三天内腐败且保质期已过半为橙色。");
     }
 
     public ConfigEntry<KeyCode> DetailKey { get; }
@@ -90,8 +90,8 @@ internal sealed class TooltipConfig
             "「获取方式」一栏：能得到这件物品的配方、作物和粉碎"),
         TipSection.Breaks => new("the Breaks down into section: what shredding, cutting or rotting turns the item into",
             "「可分解为」一栏：粉碎、切割或腐烂后会变成什么"),
-        TipSection.Fuel => new("the Fuel section: the item's burn value as fuel",
-            "「燃料」一栏：作为燃料的燃烧值"),
+        TipSection.Fuel => new("the Fuel section: the item's burn value as fuel, and how long one burns in a cooking pot, a heater and a fuel generator",
+            "「燃料」一栏：作为燃料的燃烧值，以及一个在灶具、暖炉和燃料发电机里能烧多久"),
         TipSection.FoundIn => new("the Found in section: the furniture the item can turn up in while searching, and where that furniture stands",
             "「搜寻来源」一栏：搜寻时可能找到这件物品的家具，以及这些家具所在的地点"),
         TipSection.About => new("the About section: the item's description",

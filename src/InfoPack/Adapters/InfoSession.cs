@@ -170,7 +170,7 @@ internal sealed class InfoSession
 
         if (world == null) return;
 
-        var key = new FactsKey(world.Pointer.ToInt64(), _text.LanguageKey());
+        var key = new FactsKey(world.Pointer.ToInt64(), _text.LanguageKey(), world._AgentManager?.GetLeadingRole() != null);
 
         if (_factsSchedule.NeedsBuild(key)) BuildFacts(key);
     }
@@ -199,7 +199,7 @@ internal sealed class InfoSession
             tables.Items.Select(item => item.Id).Distinct().ToList(),
             tables.Items.Where(item => item.InFoodCodex).Select(item => item.Id).Distinct().ToList(),
             FoodForecast.SatietyById(tables.Items));
-        _log($"facts built from {tables.Items.Count} items ({_facts.Length} characters, language {key.Language ?? "unknown"}) in {timer.ElapsedMilliseconds} ms");
+        _log($"facts built from {tables.Items.Count} items ({_facts.Length} characters, language {key.Language ?? "unknown"}, player {(key.HasPlayer ? "found" : "not yet")}) in {timer.ElapsedMilliseconds} ms");
     }
 
     /// <summary>

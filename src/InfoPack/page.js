@@ -522,7 +522,8 @@
     var live = context.page.live;
     var days = liveDaysLeft(context.page);
 
-    if (days > 0 && !live.expired) rows.push({ parts: [say('freshLeft', formatDays(days))], cls: days < 1 ? 'slip-bad' : days < 3 ? 'slip-amber' : 'slip-fresh', bar: wiki.life > 0 ? Math.min(1, days / wiki.life) : null });
+    // Polluted food keeps the game's own time-left line, so ours would say it twice.
+    if (days > 0 && !live.expired && !live.polluted) rows.push({ parts: [say('freshLeft', formatDays(days))], cls: days < 1 ? 'slip-bad' : days < 3 ? 'slip-amber' : 'slip-fresh', bar: wiki.life > 0 ? Math.min(1, days / wiki.life) : null });
     else if (days === 0 || (live && live.expired && wiki.life > 0)) rows.push({ parts: [say('spoiled')], cls: 'slip-bad' });
 
     if (wiki.life > 0) rows.push({ parts: [say('freshBase', formatDays(wiki.life))], cls: 'slip-dim' });
@@ -1411,8 +1412,16 @@
     }, true);
     doc.addEventListener('mousedown', function () { hover.isPressed = true; redraw(); }, true);
     doc.addEventListener('mouseup', function () { hover.isPressed = false; hover.since = Date.now(); }, true);
-    doc.addEventListener('mousemove', function () {
+    // A button let go outside the window sends no mouseup here, so a move with no button held, or the window losing
+    // focus, also ends the press.
+    win.addEventListener('blur', function () { hover.isPressed = false; }, true);
+    doc.addEventListener('mousemove', function (e) {
       var own = doc.getElementById('slip-own-tip');
+
+      if (hover.isPressed && e.buttons === 0) {
+        hover.isPressed = false;
+        hover.since = Date.now();
+      }
 
       if (own && own.style.display === 'block') keepOnScreen(win, own);
     }, true);
