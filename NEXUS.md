@@ -68,6 +68,7 @@ Check out my [url=https://sldb.core-directive.com/en/]Survival Log wiki[/url] fo
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.7: Item tooltips show in Storage Hub's panel too.[/*]
 [*]0.8.6: The cooking screen's tooltips start with the name in gold above the details, with no plain copy of the stats.[/*]
 [*]0.8.5: Shift and Ctrl work on Home tab tooltips; Crafting Hub's buttons and materials get tooltips.[/*]
 [*]0.8.4: Item tooltips show on Storage Hub's Home tab too, beside a station or the bag.[/*]

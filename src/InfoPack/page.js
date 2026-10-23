@@ -93,7 +93,7 @@
     // These pages write their lines as one text with line breaks; the workbench's tip is markup, where it would add blank lines.
     '#itemTooltip:has(>.slip-tip),#itemTip:has(>.slip-tip),#fuelTooltip:has(>.slip-tip){white-space:pre-line}',
     // A station's own item tooltip, for an item the station page has nothing to say about; it copies their look.
-    '.slip-own-tip{position:fixed;display:none;z-index:5000;pointer-events:none;width:max-content;max-width:309px;padding:10px 12px;color:#cbbfa8;font-size:12px;line-height:1.5;text-align:left}',
+    '.slip-own-tip{position:fixed;display:none;z-index:2147483600;pointer-events:none;width:max-content;max-width:309px;padding:10px 12px;color:#cbbfa8;font-size:12px;line-height:1.5;text-align:left}',
     '.slip-own-name{color:#ffc83a;font-weight:bold;font-size:14px;text-shadow:0 0 12px rgba(255,200,58,.25)}',
     '.slip-scrap{position:absolute;bottom:5px;left:3px;font-size:10px;font-weight:700;color:#c9a94f;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.12);padding:0 5px;border-radius:8px;line-height:13px;text-shadow:0 1px 2px rgba(0,0,0,.85);box-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;z-index:4}',
     '.slip-spoil{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 13px 13px 0;pointer-events:none;z-index:2;filter:drop-shadow(0 0 1px rgba(0,0,0,.7))}',
@@ -209,12 +209,16 @@
         doc = frames[i].contentDocument;
       } catch (e) {}
 
-      if (!doc) continue;
-
-      doc.querySelectorAll(DRAWN).forEach(function (el) { el.remove(); });
-      doc.querySelectorAll('.slip-own-fresh').forEach(function (el) { el.classList.remove('slip-own-fresh'); });
-      doc.querySelectorAll('.slip-headed').forEach(function (el) { el.classList.remove('slip-headed'); });
+      if (doc) clearPage(doc);
     }
+
+    clearPage(document);
+  }
+
+  function clearPage(doc) {
+    doc.querySelectorAll(DRAWN).forEach(function (el) { el.remove(); });
+    doc.querySelectorAll('.slip-own-fresh').forEach(function (el) { el.classList.remove('slip-own-fresh'); });
+    doc.querySelectorAll('.slip-headed').forEach(function (el) { el.classList.remove('slip-headed'); });
   }
 
   function setFacts(data) {
@@ -1818,6 +1822,15 @@
 
       watchTagged(frames[i]);
     }
+
+    // Other mods' panels drawn over the game (Storage Hub's) live in this page itself, not in a game page.
+    watchTaggedHere();
+  }
+
+  function watchTaggedHere() {
+    try {
+      if (document.readyState !== 'loading') patchTagged(window, document);
+    } catch (e) {}
   }
 
   function patchFrame(frame, page, src) {
