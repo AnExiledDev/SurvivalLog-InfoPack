@@ -50,13 +50,24 @@ internal sealed class HomeItems : IHomeItems
         {
             var furniture = found[i];
 
-            if (furniture == null) continue;
+            if (furniture == null || IsNeighborBasket(furniture)) continue;
 
             storageIds.Add(furniture.InstanceId);
             furnitureConfigIds[furniture.InstanceId] = furniture.AgentConfigId;
         }
 
         return new HomeItems(cache, player.InstanceId, storageIds, furnitureConfigIds);
+    }
+
+    /// <summary>
+    /// What is staged in the neighbor's basket is going to her, so it is not counted as at home. The game's storage
+    /// query includes the basket; its config id is 0 when there is none.
+    /// </summary>
+    private static bool IsNeighborBasket(Furniture furniture)
+    {
+        var basketId = NeighborRules.GetBasketFurnitureId();
+
+        return basketId > 0 && furniture.AgentConfigId == basketId;
     }
 
     /// <summary>

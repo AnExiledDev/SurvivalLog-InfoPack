@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.10
+
+- At home counts, Used in counts and the days of food on the satiety bar leave out what is staged in the neighbor's basket.
+- Made for Survival Log 1.1.19131.
+
 ## 0.8.9
 
 - Fixed: on the workbench and in other mods' panels, an item with nothing to show until Shift was held got a tooltip with an empty middle. It now shows the item's name and the Shift hint only.

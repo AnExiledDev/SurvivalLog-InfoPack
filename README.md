@@ -18,7 +18,7 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
 - **Stat bars**: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you. The numbers show after about half a game hour of play.
 - **Spoil badges**: food in backpack and storage slots that is about to spoil gets a small coloured corner: red when it spoils within a day, amber when it spoils within three days and half its shelf life is gone.
 - **Tooltips stay on screen**: a tooltip that would run past an edge of the window is moved back inside it.
-- **Home counts**: item tooltips in the backpack, storage, trade and cooking windows get an **At home** section: how many of that item are in your bag, in every storage at home (hidden ones included) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
+- **Home counts**: item tooltips in the backpack, storage, trade and cooking windows get an **At home** section: how many of that item are in your bag, in every storage at home (hidden ones included, the neighbor's basket left out) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
 - **Trade stats**: in the trade window, the tooltip of an item on the trader's shelf says what it does to satiety, mood, energy, health and life, in the game's own wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
 - **Brew quality**: the tooltip of a brewed drink says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, before it starts, the brew panel shows the batch's quality score and the score each better tier starts at, for example `Quality 0.62: Normal from 0.40, Strong from 0.80`.
 - **Scrap only**: items only worth breaking down get a line `Only useful as scrap` in their tooltips, a small `Scrap` chip on their backpack slots and a `Scrap` tag in the pickup list.
@@ -102,7 +102,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.9 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.10 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.10: What is in the neighbor's basket no longer counts as at home.
 - 0.8.9: No more empty tooltips on the workbench for items with nothing to show until Shift is held.
 - 0.8.8: Tooltips are shorter: only Effects and Freshness show until you hold Shift or Ctrl.
 - 0.8.7: Item tooltips show in Storage Hub's panel too.
