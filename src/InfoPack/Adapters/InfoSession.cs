@@ -35,6 +35,7 @@ internal sealed class InfoSession
     private readonly StatDrain _drain = new(DrainWindowSeconds, DrainMinimumSeconds);
     private LiveLists? _lists;
     private long _liveWorld;
+    private SortedDictionary<int, int>? _homeCounts;
     private string? _facts;
     private bool _isPageReady;
     private bool _hasSentFacts;
@@ -75,8 +76,9 @@ internal sealed class InfoSession
         SendKeys();
         CheckFacts(now);
         SendFacts();
-        SendCounts(now);
-        SendLive(now);
+
+        // The home count and the live pieces each read the whole home, so they never share a frame.
+        if (!SendCounts(now)) SendLive(now);
     }
 
     private void TakePageCommands()
@@ -256,24 +258,41 @@ internal sealed class InfoSession
 
     private float? FoodDays(LiveLists lists)
     {
-        var home = HomeItems.TryRead();
+        // The count from the frame before is reused when there is one, so the home is not counted twice.
+        var counts = _homeCounts;
 
-        return home == null ? null : FoodForecast.Days(FoodForecast.Satiety(HomeCounts.Count(home), lists.Satiety), _drain.PerHour(Satiety));
+        _homeCounts = null;
+
+        if (counts == null)
+        {
+            var home = HomeItems.TryRead();
+
+            if (home == null) return null;
+
+            counts = HomeCounts.Count(home);
+        }
+
+        return FoodForecast.Days(FoodForecast.Satiety(counts, lists.Satiety), _drain.PerHour(Satiety));
     }
 
-    private void SendCounts(float now)
+    /// <summary>True when it counted this frame.</summary>
+    private bool SendCounts(float now)
     {
-        if (!_features.BaseCounts || !_counts.IsDue(now)) return;
+        if (!_features.BaseCounts || !_counts.IsDue(now)) return false;
 
         _counts.Counted(now);
 
         var home = HomeItems.TryRead();
 
-        if (home == null) return;
+        if (home == null) return true;
 
-        var counts = PageFacts.Counts(HomeCounts.Count(home));
+        _homeCounts = HomeCounts.Count(home);
+
+        var counts = PageFacts.Counts(_homeCounts);
 
         if (_counts.ShouldSend(counts)) _page.Counts(counts);
+
+        return true;
     }
 
     /// <summary>What the live pieces are matched against, taken from the tables when the facts are built.</summary>

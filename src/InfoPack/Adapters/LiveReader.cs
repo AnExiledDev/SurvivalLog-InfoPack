@@ -22,6 +22,7 @@ internal sealed class LiveReader
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
     private string? _wishKey;
+    private readonly HashSet<int> _tried = new();
     private IReadOnlyCollection<int> _wishItems = Array.Empty<int>();
     private string? _aidKey;
     private IReadOnlyDictionary<int, int> _aidNeeds = new SortedDictionary<int, int>();
@@ -59,7 +60,8 @@ internal sealed class LiveReader
     {
         var codex = world._CodexManager;
 
-        return codex == null ? new SortedSet<int>() : Wanted.Untried(foodCodexItems, id => codex.IsEntryUnlocked(CodexCategory.Food, id));
+        // A food once eaten stays in the codex, so only the ones not eaten yet are asked again.
+        return codex == null ? new SortedSet<int>() : Wanted.Untried(foodCodexItems, id => _tried.Contains(id) || (codex.IsEntryUnlocked(CodexCategory.Food, id) && _tried.Add(id)));
     }, new SortedSet<int>());
 
     /// <summary>The game clock in seconds and the HUD stats as the bars show them, or null before a player exists.</summary>
@@ -86,6 +88,7 @@ internal sealed class LiveReader
     {
         _wishKey = null;
         _aidKey = null;
+        _tried.Clear();
     }
 
     private static IReadOnlyCollection<int> MatchWish(int type, int targetValue, Il2CppSystem.Collections.Generic.List<int>? targetValues, IReadOnlyList<int> itemIds)

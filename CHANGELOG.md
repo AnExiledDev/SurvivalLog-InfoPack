@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.8.13
+## 0.8.14
+
+- Less stutter: the home is counted once per check instead of twice, the count and the live tooltips no longer run in the same frame, and foods you have already eaten are not looked up again.
 
 - Other mods' item rows can add a line under the item's name on Info Pack's tooltip. Neighbor Basket uses it to show the progress an item adds.
 - Made for Survival Log 1.1.19611.
