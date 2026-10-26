@@ -12,33 +12,79 @@ public interface IHomeItems
     /// <summary>The bag, the home storages and the workbench drawer, in any order; may name one twice.</summary>
     IReadOnlyList<long> HomeStorageIds();
 
-    IEnumerable<HeldStack> StacksIn(long storageId);
+    /// <summary>Adds the stacks listed under the storage to the list, which the caller clears and reuses.</summary>
+    void StacksIn(long storageId, List<HeldStack> into);
 }
 
-public static class HomeCounts
+/// <summary>
+/// How many of each item are at home, by config id, taken again on every check into the same buffers. A storage named
+/// twice is counted once, and a stack the cache lists under a storage it no longer belongs to is skipped (the game would
+/// not let you take it from there either). The version only moves when the counts come out different, so an unchanged
+/// home builds no message.
+/// </summary>
+public sealed class HomeTally
 {
-    /// <summary>
-    /// How many of each item are at home, by config id. A storage named twice is counted once, and a stack the cache
-    /// lists under a storage it no longer belongs to is skipped (the game would not let you take it from there either).
-    /// </summary>
-    public static SortedDictionary<int, int> Count(IHomeItems home)
+    private readonly HashSet<long> _seen = new();
+    private readonly List<HeldStack> _stacks = new();
+    private Dictionary<int, int> _counts = new();
+    private Dictionary<int, int> _before = new();
+
+    /// <summary>Goes up each time a count differs from the one before it.</summary>
+    public long Version { get; private set; }
+
+    /// <summary>The latest counts. Read only: the next count reuses it.</summary>
+    public Dictionary<int, int> Counts => _counts;
+
+    /// <summary>True when the counts differ from the ones taken before.</summary>
+    public bool Count(IHomeItems home)
     {
-        var counts = new SortedDictionary<int, int>();
-        var seen = new HashSet<long>();
+        var last = _counts;
 
-        foreach (var storageId in home.HomeStorageIds())
+        _counts = _before;
+        _before = last;
+        _counts.Clear();
+        _seen.Clear();
+
+        var storageIds = home.HomeStorageIds();
+
+        for (var s = 0; s < storageIds.Count; s++)
         {
-            if (!seen.Add(storageId)) continue;
+            var storageId = storageIds[s];
 
-            foreach (var stack in home.StacksIn(storageId))
+            if (!_seen.Add(storageId)) continue;
+
+            _stacks.Clear();
+            home.StacksIn(storageId, _stacks);
+
+            for (var i = 0; i < _stacks.Count; i++)
             {
+                var stack = _stacks[i];
+
                 if (stack.OwnerId != storageId || stack.ConfigId <= 0 || stack.Count <= 0) continue;
 
-                counts.TryGetValue(stack.ConfigId, out var sum);
-                counts[stack.ConfigId] = sum + stack.Count;
+                _counts.TryGetValue(stack.ConfigId, out var sum);
+                _counts[stack.ConfigId] = sum + stack.Count;
             }
         }
 
-        return counts;
+        _stacks.Clear();
+
+        if (Same(_counts, _before)) return false;
+
+        Version++;
+
+        return true;
+    }
+
+    private static bool Same(Dictionary<int, int> now, Dictionary<int, int> before)
+    {
+        if (now.Count != before.Count) return false;
+
+        foreach (var pair in now)
+        {
+            if (!before.TryGetValue(pair.Key, out var count) || count != pair.Value) return false;
+        }
+
+        return true;
     }
 }

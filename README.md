@@ -102,7 +102,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the 
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.14 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read, stat wording that fell back to English, or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.15 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.15: Less stutter, and no hitch when a save loads or the language changes.
 - 0.8.13: Neighbor Basket's station shows Info Pack tooltips with the progress each item adds.
 - 0.8.12: Tooltips use the game's own effect numbers, and hide the game's effect and home lines where Info Pack shows them.
 - 0.8.11: The At home count shows on every tooltip again, without holding Shift.
@@ -152,7 +153,7 @@ dotnet build src/InfoPack -c Release -p:GameDir="C:\path\to\Survival Log"
 
 `GameDir` is the game folder. The default in the project file is a local path you will almost certainly need to override. The output DLL is at `src\InfoPack\bin\Release\InfoPack.dll`.
 
-The unit tests cover the pure rules (home counts and where items are kept, stat lines, brew tiers, the scrap rule, the planning badges and the tooltip settings) and need nothing from the game:
+The unit tests cover the pure rules (home counts and where items are kept, brew tiers, the scrap rule, the planning badges and the tooltip settings) and need nothing from the game:
 
 ```
 dotnet test tests/InfoPack.Tests

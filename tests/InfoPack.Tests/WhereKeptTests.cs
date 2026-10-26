@@ -52,7 +52,11 @@ public class WhereKeptTests
             .Holds(Trader, Rice, 12)
             .Holds(Drawer, Rice, 0);
 
-        Assert.Equal(HomeCounts.Count(home)[Rice], Rows(home, Rice).Sum(row => row.Count));
+        var tally = new HomeTally();
+
+        tally.Count(home);
+
+        Assert.Equal(tally.Counts[Rice], Rows(home, Rice).Sum(row => row.Count));
         Assert.Equal(new[] { new KeptIn("Fridge", 8), new KeptIn("Inventory", 3) }, Rows(home, Rice));
     }
 

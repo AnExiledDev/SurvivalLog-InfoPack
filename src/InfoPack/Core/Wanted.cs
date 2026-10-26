@@ -44,10 +44,6 @@ public static class Wanted
         return needs;
     }
 
-    /// <summary>The food codex items the player has not unlocked by eating them, in ascending id order.</summary>
-    public static SortedSet<int> Untried(IEnumerable<int> foodCodexItems, Func<int, bool> isTried) =>
-        new(foodCodexItems.Where(id => !isTried(id)));
-
     /// <summary>{"wish":[id],"aid":{id:left},"untried":[id]}, ids ascending so the same state always gives the same text.</summary>
     public static string ToJson(IEnumerable<int> wish, IReadOnlyDictionary<int, int> aid, IEnumerable<int> untried) =>
         "{\"wish\":" + List(wish)

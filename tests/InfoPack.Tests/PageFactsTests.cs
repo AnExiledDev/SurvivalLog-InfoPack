@@ -52,7 +52,7 @@ public class PageFactsTests
     [Fact]
     public void With_every_piece_on_the_page_gets_every_kind_of_fact()
     {
-        Assert.Equal(new[] { "stats", "desc", "dish", "brew", "scrap", "plan", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOn)));
+        Assert.Equal(new[] { "desc", "dish", "brew", "scrap", "plan", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOn)));
     }
 
     [Fact]
@@ -61,14 +61,14 @@ public class PageFactsTests
         Assert.Equal(new[] { "desc", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff)));
         Assert.Equal(new[] { "desc", "scrap", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { ScrapOnly = true })));
         Assert.Equal(new[] { "desc", "brew", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { AlcoholQuality = true })));
-        Assert.Equal(new[] { "stats", "desc", "dish", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
+        Assert.Equal(new[] { "desc", "dish", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { CookingCodex = true })));
         Assert.Equal(new[] { "desc", "plan", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { PlanningBadges = true })));
     }
 
     [Fact]
-    public void Trade_stats_alone_still_gets_the_stat_lines()
+    public void Trade_stats_need_no_facts_of_their_own_because_the_wiki_carries_the_effects()
     {
-        Assert.Equal(new[] { "stats", "desc", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
+        Assert.Equal(new[] { "desc", "bait", "robot", "items", "wiki", "ui" }, Keys(Build(AllOff with { TradeStats = true })));
     }
 
     [Fact]
@@ -84,15 +84,6 @@ public class PageFactsTests
 
         Assert.Equal(new[] { 20f, 3f, 0f, 0f, -1f }, facts.GetProperty("wiki").GetProperty("701").GetProperty("fx").EnumerateArray().Select(value => value.GetSingle()).ToArray());
         Assert.Equal(JsonValueKind.Array, facts.GetProperty("items").GetProperty("701").ValueKind);
-    }
-
-    [Fact]
-    public void Each_item_that_changes_a_stat_gets_its_line_in_the_games_wording()
-    {
-        var stats = Build(AllOn).GetProperty("stats");
-
-        Assert.Equal(new[] { "601", "701" }, Keys(stats));
-        Assert.Equal("Satiety +20, Mood +3, Life -1", stats.GetProperty("701").GetString());
     }
 
     [Fact]

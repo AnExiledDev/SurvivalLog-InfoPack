@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.15
+
+- Less stutter while you play: Info Pack does much less work each frame and skips its updates when nothing has changed.
+- No more hitch when a save loads or you change the game's language. Info Pack now gathers its item information a little at a time.
+- Tooltips and the stat bars are redrawn only when what they show has changed.
+- Made for Survival Log 1.1.19611.
+
 ## 0.8.14
 
 - Less stutter: the home is counted once per check instead of twice, the count and the live tooltips no longer run in the same frame, and foods you have already eaten are not looked up again.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
+using Il2CppInterop.Runtime.InteropTypes;
 using InfoPack.Core;
 using Il2CppInts = Il2CppSystem.Collections.Generic.List<int>;
 
@@ -10,7 +11,9 @@ namespace InfoPack.Adapters;
 /// <summary>
 /// Copies what the facts need out of the game's config tables into plain data. Read only. Each table is read on its
 /// own, so one the game changed shape on costs only the pieces built from it: a table that fails reads as empty and is
-/// logged once.
+/// logged once. The reading is a list of steps, one table row each, so a <see cref="SlicedJob"/> can spread it over
+/// frames. The copy is kept while none of the tables it came from changed, so a save load or a language change reads
+/// them again only to check that; the brewing and fuel numbers follow the player's talents and are read every time.
 /// </summary>
 internal sealed class GameTableReader
 {
@@ -20,104 +23,229 @@ internal sealed class GameTableReader
 
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
+    private readonly List<long> _readStamp = new();
+    private GameTables? _kept;
+    private List<long> _keptStamp = new();
 
     public GameTableReader(Action<string> log)
     {
         _log = log;
     }
 
-    /// <summary>Null until the game has loaded its item table.</summary>
-    public GameTables? TryRead()
+    /// <summary>Whether the game has loaded its item table, so a read would find something.</summary>
+    public bool IsLoaded()
+    {
+        var itemTable = GameSingleton.Existing<ConfigManager>()?._Config_Item_Dict;
+
+        return itemTable != null && itemTable.Count > 0;
+    }
+
+    /// <summary>
+    /// The steps that read the tables; done gets them at the last one. Started in the frame <see cref="IsLoaded"/> said
+    /// yes, the first step finds them loaded; if they are gone by then, the steps end without calling done.
+    /// </summary>
+    public IEnumerable<bool> Read(Action<GameTables> done)
     {
         var config = GameSingleton.Existing<ConfigManager>();
         var itemTable = config?._Config_Item_Dict;
 
-        if (config == null || itemTable == null || itemTable.Count == 0) return null;
+        if (config == null || itemTable == null || itemTable.Count == 0) yield break;
 
-        var items = Guarded("item table", () => Items(config, itemTable), new List<ItemRow>());
-        var shredYields = Guarded("shred yields", () => ShredYields(config, items), new Dictionary<int, IReadOnlyList<Yield>>());
+        Stamp(config, _readStamp);
 
-        return new GameTables(
-            items,
-            Guarded("workbench recipes", () => Production(config), new List<ProductionRecipe>()),
-            Guarded("cooking recipes", () => Cooking(config), new List<CookingRecipe>()),
-            Guarded("brew barrels", () => BrewProducts(config), new List<IReadOnlyList<int>>()),
-            shredYields,
-            Guarded("talent table", () => Talents(config), new List<TalentRow>()),
-            Guarded("buff table", () => BuffDurations(config), new Dictionary<int, float>()),
-            Guarded("plant table", () => Plants(config), new Dictionary<int, PlantRow>()),
-            Guarded("furniture loot", () => FurnitureLoot(config), new List<LootFurniture>()),
-            Guarded("loot groups", () => LootGroups(config), new Dictionary<int, IReadOnlyList<int>>()),
-            Guarded("furniture placements", () => Placements(config), new List<Placement>()))
+        var tables = _kept;
+
+        if (tables == null || !Same(_readStamp, _keptStamp))
         {
-            AidDemandItems = Guarded("relief request demands", () => AidDemandItems(config), new HashSet<int>()),
-            TrapBait = Guarded("trap bait table", () => TrapBait(config), new Dictionary<int, string>()),
-            RobotModules = Guarded("robot module table", () => RobotModules(config), new Dictionary<int, int>()),
+            _kept = null;
+
+            var attempt = new Attempt();
+            var items = new List<ItemRow>();
+            var shredYields = new Dictionary<int, IReadOnlyList<Yield>>();
+            var production = new List<ProductionRecipe>();
+            var cooking = new List<CookingRecipe>();
+            var brewProducts = new List<IReadOnlyList<int>>();
+            var talents = new List<TalentRow>();
+            var buffDurations = new Dictionary<int, float>();
+            var plants = new Dictionary<int, PlantRow>();
+            var furnitureLoot = new List<LootFurniture>();
+            var lootGroups = new Dictionary<int, IReadOnlyList<int>>();
+            var placements = new List<Placement>();
+            var aidDemandItems = new HashSet<int>();
+            var trapBait = new Dictionary<int, string>();
+            var robotModules = new Dictionary<int, int>();
+
+            // The stamp is taken before the rows, so a table that changes while it is read is read again next time.
+            var stamp = new List<long>(_readStamp);
+
+            foreach (var step in Guarded("item table", Items(config, itemTable, items), items.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("shred yields", ShredYields(config, items, shredYields), shredYields.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("workbench recipes", Production(config, production), production.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("cooking recipes", Cooking(config, cooking), cooking.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("brew barrels", BrewProducts(config, brewProducts), brewProducts.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("talent table", Talents(config, talents), talents.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("buff table", BuffDurations(config, buffDurations), buffDurations.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("plant table", Plants(config, plants), plants.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("furniture loot", FurnitureLoot(config, furnitureLoot), furnitureLoot.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("loot groups", LootGroups(config, lootGroups), lootGroups.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("furniture placements", Placements(config, placements), placements.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("relief request demands", AidDemandItems(config, aidDemandItems), aidDemandItems.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("trap bait table", TrapBait(config, trapBait), trapBait.Clear, attempt)) yield return step;
+            foreach (var step in Guarded("robot module table", RobotModules(config, robotModules), robotModules.Clear, attempt)) yield return step;
+
+            tables = new GameTables(items, production, cooking, brewProducts, shredYields, talents, buffDurations, plants, furnitureLoot, lootGroups, placements)
+            {
+                AidDemandItems = aidDemandItems,
+                TrapBait = trapBait,
+                RobotModules = robotModules,
+            };
+
+            // A table that failed is read again next time rather than kept empty.
+            if (!attempt.HasFailed)
+            {
+                _kept = tables;
+                _keptStamp = stamp;
+            }
+        }
+
+        done(tables with
+        {
             Brewing = Guarded("brew settings", BrewSettings, BrewRules.Default),
             Fuel = Guarded("fuel burners", () => FuelBurners(config), FuelRates.None),
-        };
+        });
+    }
+
+    /// <summary>Which tables these are and how often each was changed: any edit to one gives a new stamp.</summary>
+    private static void Stamp(ConfigManager config, List<long> into)
+    {
+        into.Clear();
+        into.Add(config.Pointer.ToInt64());
+        Stamp(into, config._Config_Item_Dict);
+        Stamp(into, config._Config_ProductionList_Dict);
+        Stamp(into, config._Config_CookingRecipe_Dict);
+        Stamp(into, config._Config_Furniture_Dict);
+        Stamp(into, config._Config_Talent_Dict);
+        Stamp(into, config._Config_Buff_Dict);
+        Stamp(into, config._Config_Plant_Dict);
+        Stamp(into, config._Config_RandomGroup_Dict);
+        Stamp(into, config._Config_GuidanceFurniture_Dict);
+        Stamp(into, config._Config_AidCommission_Dict);
+        Stamp(into, config._Config_AidDemandPool_Dict);
+        Stamp(into, config._Config_TrapBait_Dict);
+        Stamp(into, config._Config_RobotModule_Dict);
+    }
+
+    private static void Stamp<TKey, TValue>(List<long> into, Il2CppSystem.Collections.Generic.Dictionary<TKey, TValue>? table)
+    {
+        if (table == null)
+        {
+            into.Add(0L);
+
+            return;
+        }
+
+        into.Add(table.Pointer.ToInt64());
+        into.Add(table._version);
+        into.Add(table.Count);
+    }
+
+    private static bool Same(List<long> a, List<long> b)
+    {
+        if (a.Count != b.Count) return false;
+
+        for (var i = 0; i < a.Count; i++)
+        {
+            if (a[i] != b[i]) return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// A table's rows, gathered in one step so no step holds the game's collection open across frames; each row is
+    /// then read in a step of its own.
+    /// </summary>
+    private static List<T> Rows<T>(Il2CppSystem.Collections.Generic.Dictionary<int, T> table) where T : Il2CppObjectBase
+    {
+        var rows = new List<T>(table.Count);
+
+        foreach (var row in table.Values)
+        {
+            if (row != null) rows.Add(row);
+        }
+
+        return rows;
     }
 
     /// <summary>The items a fixed request names (a demand of kind 0) and the items a drawn request can name (pool rows of kind 0).</summary>
-    private static HashSet<int> AidDemandItems(ConfigManager config)
+    private static IEnumerable<bool> AidDemandItems(ConfigManager config, HashSet<int> items)
     {
-        var items = new HashSet<int>();
-        var commissions = config._Config_AidCommission_Dict ?? throw new InvalidOperationException("the game has no relief request table loaded");
-        var pool = config._Config_AidDemandPool_Dict ?? throw new InvalidOperationException("the game has no relief demand pool loaded");
+        var commissions = Rows(config._Config_AidCommission_Dict ?? throw new InvalidOperationException("the game has no relief request table loaded"));
+        var pool = Rows(config._Config_AidDemandPool_Dict ?? throw new InvalidOperationException("the game has no relief demand pool loaded"));
 
-        foreach (var commission in commissions.Values)
+        yield return true;
+
+        foreach (var commission in commissions)
         {
-            var ids = Ints(commission?.DemandItemIds);
-            var kinds = Ints(commission?.DemandKinds);
+            var ids = Ints(commission.DemandItemIds);
+            var kinds = Ints(commission.DemandKinds);
 
             for (var i = 0; i < ids.Count; i++)
             {
                 if (ids[i] > 0 && (i >= kinds.Count || kinds[i] == AidDemand.ItemKind)) items.Add(ids[i]);
             }
+
+            yield return true;
         }
 
-        foreach (var row in pool.Values)
+        foreach (var row in pool)
         {
-            if (row != null && row.Kind == AidDemand.ItemKind && row.ItemId > 0) items.Add(row.ItemId);
-        }
+            if (row.Kind == AidDemand.ItemKind && row.ItemId > 0) items.Add(row.ItemId);
 
-        return items;
+            yield return true;
+        }
     }
 
-    private static Dictionary<int, string> TrapBait(ConfigManager config)
+    private static IEnumerable<bool> TrapBait(ConfigManager config, Dictionary<int, string> bait)
     {
-        var bait = new Dictionary<int, string>();
-        var table = config._Config_TrapBait_Dict ?? throw new InvalidOperationException("the game has no trap bait table loaded");
+        var rows = Rows(config._Config_TrapBait_Dict ?? throw new InvalidOperationException("the game has no trap bait table loaded"));
 
-        foreach (var row in table.Values)
+        yield return true;
+
+        foreach (var row in rows)
         {
-            if (row != null && !string.IsNullOrEmpty(row.Effect_Des)) bait[row.ID] = row.Effect_Des;
-        }
+            var effect = row.Effect_Des;
 
-        return bait;
+            if (!string.IsNullOrEmpty(effect)) bait[row.ID] = effect;
+
+            yield return true;
+        }
     }
 
-    private static Dictionary<int, int> RobotModules(ConfigManager config)
+    private static IEnumerable<bool> RobotModules(ConfigManager config, Dictionary<int, int> modules)
     {
-        var modules = new Dictionary<int, int>();
-        var table = config._Config_RobotModule_Dict ?? throw new InvalidOperationException("the game has no robot module table loaded");
+        var rows = Rows(config._Config_RobotModule_Dict ?? throw new InvalidOperationException("the game has no robot module table loaded"));
 
-        foreach (var row in table.Values)
+        yield return true;
+
+        foreach (var row in rows)
         {
-            if (row != null) modules[row.ID] = row.Level;
-        }
+            modules[row.ID] = row.Level;
 
-        return modules;
+            yield return true;
+        }
     }
 
-    private static List<ItemRow> Items(ConfigManager config, Il2CppSystem.Collections.Generic.Dictionary<int, Config_Item> table)
+    private static IEnumerable<bool> Items(ConfigManager config, Il2CppSystem.Collections.Generic.Dictionary<int, Config_Item> table, List<ItemRow> rows)
     {
-        var rows = new List<ItemRow>(table.Count);
+        var items = Rows(table);
 
-        foreach (var item in table.Values)
+        rows.Capacity = items.Count;
+
+        yield return true;
+
+        foreach (var item in items)
         {
-            if (item == null) continue;
-
             rows.Add(new ItemRow(
                 item.ID,
                 item.Category,
@@ -140,16 +268,14 @@ internal sealed class GameTableReader
                 Icon: item.WebIcon ?? "",
                 InFoodCodex: item.Category == FoodCategory && item.InCodex,
                 UseTimes: item.UseTimes));
-        }
 
-        return rows;
+            yield return true;
+        }
     }
 
     /// <summary>Asked only for items the game calls shreddable; the rest have no yields to show.</summary>
-    private static Dictionary<int, IReadOnlyList<Yield>> ShredYields(ConfigManager config, IEnumerable<ItemRow> items)
+    private static IEnumerable<bool> ShredYields(ConfigManager config, List<ItemRow> items, Dictionary<int, IReadOnlyList<Yield>> yields)
     {
-        var yields = new Dictionary<int, IReadOnlyList<Yield>>();
-
         foreach (var item in items)
         {
             if (!item.IsShreddable) continue;
@@ -165,60 +291,69 @@ internal sealed class GameTableReader
             }
 
             yields[item.Id] = list;
-        }
 
-        return yields;
+            yield return true;
+        }
     }
 
-    private static List<ProductionRecipe> Production(ConfigManager config)
+    private static IEnumerable<bool> Production(ConfigManager config, List<ProductionRecipe> recipes)
     {
-        var recipes = new List<ProductionRecipe>();
         var table = config._Config_ProductionList_Dict;
 
-        if (table == null) return recipes;
+        if (table == null) yield break;
 
-        foreach (var recipe in table.Values)
+        var rows = Rows(table);
+
+        yield return true;
+
+        foreach (var recipe in rows)
         {
-            if (recipe != null) recipes.Add(new ProductionRecipe(Ints(recipe.MaterialList), ConfigManager.IsShredOnlyRecipe(recipe), First(recipe.ProductID), recipe.IsUseable));
-        }
+            recipes.Add(new ProductionRecipe(Ints(recipe.MaterialList), ConfigManager.IsShredOnlyRecipe(recipe), First(recipe.ProductID), recipe.IsUseable));
 
-        return recipes;
+            yield return true;
+        }
     }
 
-    private static List<CookingRecipe> Cooking(ConfigManager config)
+    private static IEnumerable<bool> Cooking(ConfigManager config, List<CookingRecipe> recipes)
     {
-        var recipes = new List<CookingRecipe>();
         var table = config._Config_CookingRecipe_Dict;
 
-        if (table == null) return recipes;
+        if (table == null) yield break;
 
-        foreach (var recipe in table.Values)
+        var rows = Rows(table);
+
+        yield return true;
+
+        foreach (var recipe in rows)
         {
-            if (recipe != null) recipes.Add(new CookingRecipe(recipe.ID, Ints(recipe.SpecificItems), recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID, recipe.FailItemID, recipe.CookTime));
-        }
+            recipes.Add(new CookingRecipe(recipe.ID, Ints(recipe.SpecificItems), recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID, recipe.FailItemID, recipe.CookTime));
 
-        return recipes;
+            yield return true;
+        }
     }
 
     /// <summary>
     /// Every furniture row's brew products. The game's brew preview indexes a barrel's RotProductOverride by tier, so
     /// each list is lowest tier first; furniture that brews nothing has an empty list.
     /// </summary>
-    private static List<IReadOnlyList<int>> BrewProducts(ConfigManager config)
+    private static IEnumerable<bool> BrewProducts(ConfigManager config, List<IReadOnlyList<int>> lists)
     {
-        var lists = new List<IReadOnlyList<int>>();
         var table = config._Config_Furniture_Dict;
 
-        if (table == null) return lists;
+        if (table == null) yield break;
 
-        foreach (var furniture in table.Values)
+        var rows = Rows(table);
+
+        yield return true;
+
+        foreach (var furniture in rows)
         {
-            var products = furniture == null ? new List<int>() : Ints(furniture.RotProductOverride);
+            var products = Ints(furniture.RotProductOverride);
 
             if (products.Count > 0) lists.Add(products);
-        }
 
-        return lists;
+            yield return true;
+        }
     }
 
     /// <summary>The game's own effective values, so a brewing talent the player has when the world loads counts.</summary>
@@ -276,55 +411,57 @@ internal sealed class GameTableReader
     }
 
     /// <summary>The planning cards need both this and the buff table; a missing one is thrown so it is logged once.</summary>
-    private static List<TalentRow> Talents(ConfigManager config)
+    private static IEnumerable<bool> Talents(ConfigManager config, List<TalentRow> talents)
     {
-        var talents = new List<TalentRow>();
-        var table = config._Config_Talent_Dict ?? throw new InvalidOperationException("the game has no talent table loaded");
+        var rows = Rows(config._Config_Talent_Dict ?? throw new InvalidOperationException("the game has no talent table loaded"));
 
-        foreach (var talent in table.Values)
+        yield return true;
+
+        foreach (var talent in rows)
         {
-            if (talent != null) talents.Add(new TalentRow(talent.ID, talent.Type, talent.BuffID));
-        }
+            talents.Add(new TalentRow(talent.ID, talent.Type, talent.BuffID));
 
-        return talents;
+            yield return true;
+        }
     }
 
-    private static Dictionary<int, float> BuffDurations(ConfigManager config)
+    private static IEnumerable<bool> BuffDurations(ConfigManager config, Dictionary<int, float> durations)
     {
-        var durations = new Dictionary<int, float>();
-        var table = config._Config_Buff_Dict ?? throw new InvalidOperationException("the game has no buff table loaded");
+        var rows = Rows(config._Config_Buff_Dict ?? throw new InvalidOperationException("the game has no buff table loaded"));
 
-        foreach (var buff in table.Values)
+        yield return true;
+
+        foreach (var buff in rows)
         {
-            if (buff != null) durations[buff.ID] = buff.BuffDuring;
-        }
+            durations[buff.ID] = buff.BuffDuring;
 
-        return durations;
+            yield return true;
+        }
     }
 
-    private static Dictionary<int, PlantRow> Plants(ConfigManager config)
+    private static IEnumerable<bool> Plants(ConfigManager config, Dictionary<int, PlantRow> plants)
     {
-        var plants = new Dictionary<int, PlantRow>();
-        var table = config._Config_Plant_Dict ?? throw new InvalidOperationException("the game has no plant table loaded");
+        var rows = Rows(config._Config_Plant_Dict ?? throw new InvalidOperationException("the game has no plant table loaded"));
 
-        foreach (var plant in table.Values)
+        yield return true;
+
+        foreach (var plant in rows)
         {
-            if (plant != null) plants[plant.ID] = new PlantRow(plant.ID, plant.GrowthTime, plant.HarvestTime, plant.LightNeed, plant.ColdResistance, Ints(plant.Gain), plant.Seed_Rate);
-        }
+            plants[plant.ID] = new PlantRow(plant.ID, plant.GrowthTime, plant.HarvestTime, plant.LightNeed, plant.ColdResistance, Ints(plant.Gain), plant.Seed_Rate);
 
-        return plants;
+            yield return true;
+        }
     }
 
     /// <summary>The _P1 to _P4 groups are the loot the furniture holds for each playable character; all of them count.</summary>
-    private static List<LootFurniture> FurnitureLoot(ConfigManager config)
+    private static IEnumerable<bool> FurnitureLoot(ConfigManager config, List<LootFurniture> furnitureWithLoot)
     {
-        var furnitureWithLoot = new List<LootFurniture>();
-        var table = config._Config_Furniture_Dict ?? throw new InvalidOperationException("the game has no furniture table loaded");
+        var rows = Rows(config._Config_Furniture_Dict ?? throw new InvalidOperationException("the game has no furniture table loaded"));
 
-        foreach (var furniture in table.Values)
+        yield return true;
+
+        foreach (var furniture in rows)
         {
-            if (furniture == null) continue;
-
             var groups = new List<int>();
 
             foreach (var group in new[] { furniture.LootRandomGroupId, furniture.LootRandomGroupId_P1, furniture.LootRandomGroupId_P2, furniture.LootRandomGroupId_P3, furniture.LootRandomGroupId_P4 })
@@ -333,35 +470,37 @@ internal sealed class GameTableReader
             }
 
             if (groups.Count > 0) furnitureWithLoot.Add(new LootFurniture(furniture.ID, groups));
-        }
 
-        return furnitureWithLoot;
+            yield return true;
+        }
     }
 
-    private static Dictionary<int, IReadOnlyList<int>> LootGroups(ConfigManager config)
+    private static IEnumerable<bool> LootGroups(ConfigManager config, Dictionary<int, IReadOnlyList<int>> groups)
     {
-        var groups = new Dictionary<int, IReadOnlyList<int>>();
-        var table = config._Config_RandomGroup_Dict ?? throw new InvalidOperationException("the game has no loot group table loaded");
+        var rows = Rows(config._Config_RandomGroup_Dict ?? throw new InvalidOperationException("the game has no loot group table loaded"));
 
-        foreach (var group in table.Values)
+        yield return true;
+
+        foreach (var group in rows)
         {
-            if (group != null) groups[group.ID] = Ints(group.IdList);
-        }
+            groups[group.ID] = Ints(group.IdList);
 
-        return groups;
+            yield return true;
+        }
     }
 
-    private static List<Placement> Placements(ConfigManager config)
+    private static IEnumerable<bool> Placements(ConfigManager config, List<Placement> placements)
     {
-        var placements = new List<Placement>();
-        var table = config._Config_GuidanceFurniture_Dict ?? throw new InvalidOperationException("the game has no furniture placement table loaded");
+        var rows = Rows(config._Config_GuidanceFurniture_Dict ?? throw new InvalidOperationException("the game has no furniture placement table loaded"));
 
-        foreach (var placement in table.Values)
+        yield return true;
+
+        foreach (var placement in rows)
         {
-            if (placement != null) placements.Add(new Placement(placement.FurnitureId, placement.MapPointID));
-        }
+            placements.Add(new Placement(placement.FurnitureId, placement.MapPointID));
 
-        return placements;
+            yield return true;
+        }
     }
 
     private static List<int> Ints(Il2CppInts? list)
@@ -376,6 +515,42 @@ internal sealed class GameTableReader
     /// <summary>The game reads a one-entry list for these (the rot product, a recipe's product); 0 when it is empty.</summary>
     private static int First(Il2CppInts? list) => list != null && list.Count > 0 ? list[0] : 0;
 
+    /// <summary>
+    /// Runs one table's steps. A step that throws ends that table: what it read so far is cleared, so the table reads
+    /// as empty, the failure is logged once, and the read is marked as failed.
+    /// </summary>
+    private IEnumerable<bool> Guarded(string what, IEnumerable<bool> steps, Action clear, Attempt attempt)
+    {
+        using var each = steps.GetEnumerator();
+
+        while (true)
+        {
+            bool hasStep;
+            Exception? failure = null;
+
+            try
+            {
+                hasStep = each.MoveNext();
+            }
+            catch (Exception ex)
+            {
+                hasStep = false;
+                failure = ex;
+            }
+
+            if (failure != null)
+            {
+                Report(what, failure);
+                clear();
+                attempt.HasFailed = true;
+            }
+
+            if (!hasStep) yield break;
+
+            yield return each.Current;
+        }
+    }
+
     private T Guarded<T>(string what, Func<T> read, T empty)
     {
         try
@@ -384,9 +559,20 @@ internal sealed class GameTableReader
         }
         catch (Exception ex)
         {
-            if (_reportedFailures.Add(what)) _log($"could not read the {what}, the pieces built from it show nothing (reported once): {ex}");
+            Report(what, ex);
 
             return empty;
         }
+    }
+
+    private void Report(string what, Exception ex)
+    {
+        if (_reportedFailures.Add(what)) _log($"could not read the {what}, the pieces built from it show nothing (reported once): {ex}");
+    }
+
+    /// <summary>Whether any table failed in one read, so its copy is not kept.</summary>
+    private sealed class Attempt
+    {
+        public bool HasFailed;
     }
 }

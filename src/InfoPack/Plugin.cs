@@ -14,7 +14,7 @@ namespace InfoPack;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.8.14";
+    private const string Version = "0.8.15";
 
     public override void Load()
     {
@@ -73,7 +73,7 @@ public sealed class Plugin : BasePlugin
         if (!PageMessages.Apply(harmony, log.Write)) return;
 
         var keys = new TipKeys(tooltip.DetailKey.Value, tooltip.WhereKey.Value);
-        var session = new InfoSession(ReadFeatures(), keys, new WebPage(log.Write), new GameTableReader(log.Write), new GameTextReader(log.Write), log.Write);
+        var session = new InfoSession(ReadFeatures(), keys, new WebPage(log.Write), new GameTableReader(log.Write), new GameTextReader(), log.Write);
 
         OptionalLive.Watch(() =>
         {

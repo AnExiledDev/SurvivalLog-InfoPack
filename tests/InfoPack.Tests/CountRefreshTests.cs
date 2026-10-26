@@ -44,4 +44,52 @@ public class CountRefreshTests
         Assert.True(refresh.IsDue(10.5f));
         Assert.True(refresh.ShouldSend("{\"101\":3}"));
     }
+
+    [Fact]
+    public void A_stamp_the_page_already_holds_needs_no_message_built()
+    {
+        var refresh = new CountRefresh(2f);
+
+        Assert.False(refresh.Holds(1));
+
+        refresh.ShouldSend("{\"101\":3}", 1);
+
+        Assert.True(refresh.Holds(1));
+        Assert.False(refresh.Holds(2));
+    }
+
+    [Fact]
+    public void A_new_stamp_with_the_same_text_is_held_but_not_sent_again()
+    {
+        var refresh = new CountRefresh(2f);
+
+        refresh.ShouldSend("{\"101\":3}", 1);
+
+        Assert.False(refresh.ShouldSend("{\"101\":3}", 2));
+        Assert.True(refresh.Holds(2));
+    }
+
+    [Fact]
+    public void A_setting_change_builds_the_message_again_even_for_the_same_stamp()
+    {
+        var refresh = new CountRefresh(2f);
+
+        refresh.ShouldSend("{\"101\":3}", 1);
+        refresh.Forget();
+
+        Assert.False(refresh.Holds(1));
+        Assert.True(refresh.ShouldSend("{\"101\":3,\"x\":1}", 1));
+    }
+
+    [Fact]
+    public void A_reloaded_page_holds_no_stamp_so_the_message_is_built_and_sent()
+    {
+        var refresh = new CountRefresh(2f);
+
+        refresh.ShouldSend("{\"101\":3}", 1);
+        refresh.PageReloaded();
+
+        Assert.False(refresh.Holds(1));
+        Assert.True(refresh.ShouldSend("{\"101\":3}", 1));
+    }
 }

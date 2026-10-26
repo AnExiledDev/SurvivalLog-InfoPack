@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using GameCore.HotUpdate.Battle.Logic;
 using InfoPack.Core;
-using UnityEngine;
 
 namespace InfoPack.Adapters;
 
 /// <summary>
 /// The mod's game side, run once a frame. It keeps the page script installed, answers its messages, sends it the facts
 /// once per loaded world and language, the home counts whenever they change, and the detail and breakdown keys whenever
-/// they are pressed or let go. It only reads; nothing here changes the game.
+/// they are pressed or let go. It only reads; nothing here changes the game. A frame does at most one of the heavier
+/// jobs (the install check and the facts, the home count, the live pieces), and a frame where nothing is due reads only
+/// the keys.
 /// </summary>
 internal sealed class InfoSession
 {
@@ -20,23 +20,39 @@ internal sealed class InfoSession
     private const int DrainMinimumSeconds = 1800;
     private const int Satiety = 1;
 
+    /// <summary>How long a frame may spend on the facts before the rest waits for the next frame.</summary>
+    private static readonly long SliceTicks = Stopwatch.Frequency * 2 / 1000;
+
+    private static readonly IReadOnlyCollection<int> NoItems = Array.Empty<int>();
+    private static readonly IReadOnlyDictionary<int, int> NoNeeds = new SortedDictionary<int, int>();
+
     private Features _features;
     private readonly TipKeys _keys;
     private readonly WebPage _page;
     private readonly GameTableReader _tables;
     private readonly GameTextReader _text;
     private readonly Action<string> _log;
+    private readonly Stopwatch _clock = Stopwatch.StartNew();
     private readonly CountRefresh _counts = new(CheckSeconds);
     private readonly FactsSchedule _factsSchedule = new(CheckSeconds);
     private readonly KeySync _keySync = new();
     private readonly LiveReader _live;
     private readonly CountRefresh _wanted = new(CheckSeconds);
-    private readonly CountRefresh _stats = new(CheckSeconds);
     private readonly StatDrain _drain = new(DrainWindowSeconds, DrainMinimumSeconds);
+    private readonly StatsPrint _statsPrint = new(LiveReader.HudStats);
+    private readonly Dictionary<int, float> _statValues = new();
+    private readonly HomeItems _home;
+    private readonly HomeTally _tally = new();
+    private readonly TextCopies _textCopies = new();
+    private readonly Func<bool> _isSliceSpent;
+    private long _sliceEndsAt;
+    private SlicedJob? _factsJob;
     private LiveLists? _lists;
+    private IReadOnlyList<ItemRow>? _listsItems;
     private long _liveWorld;
-    private SortedDictionary<int, int>? _homeCounts;
+    private bool _isTallyFresh;
     private string? _facts;
+    private string? _sentFacts;
     private bool _isPageReady;
     private bool _hasSentFacts;
     private bool _hasReportedWhereFailure;
@@ -50,6 +66,8 @@ internal sealed class InfoSession
         _text = text;
         _log = log;
         _live = new LiveReader(log);
+        _home = new HomeItems(log);
+        _isSliceSpent = () => Stopwatch.GetTimestamp() >= _sliceEndsAt;
     }
 
     /// <summary>
@@ -61,23 +79,33 @@ internal sealed class InfoSession
         _features = features;
         _factsSchedule.SettingsChanged();
 
+        // Facts being built were built for the old settings.
+        _factsJob = null;
+
+        // What the live messages hold follows the settings, which no stamp shows.
+        _wanted.Forget();
+        _statsPrint.Forget();
+
         if (_isPageReady) _page.Features(features.ToJson());
     }
 
     public void Update()
     {
-        var now = Time.unscaledTime;
+        var now = (float)_clock.Elapsed.TotalSeconds;
+        var isBusy = _page.KeepInstalled(now);
 
-        _page.KeepInstalled(now);
         TakePageCommands();
 
         if (!_isPageReady) return;
 
         SendKeys();
-        CheckFacts(now);
+        isBusy |= CheckFacts(now);
         SendFacts();
 
-        // The home count and the live pieces each read the whole home, so they never share a frame.
+        // The home count and the live pieces each read the whole home, so they never share a frame, nor one that
+        // already read the game for the install check or the facts.
+        if (isBusy) return;
+
         if (!SendCounts(now)) SendLive(now);
     }
 
@@ -97,7 +125,7 @@ internal sealed class InfoSession
                     _page.Install();
                     break;
                 case PageCommand.Instance instance:
-                    _page.Instance(instance.ItemId, HomeItems.ConfigOfInstance(instance.ItemId));
+                    _page.Instance(instance.ItemId, _home.ConfigOfInstance(instance.ItemId));
                     break;
                 case PageCommand.Where where:
                     AnswerWhere(where.ConfigId);
@@ -116,9 +144,10 @@ internal sealed class InfoSession
     {
         _isPageReady = true;
         _hasSentFacts = false;
+        _sentFacts = null;
         _counts.PageReloaded();
         _wanted.PageReloaded();
-        _stats.PageReloaded();
+        _statsPrint.Forget();
         _factsSchedule.PageReloaded();
         _keySync.PageReloaded();
     }
@@ -140,12 +169,10 @@ internal sealed class InfoSession
 
         try
         {
-            var home = HomeItems.TryRead();
-
-            if (home == null) return;
+            if (!_home.TryRead()) return;
 
             var isChinese = _text.IsChinese();
-            var rows = WhereKept.Rows(home, storageId => home.StorageName(storageId, isChinese), configId);
+            var rows = WhereKept.Rows(_home, storageId => _home.StorageName(storageId, isChinese), configId);
 
             _page.Where(configId, WhereKept.ToJson(rows));
         }
@@ -160,21 +187,85 @@ internal sealed class InfoSession
     /// <summary>
     /// The facts are built once per loaded world and language: the tables do not change while a world runs, and the
     /// descriptions are in the language the game shows. Both are looked at on the count cadence rather than every frame.
-    /// A world whose tables are not loaded yet is tried again at the next look.
+    /// A world whose tables are not loaded yet is tried again at the next look. The build is spread over frames, a
+    /// slice each, and its heavy middle runs on a worker. True when this frame read the game for them.
     /// </summary>
-    private void CheckFacts(float now)
+    private bool CheckFacts(float now)
     {
-        if (!_factsSchedule.IsDue(now)) return;
+        if (_factsJob != null)
+        {
+            AdvanceFacts();
+
+            return true;
+        }
+
+        if (!_factsSchedule.IsDue(now)) return false;
 
         _factsSchedule.Checked(now);
 
         var world = GameSingleton.Existing<BattleLogicWorld>();
 
-        if (world == null) return;
+        if (world == null) return true;
 
         var key = new FactsKey(world.Pointer.ToInt64(), _text.LanguageKey(), world._AgentManager?.GetLeadingRole() != null);
 
-        if (_factsSchedule.NeedsBuild(key)) BuildFacts(key);
+        if (!_factsSchedule.NeedsBuild(key) || !_tables.IsLoaded()) return true;
+
+        // Marked as built before building, so a build that throws is reported once by the ticker and not retried at every look.
+        _factsSchedule.Building(key);
+        _factsJob = new SlicedJob(BuildFacts(key, _features, Stopwatch.StartNew()));
+        AdvanceFacts();
+
+        return true;
+    }
+
+    private void AdvanceFacts()
+    {
+        var job = _factsJob!;
+
+        _sliceEndsAt = Stopwatch.GetTimestamp() + SliceTicks;
+
+        try
+        {
+            if (job.Advance(_isSliceSpent) && _factsJob == job) _factsJob = null;
+        }
+        catch (Exception)
+        {
+            // Dropped, so the next look starts clean; the ticker reports the failure once.
+            if (_factsJob == job) _factsJob = null;
+
+            throw;
+        }
+    }
+
+    private IEnumerable<bool> BuildFacts(FactsKey key, Features features, Stopwatch timer)
+    {
+        GameTables? tables = null;
+
+        foreach (var step in _tables.Read(read => tables = read)) yield return step;
+
+        if (tables == null) yield break;
+
+        var text = _textCopies.For(key, tables);
+
+        foreach (var step in FactsBuild.Steps(tables, text, _text, features, FactsBuild.OnWorker, built => Built(key, tables, built, timer))) yield return step;
+    }
+
+    private void Built(FactsKey key, GameTables tables, BuiltFacts built, Stopwatch timer)
+    {
+        _facts = built.Json;
+
+        // Facts the page already holds are not sent again.
+        if (built.Json != _sentFacts) _hasSentFacts = false;
+
+        // The same tables give the same lists; keeping them keeps what the live pieces matched against them.
+        if (_lists == null || !ReferenceEquals(_listsItems, tables.Items))
+        {
+            _lists = built.Lists;
+            _listsItems = tables.Items;
+        }
+
+        _log($"facts built from {tables.Items.Count} items ({built.Json.Length} characters, language {key.Language ?? "unknown"}, player {(key.HasPlayer ? "found" : "not yet")}) in {timer.ElapsedMilliseconds} ms");
     }
 
     private void SendFacts()
@@ -182,26 +273,8 @@ internal sealed class InfoSession
         if (_facts == null || _hasSentFacts) return;
 
         _page.Facts(_facts);
+        _sentFacts = _facts;
         _hasSentFacts = true;
-    }
-
-    private void BuildFacts(FactsKey key)
-    {
-        var timer = Stopwatch.StartNew();
-        var tables = _tables.TryRead();
-
-        if (tables == null) return;
-
-        // Marked as built before building, so a build that throws is reported once by the ticker and not retried at every look.
-        _factsSchedule.Building(key);
-        _facts = null;
-        _hasSentFacts = false;
-        _facts = PageFacts.Build(tables, _text, _features);
-        _lists = new LiveLists(
-            tables.Items.Select(item => item.Id).Distinct().ToList(),
-            tables.Items.Where(item => item.InFoodCodex).Select(item => item.Id).Distinct().ToList(),
-            FoodForecast.SatietyById(tables.Items));
-        _log($"facts built from {tables.Items.Count} items ({_facts.Length} characters, language {key.Language ?? "unknown"}, player {(key.HasPlayer ? "found" : "not yet")}) in {timer.ElapsedMilliseconds} ms");
     }
 
     /// <summary>
@@ -232,69 +305,69 @@ internal sealed class InfoSession
         if (_features.NeedsDrain) SendStats(world, _lists);
     }
 
+    /// <summary>The message is only built when one of the answers changed since the one the page holds.</summary>
     private void SendWanted(BattleLogicWorld world, LiveLists lists)
     {
-        var none = Array.Empty<int>();
-        var wish = _features.Wanted ? _live.WishItems(world, lists.ItemIds) : none;
-        var aid = _features.Wanted ? _live.AidNeeds(world, lists.ItemIds) : new SortedDictionary<int, int>();
-        var untried = _features.NeverTried ? _live.Untried(world, lists.FoodCodex) : none;
+        var wish = _features.Wanted ? _live.WishItems(world, lists.ItemIds) : NoItems;
+        var aid = _features.Wanted ? _live.AidNeeds(world, lists.ItemIds) : NoNeeds;
+        var untried = _features.NeverTried ? _live.Untried(world, lists.FoodCodex) : NoItems;
+        var version = _live.Version;
+
+        if (_wanted.Holds(version)) return;
+
         var json = Wanted.ToJson(wish, aid, untried);
 
-        if (_wanted.ShouldSend(json)) _page.Wanted(json);
+        if (_wanted.ShouldSend(json, version)) _page.Wanted(json);
     }
 
+    /// <summary>The message is only built when a number the page shows changed.</summary>
     private void SendStats(BattleLogicWorld world, LiveLists lists)
     {
-        if (_live.Stats(world) is not { } reading) return;
+        if (_live.Stats(world, _statValues) is not { } seconds) return;
 
-        _drain.Add(reading.Seconds, reading.Values);
+        _drain.Add(seconds, _statValues);
 
-        var rates = _features.StatRates ? _drain.ToJson(LiveReader.HudStats) : "{}";
         var days = _features.FoodForecast ? FoodDays(lists) : null;
-        var json = FoodForecast.StatsJson(rates, days);
 
-        if (_stats.ShouldSend(json)) _page.Stats(json);
+        if (_statsPrint.Update(_drain, _features.StatRates, days)) _page.Stats(_statsPrint.Json());
     }
 
     private float? FoodDays(LiveLists lists)
     {
         // The count from the frame before is reused when there is one, so the home is not counted twice.
-        var counts = _homeCounts;
+        var isFresh = _isTallyFresh;
 
-        _homeCounts = null;
+        _isTallyFresh = false;
 
-        if (counts == null)
+        if (!isFresh)
         {
-            var home = HomeItems.TryRead();
+            if (!_home.TryRead()) return null;
 
-            if (home == null) return null;
-
-            counts = HomeCounts.Count(home);
+            _tally.Count(_home);
         }
 
-        return FoodForecast.Days(FoodForecast.Satiety(counts, lists.Satiety), _drain.PerHour(Satiety));
+        return FoodForecast.Days(FoodForecast.Satiety(_tally.Counts, lists.Satiety), _drain.PerHour(Satiety));
     }
 
-    /// <summary>True when it counted this frame.</summary>
+    /// <summary>True when it counted this frame. The message is only built when the counts changed since the one the page holds.</summary>
     private bool SendCounts(float now)
     {
         if (!_features.BaseCounts || !_counts.IsDue(now)) return false;
 
         _counts.Counted(now);
+        _isTallyFresh = false;
 
-        var home = HomeItems.TryRead();
+        if (!_home.TryRead()) return true;
 
-        if (home == null) return true;
+        _tally.Count(_home);
+        _isTallyFresh = true;
 
-        _homeCounts = HomeCounts.Count(home);
+        if (_counts.Holds(_tally.Version)) return true;
 
-        var counts = PageFacts.Counts(_homeCounts);
+        var counts = PageFacts.Counts(_tally.Counts);
 
-        if (_counts.ShouldSend(counts)) _page.Counts(counts);
+        if (_counts.ShouldSend(counts, _tally.Version)) _page.Counts(counts);
 
         return true;
     }
-
-    /// <summary>What the live pieces are matched against, taken from the tables when the facts are built.</summary>
-    private sealed record LiveLists(IReadOnlyList<int> ItemIds, IReadOnlyList<int> FoodCodex, IReadOnlyDictionary<int, float> Satiety);
 }

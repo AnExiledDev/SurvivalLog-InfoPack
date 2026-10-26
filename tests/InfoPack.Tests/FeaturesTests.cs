@@ -162,13 +162,4 @@ public class FeaturesTests
         Assert.Equal(new[] { TipSection.Grow, TipSection.Effects }, layout.Order.Take(2));
         Assert.Equal(SectionKeys.Length, layout.Order.Count);
     }
-
-    [Fact]
-    public void Stat_lines_are_needed_by_the_trade_tooltip_and_by_the_cooking_codex()
-    {
-        Assert.False(AllOff.NeedsStats);
-        Assert.False((AllOff with { BaseCounts = true, AlcoholQuality = true, ScrapOnly = true }).NeedsStats);
-        Assert.True((AllOff with { TradeStats = true }).NeedsStats);
-        Assert.True((AllOff with { CookingCodex = true }).NeedsStats);
-    }
 }

@@ -24,13 +24,14 @@ public static class WhereKept
         var rows = new List<KeptIn>();
         var seen = new HashSet<long>();
         var timesNamed = new Dictionary<string, int>(StringComparer.Ordinal);
+        var stacks = new List<HeldStack>();
 
         foreach (var storageId in home.HomeStorageIds())
         {
             if (!seen.Add(storageId)) continue;
 
             var name = Numbered(nameOf(storageId), timesNamed);
-            var count = CountIn(home, storageId, configId);
+            var count = CountIn(home, storageId, configId, stacks);
 
             if (count > 0) rows.Add(new KeptIn(name, count));
         }
@@ -46,10 +47,20 @@ public static class WhereKept
         "[" + string.Join(",", rows.Select(row => "[" + JsText.Literal(row.Storage) + "," + row.Count.ToString(CultureInfo.InvariantCulture) + "]")) + "]";
 
     /// <summary>Skips stacks the cache lists under a storage they no longer belong to, as the home count does.</summary>
-    private static int CountIn(IHomeItems home, long storageId, int configId) =>
-        home.StacksIn(storageId)
-            .Where(stack => stack.OwnerId == storageId && stack.ConfigId == configId && stack.Count > 0)
-            .Sum(stack => stack.Count);
+    private static int CountIn(IHomeItems home, long storageId, int configId, List<HeldStack> stacks)
+    {
+        var count = 0;
+
+        stacks.Clear();
+        home.StacksIn(storageId, stacks);
+
+        foreach (var stack in stacks)
+        {
+            if (stack.OwnerId == storageId && stack.ConfigId == configId && stack.Count > 0) count += stack.Count;
+        }
+
+        return count;
+    }
 
     private static string Numbered(string name, Dictionary<string, int> timesNamed)
     {

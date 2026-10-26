@@ -10,7 +10,7 @@
   if (window.__slinfopack) return;
 
   var PREFIX = 'slmod|infopack|';
-  var POLL_MS = 200;
+  var POLL_MS = 250;
   var INSTANCE_RETRY_MS = 3000;
   var WHERE_RETRY_MS = 2000;
   var COOKING_TIP_WIDTH = '300px';
@@ -175,6 +175,12 @@
   var instances = {};
   var asked = {};
   var reported = {};
+  // Goes up with every message from the plugin that can change what is drawn, so a drawing keyed on it is redone
+  // only when its data changed.
+  var dataVersion = 0;
+  var isRepaintDue = false;
+  // The game's page iframes, a list the browser keeps current.
+  var pageFrames = document.getElementsByTagName('iframe');
 
   function send(message) {
     try {
@@ -195,6 +201,7 @@
   function setFeatures(flags) {
     features = flags || {};
     tipSettings = readTipSettings(features.tip);
+    dataVersion++;
     clearDrawn();
   }
 
@@ -219,13 +226,11 @@
   // A change of the settings starts every page clean, so nothing of a feature turned off is left; the next poll draws
   // what is still on.
   function clearDrawn() {
-    var frames = document.querySelectorAll('iframe');
-
-    for (var i = 0; i < frames.length; i++) {
+    for (var i = 0; i < pageFrames.length; i++) {
       var doc = null;
 
       try {
-        doc = frames[i].contentDocument;
+        doc = pageFrames[i].contentDocument;
       } catch (e) {}
 
       if (doc) clearPage(doc);
@@ -251,6 +256,7 @@
       desc: data.desc || {}, dish: data.dish || {}, brew: data.brew || {}, scrap: scrap, plan: data.plan || {},
       bait: data.bait || {}, robot: data.robot || {}, ui: data.ui || {}, items: data.items || {}, wiki: data.wiki || {}
     };
+    dataVersion++;
   }
 
   function idSet(ids) {
@@ -265,40 +271,61 @@
   function setWanted(data) {
     data = data || {};
     wanted = { wish: idSet(data.wish), aid: data.aid || {}, untried: idSet(data.untried) };
-    repaint();
+    changed();
   }
 
   // rates: {stat: [drop per game hour, hours left]}; food: the days the food at home lasts, when known.
   function setStats(data) {
     data = data || {};
     stats = { rates: data.rates || {}, food: data.food > 0 || data.food === 0 ? data.food : null };
-    repaint();
+    changed();
   }
 
   function setCounts(data) {
     counts = data || {};
     hasCounts = true;
-    repaint();
+    changed();
   }
 
   function setInstance(id, configId) {
     instances[id] = configId || 0;
     asked[id] = Date.now();
-    repaint();
+    changed();
   }
 
   // The plugin reads the detail and breakdown keys itself, since the page never sees modifier keys.
   function setKeys(state) {
-    keys = { detail: !!(state && state.detail), where: !!(state && state.where) };
-    repaint();
+    var detail = !!(state && state.detail);
+    var where = !!(state && state.where);
+
+    if (detail === keys.detail && where === keys.where) return;
+
+    keys = { detail: detail, where: where };
+    changed();
   }
 
   function setWhere(configId, rows) {
     whereRows[String(configId)] = rows || [];
+    changed();
+  }
+
+  // Data that changes what a shown tooltip says is drawn before the next frame rather than on the next poll. Several
+  // messages in a row share one pass.
+  function changed() {
+    dataVersion++;
+
+    if (isRepaintDue) return;
+
+    isRepaintDue = true;
+    if (window.requestAnimationFrame) window.requestAnimationFrame(dueRepaint);
+    else window.setTimeout(dueRepaint, 0);
+  }
+
+  function dueRepaint() {
+    isRepaintDue = false;
     repaint();
   }
 
-  // Data that changes what a shown tooltip says is drawn now rather than on the next poll.
   function repaint() {
     try {
       patchPages();
@@ -514,6 +541,26 @@
       hint: needsHint && !keys.detail ? say('hintMore', tipSettings.detailKey) : '',
       isOwnFresh: isOpen(tipSettings.modes.fresh) && liveDaysLeft(page) > 0 && !page.live.expired && !page.live.polluted
     };
+  }
+
+  // tipModel for one tooltip, built again only when the item, the page's own values or the plugin's data changed: the
+  // game moves its tooltips on every mouse move, and each move draws the tooltip again.
+  function cachedModel(holder, configId, page) {
+    var input = dataVersion + '|' + configId + '|' + JSON.stringify(page);
+
+    if (holder.__slipModelFor !== input) {
+      holder.__slipModelFor = input;
+      holder.__slipModel = configId > 0 ? tipModel(configId, page) : null;
+    }
+
+    return holder.__slipModel;
+  }
+
+  // What a model says as one text, worked out once per model. The stored text is not enumerable, so it stays out of it.
+  function modelKey(model) {
+    if (!model.hasOwnProperty('__slipKey')) Object.defineProperty(model, '__slipKey', { value: JSON.stringify(model) });
+
+    return model.__slipKey;
   }
 
   // Rows are { chips } or { parts, cls, meta, metaCls, sub, subChips, bar }: parts are text and item references, meta
@@ -772,10 +819,12 @@
   // The block stays the tooltip's last element, since a line the game shows later (shelf life, say) is inserted
   // where Vue keeps its place, which can be after ours. It is only rebuilt when what it says changes.
   function drawBlock(doc, tip, model) {
-    var box = tip.querySelector(':scope > .slip-tip');
+    var box = ownChild(tip, '__slipBox', 'slip-tip');
 
     if (!model || (!model.sections.length && !model.hint)) {
       if (box) box.remove();
+
+      tip.__slipBox = null;
 
       return false;
     }
@@ -785,9 +834,11 @@
       box.className = 'slip-tip';
     }
 
+    tip.__slipBox = box;
+
     if (tip.lastElementChild !== box) tip.appendChild(box);
 
-    var key = JSON.stringify(model);
+    var key = modelKey(model);
 
     if (box.__slipKey === key) return true;
 
@@ -803,6 +854,17 @@
     }
 
     return true;
+  }
+
+  // A node of ours directly under parent, kept on the parent in slot so finding it again costs no search. Only this
+  // script adds these nodes and it updates the slot each time, so a kept "none" stays true; a node the page or a
+  // settings change removed has lost its parent and counts as missing.
+  function ownChild(parent, slot, className) {
+    var node = parent[slot];
+
+    if (node === undefined) node = parent.querySelector(':scope > .' + className);
+
+    return node && node.parentNode === parent ? node : null;
   }
 
   function addElement(doc, parent, tag, className) {
@@ -907,13 +969,19 @@
   // does not fit and pushed inside the window when neither side does. It runs straight after each of the game's own
   // moves (watchTooltip), before the frame is drawn, so the two never show as a jump.
   function keepOnScreen(win, tip) {
-    if (!features.onScreen || tip.style.display === 'none') return;
+    if (!features.onScreen) return;
+
+    if (tip.style.display === 'none') {
+      tip.__slipZoom = 0;
+
+      return;
+    }
 
     var rect = tip.getBoundingClientRect();
 
     if (!rect.width || !rect.height) return;
 
-    var zoom = zoomOf(win, tip);
+    var zoom = zoomFor(win, tip);
     var pointer = win.__slipPointer;
     var hasPointer = !!(pointer && pointer.isKnown);
     var left = hasPointer ? besideCursor(pointer.x, rect.width, win.innerWidth, CURSOR_GAP * zoom) : insideWindow(rect.left, rect.width, win.innerWidth);
@@ -957,6 +1025,19 @@
     return zoom;
   }
 
+  // The pages change their zoom only with the window's size, so a shown tooltip's zoom is read once and again only
+  // after the window changed size or the tooltip was hidden: reading it walks every element above the tooltip.
+  function zoomFor(win, tip) {
+    var size = win.innerWidth * 100000 + win.innerHeight;
+
+    if (!(tip.__slipZoom > 0) || tip.__slipZoomSize !== size) {
+      tip.__slipZoom = zoomOf(win, tip);
+      tip.__slipZoomSize = size;
+    }
+
+    return tip.__slipZoom;
+  }
+
   // The cursor as the page last saw it, read in the capture phase so it is current before the game's own handlers run.
   function trackPointer(win, doc) {
     if (win.__slipPointer) return;
@@ -974,24 +1055,36 @@
   }
 
   // The tooltip is redrawn the moment the game changes it (new item, new position, shown or hidden) instead of on the
-  // next poll, so the block never shows the last item's facts and placement happens before the frame is drawn. Our own
-  // writes wake it once more; that pass finds nothing to change, so it settles.
+  // next poll, so the block never shows the last item's facts and placement happens before the frame is drawn. The
+  // changes our own drawing made are taken off the watcher's queue (settle), so they do not wake it again.
   function watchTooltip(win, tip, kind, redraw) {
-    if (tip.__slipWatched) return;
+    if (tip.__slipObserver) return;
 
-    tip.__slipWatched = true;
-    new win.MutationObserver(function () {
+    tip.__slipObserver = new win.MutationObserver(function () {
       try {
         redraw();
       } catch (e) {
         diag(kind, e);
       }
-    }).observe(tip, { attributes: true, attributeFilter: ['style', 'class'], childList: true, characterData: true, subtree: true });
+
+      settle(tip);
+    });
+    tip.__slipObserver.observe(tip, { attributes: true, attributeFilter: ['style', 'class'], childList: true, characterData: true, subtree: true });
+  }
+
+  // Drops the changes waiting for a watched element's watcher. Called straight after our own drawing, in the same
+  // task: the game's changes from earlier tasks have been handed over already, so only ours are dropped.
+  function settle(el) {
+    if (el && el.__slipObserver) el.__slipObserver.takeRecords();
   }
 
   // ===== Shared page helpers =====
 
+  // Checked on every poll, so once it is in place the check is one property read: comparing the sheet's text each
+  // time would copy all of it.
   function addStyle(doc) {
+    if (doc.__slipStyle && doc.__slipStyle.isConnected) return;
+
     var style = doc.getElementById('slip-style');
 
     if (!doc.head) return;
@@ -1003,6 +1096,8 @@
     }
 
     if (style.textContent !== CSS) style.textContent = CSS;
+
+    doc.__slipStyle = style;
   }
 
   function vueSetup(doc) {
@@ -1012,15 +1107,18 @@
   }
 
   // The game's Vue item tooltip: the element holding .tooltip-name (the same in BackpackUI, TradeUI and ShopUI).
+  // Kept on the document while it is still in the page, so a poll costs no search.
   function vueTooltip(doc) {
-    var name = doc.querySelector('.tooltip > .tooltip-name');
+    var name = doc.__slipTipName;
+
+    if (!name || !name.isConnected || !name.parentNode.classList.contains('tooltip')) name = doc.__slipTipName = doc.querySelector('.tooltip > .tooltip-name');
 
     return name ? name.parentNode : null;
   }
 
   // Draws the block for whatever a Vue tooltip shows (configId 0 for nothing of ours) and places the tooltip.
   function drawVueTip(win, doc, tip, configId, page) {
-    var model = configId > 0 ? tipModel(configId, page) : null;
+    var model = cachedModel(tip, configId, page);
 
     askWhere(configId);
     drawBlock(doc, tip, model);
@@ -1048,23 +1146,32 @@
     } catch (e) {
       diag(kind + ' tooltip', e);
     }
+
+    settle(tip);
   }
 
+  var chipSlots = {};
+
   function setChip(parent, doc, isWanted, className, text) {
-    var chip = parent.querySelector(':scope > .' + className);
+    var slot = chipSlots[className] || (chipSlots[className] = '__slip_' + className);
+    var chip = ownChild(parent, slot, className);
 
     if (!isWanted) {
       if (chip) chip.remove();
 
+      parent[slot] = null;
+
       return;
     }
 
-    if (chip) return;
+    if (!chip) {
+      chip = doc.createElement('span');
+      chip.className = className;
+      chip.textContent = text;
+      parent.appendChild(chip);
+    }
 
-    chip = doc.createElement('span');
-    chip.className = className;
-    chip.textContent = text;
-    parent.appendChild(chip);
+    parent[slot] = chip;
   }
 
   // ===== Backpack =====
@@ -1093,9 +1200,12 @@
   // mismatch (a redraw in flight) skips the side until the next poll rather than mark the wrong slot.
   function patchBackpackSlots(doc, setup) {
     var sides = setup.visibleSides;
-    var grids = doc.querySelectorAll('.grid-container');
+    // A list the browser keeps current, kept on the document instead of searching it each poll.
+    var grids = doc.__slipGrids || (doc.__slipGrids = doc.getElementsByClassName('grid-container'));
 
     if (!sides || grids.length !== sides.length) return;
+
+    var scrapText = say('scrapChip');
 
     for (var s = 0; s < sides.length; s++) {
       var bag = setup.getBag(sides[s]);
@@ -1107,7 +1217,7 @@
       for (var i = 0; i < cells.length; i++) {
         var item = items[i];
 
-        setChip(cells[i], doc, isScrap(item.cfgId) && !(item.useTimesMax > 1), 'slip-scrap', say('scrapChip'));
+        setChip(cells[i], doc, isScrap(item.cfgId) && !(item.useTimesMax > 1), 'slip-scrap', scrapText);
         setSpoilBadge(cells[i], doc, spoilLevel(item));
         setChip(cells[i], doc, !!(features.wanted && wanted.aid[item.cfgId] > 0), 'slip-wanted', '\u2605');
       }
@@ -1131,12 +1241,16 @@
 
   // The top-right corner, under the game's story and wish marks (both rare and drawn above it), clear of the use
   // counter and Scrap chip at the bottom left and the stack count at the bottom right.
+  var SPOIL_CLASSES = { red: 'slip-spoil slip-spoil-red', amber: 'slip-spoil slip-spoil-amber' };
+
   function setSpoilBadge(cell, doc, level) {
-    var badge = cell.querySelector(':scope > .slip-spoil');
-    var className = 'slip-spoil slip-spoil-' + level;
+    var badge = ownChild(cell, '__slipSpoil', 'slip-spoil');
+    var className = SPOIL_CLASSES[level];
 
     if (!level) {
       if (badge) badge.remove();
+
+      cell.__slipSpoil = null;
 
       return;
     }
@@ -1145,6 +1259,8 @@
       badge = doc.createElement('span');
       cell.appendChild(badge);
     }
+
+    cell.__slipSpoil = badge;
 
     if (badge.className !== className) badge.className = className;
   }
@@ -1199,7 +1315,12 @@
 
     if (!tip) return;
 
-    if (win.__slipCooking) return drawCookingTip(win, doc, tip);
+    if (win.__slipCooking) {
+      drawCookingTip(win, doc, tip);
+      settle(tip);
+
+      return;
+    }
 
     if (typeof original !== 'function') return diag('cooking', 'showItemTip is missing');
 
@@ -1217,13 +1338,16 @@
     };
 
     trackPointer(win, doc);
-    new win.MutationObserver(function () {
+    tip.__slipObserver = new win.MutationObserver(function () {
       try {
         onCookingTipChanged(win, doc, tip);
       } catch (e) {
         diag('cooking recipe tooltip', e);
       }
-    }).observe(tip, { attributes: true, attributeFilter: ['style'], childList: true, characterData: true, subtree: true });
+
+      settle(tip);
+    });
+    tip.__slipObserver.observe(tip, { attributes: true, attributeFilter: ['style'], childList: true, characterData: true, subtree: true });
   }
 
   // The tooltip's text without our block: what the page itself wrote.
@@ -1285,21 +1409,37 @@
     return subject.item.configId > 0 ? subject.item.configId : configOfInstance(subject.item.itemId);
   }
 
+  var NO_LIVE_PAGE = { live: null, withEffects: true };
+
   function drawCookingTip(win, doc, tip) {
     var isShown = tip.style.display === 'block';
     var configId = features && features.codex ? cookingConfigId(tip.__slipSubject) : 0;
-    var model = configId > 0 ? tipModel(configId, { live: null, withEffects: true }) : null;
+    var model = cachedModel(tip, configId, NO_LIVE_PAGE);
     var isDrawn = drawBlock(doc, tip, model);
     var width = isDrawn ? COOKING_TIP_WIDTH : '';
 
     if (tip.style.maxWidth !== width) tip.style.maxWidth = width;
 
-    drawCookingHead(doc, tip, isDrawn ? headLines(tip.__slipBase || '', tip.__slipSubject, model) : null);
+    drawCookingHead(doc, tip, isDrawn ? cookingHeadLines(tip, model) : null);
 
     if (!isShown) return;
 
     askWhere(configId);
     keepOnScreen(win, tip);
+  }
+
+  // headLines for the tooltip, worked out again only when the page's text, the subject or the block changed.
+  function cookingHeadLines(tip, model) {
+    var base = tip.__slipBase || '';
+
+    if (tip.__slipLinesBase !== base || tip.__slipLinesSubject !== tip.__slipSubject || tip.__slipLinesModel !== model) {
+      tip.__slipLinesBase = base;
+      tip.__slipLinesSubject = tip.__slipSubject;
+      tip.__slipLinesModel = model;
+      tip.__slipLines = headLines(base, tip.__slipSubject, model);
+    }
+
+    return tip.__slipLines;
   }
 
   // The page's lines as our header: the name first, then the rest, without the effect line when the block's EFFECTS
@@ -1319,7 +1459,7 @@
 
   // Only rebuilt when its lines change: each rebuild is a change the tooltip's watcher sees and answers by drawing again.
   function drawCookingHead(doc, tip, lines) {
-    var head = tip.querySelector(':scope > .slip-head');
+    var head = ownChild(tip, '__slipHead', 'slip-head');
     var isHeaded = !!lines;
 
     if (tip.classList.contains('slip-headed') !== isHeaded) tip.classList.toggle('slip-headed', isHeaded);
@@ -1327,18 +1467,29 @@
     if (!lines) {
       if (head) head.remove();
 
+      tip.__slipHead = null;
+
       return;
     }
 
+    if (head && head.__slipLines === lines && tip.firstChild === head) return;
+
     var key = JSON.stringify(lines);
 
-    if (head && head.__slipKey === key && tip.firstChild === head) return;
+    if (head && head.__slipKey === key && tip.firstChild === head) {
+      tip.__slipHead = head;
+      head.__slipLines = lines;
+
+      return;
+    }
 
     if (!head) {
       head = doc.createElement('div');
       head.className = 'slip-head';
     }
 
+    tip.__slipHead = head;
+    head.__slipLines = lines;
     head.__slipKey = key;
     head.textContent = '';
     addElement(doc, head, 'div', 'slip-own-name').textContent = lines.name;
@@ -1355,12 +1506,12 @@
   function patchBrew(win, doc) {
     var state = win.State;
     var text = win.i18nText || {};
-    var labels = doc.querySelector('.qbar > .qlabels');
+    var labels = doc.__slipLabels && doc.__slipLabels.isConnected ? doc.__slipLabels : (doc.__slipLabels = doc.querySelector('.qbar > .qlabels'));
     var box = doc.getElementById('slip-brew');
     var isShown = !!(features && features.brew && state && labels && state.brewState === 0 && state.materialCount > 0 && state.resultCount > 0);
 
     if (!isShown) {
-      if (box) box.style.display = 'none';
+      if (box && box.style.display !== 'none') box.style.display = 'none';
 
       return;
     }
@@ -1381,8 +1532,11 @@
 
     if (labels.nextSibling !== box) labels.parentNode.insertBefore(box, labels.nextSibling);
 
-    box.style.display = '';
-    box.textContent = say('brewScore', fixed(state.moodDensity), text.tierMid || 'Normal', fixed(low), text.tierHigh || 'Strong', fixed(high));
+    var line = say('brewScore', fixed(state.moodDensity), text.tierMid || 'Normal', fixed(low), text.tierHigh || 'Strong', fixed(high));
+
+    // Writing the same again would still be a change the page has to lay out.
+    if (box.style.display) box.style.display = '';
+    if (box.textContent !== line) box.textContent = line;
   }
 
   function fixed(value) {
@@ -1399,10 +1553,13 @@
     if (!items) return diag('pickup', 'no Vue state');
     if (rows.length !== items.length) return;
 
-    for (var i = 0; i < rows.length; i++) {
-      var info = rows[i].querySelector('.item-info');
+    var scrapText = say('scrapChip');
 
-      if (info) setChip(info, doc, isScrap(items[i].configId), 'slip-tag', say('scrapChip'));
+    for (var i = 0; i < rows.length; i++) {
+      var info = rows[i].__slipInfo;
+
+      if (!info || !rows[i].contains(info)) info = rows[i].__slipInfo = rows[i].querySelector('.item-info');
+      if (info) setChip(info, doc, isScrap(items[i].configId), 'slip-tag', scrapText);
     }
   }
 
@@ -1420,39 +1577,47 @@
     if (slots.length !== cards.length) return;
 
     for (var i = 0; i < slots.length; i++) {
-      var frame = slots[i].querySelector(':scope > .card > .icon-frame');
+      var frame = slots[i].__slipFrame;
 
+      if (!frame || !frame.parentNode || frame.parentNode.parentNode !== slots[i]) frame = slots[i].__slipFrame = slots[i].querySelector(':scope > .card > .icon-frame');
       if (frame) setPlanBadge(frame, doc, cards[i] ? facts.plan[cards[i].id] : null);
     }
   }
 
   // The poll alone can leave the old card's badge on a new card for a moment after a refresh, so the grid is also
-  // watched. Our own badge writes trigger one more pass that finds nothing to change, so it does not loop.
+  // watched. The changes our own badges make are taken off its queue, so they do not wake it again.
   function patchPlanningPage(win, doc) {
-    var grid = doc.querySelector('.card-grid');
+    var grid = doc.__slipGrid && doc.__slipGrid.isConnected ? doc.__slipGrid : (doc.__slipGrid = doc.querySelector('.card-grid'));
 
-    if (grid && win.__slipPlanGrid !== grid) {
-      win.__slipPlanGrid = grid;
-      new win.MutationObserver(function () {
+    if (grid && !grid.__slipObserver) {
+      grid.__slipObserver = new win.MutationObserver(function () {
         try {
           patchPlanning(doc);
         } catch (e) {
           diag('planning observer', e);
         }
-      }).observe(grid, { childList: true, subtree: true });
+
+        settle(grid);
+      });
+      grid.__slipObserver.observe(grid, { childList: true, subtree: true });
     }
 
     patchPlanning(doc);
+    settle(grid);
   }
+
+  var PLAN_CLASSES = { once: 'slip-plan slip-plan-once', timed: 'slip-plan slip-plan-timed' };
 
   // The badge sits in the picture's bottom-right corner, clear of the game's exclusive seal, lock badge and
   // "Activated" stamp, which all sit at the top of the card.
   function setPlanBadge(frame, doc, text) {
-    var badge = frame.querySelector(':scope > .slip-plan');
-    var className = 'slip-plan ' + (text === ONE_OFF_BADGE ? 'slip-plan-once' : 'slip-plan-timed');
+    var badge = ownChild(frame, '__slipPlan', 'slip-plan');
+    var className = text === ONE_OFF_BADGE ? PLAN_CLASSES.once : PLAN_CLASSES.timed;
 
     if (!text) {
       if (badge) badge.remove();
+
+      frame.__slipPlan = null;
 
       return;
     }
@@ -1461,6 +1626,8 @@
       badge = doc.createElement('span');
       frame.appendChild(badge);
     }
+
+    frame.__slipPlan = badge;
 
     if (badge.className !== className) badge.className = className;
     if (badge.textContent !== text) badge.textContent = text;
@@ -1506,7 +1673,7 @@
         hover.id = id;
         hover.since = Date.now();
         redraw();
-        if (id) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+        if (id) redrawLater(win, hover, redraw);
       }
     }, true);
     doc.addEventListener('mouseout', function (e) {
@@ -1521,7 +1688,7 @@
     // focus, also ends the press.
     win.addEventListener('blur', function () { hover.isPressed = false; }, true);
     doc.addEventListener('mousemove', function (e) {
-      var own = doc.getElementById('slip-own-tip');
+      var own = findOwn(doc);
 
       if (hover.isPressed && e.buttons === 0) {
         hover.isPressed = false;
@@ -1538,14 +1705,28 @@
     });
   }
 
+  // One waiting redraw per page: a new wait replaces the old one, whose redraw would have found nothing new.
+  function redrawLater(win, hover, redraw) {
+    if (hover.timer) win.clearTimeout(hover.timer);
+
+    hover.timer = win.setTimeout(function () {
+      hover.timer = 0;
+      redraw();
+    }, STATION_TIP_DELAY_MS);
+  }
+
+  // A pass with no item to describe after one that left nothing drawn has nothing to do, so it stops at once.
   function drawStationTip(win, doc) {
     var hover = win.__slipStation;
     var configId = hover && hover.id && !hover.isPressed ? configOfInstance(hover.id) : 0;
-    var model = configId > 0 ? tipModel(configId, { live: null, withEffects: true }) : null;
+    var model = cachedModel(hover, configId, NO_LIVE_PAGE);
     var pageTip = null;
+    var i;
 
-    STATION_TIPS.forEach(function (id) {
-      var tip = doc.getElementById(id);
+    if (!model && hover.isBlank) return;
+
+    for (i = 0; i < STATION_TIPS.length; i++) {
+      var tip = doc.getElementById(STATION_TIPS[i]);
       var isShown = !!tip && tip.style.display === 'block' && !tip.classList.contains('kin-mode');
 
       if (isShown && !pageTip && model) {
@@ -1553,7 +1734,7 @@
       } else if (tip) {
         drawBlock(doc, tip, null);
       }
-    });
+    }
 
     if (pageTip) {
       askWhere(configId);
@@ -1564,29 +1745,44 @@
     var isOwn = !pageTip && !!model && Date.now() - hover.since >= STATION_TIP_DELAY_MS;
 
     // A tagged row (another mod's list) owns our tooltip while the cursor is on it.
-    if (isTaggedHover(win)) return;
+    if (isTaggedHover(win)) {
+      hover.isBlank = false;
+    } else {
+      drawOwnTip(win, doc, isOwn ? configId : 0, isOwn ? model : null);
+      hover.isBlank = !model;
+    }
 
-    drawOwnTip(win, doc, isOwn ? configId : 0, isOwn ? model : null);
+    for (i = 0; i < STATION_TIPS.length; i++) settle(doc.getElementById(STATION_TIPS[i]));
+  }
+
+  // Our own tooltip on this page, kept on the document. Only ownTip adds it, and a removed one is no longer connected.
+  function findOwn(doc) {
+    var own = doc.__slipOwn;
+
+    if (own === undefined) own = doc.__slipOwn = doc.getElementById('slip-own-tip');
+
+    return own && own.isConnected ? own : null;
   }
 
   function ownTip(doc) {
-    var own = doc.getElementById('slip-own-tip');
+    var own = findOwn(doc);
 
     if (own) return own;
 
     own = doc.createElement('div');
     own.id = 'slip-own-tip';
     own.className = 'slip-own-tip';
-    addElement(doc, own, 'div', 'slip-own-name');
-    addElement(doc, own, 'div', 'slip-own-note');
+    own.__slipName = addElement(doc, own, 'div', 'slip-own-name');
+    own.__slipNote = addElement(doc, own, 'div', 'slip-own-note');
     doc.body.appendChild(own);
+    doc.__slipOwn = own;
 
     return own;
   }
 
   // note is the tagged row's data-slip-note, shown under the name; the station bags have none.
   function drawOwnTip(win, doc, configId, model, note) {
-    var own = doc.getElementById('slip-own-tip');
+    var own = findOwn(doc);
 
     if (!model) {
       if (own && own.style.display !== 'none') own.style.display = 'none';
@@ -1597,7 +1793,7 @@
     own = ownTip(doc);
 
     var known = facts.items[configId];
-    var name = own.querySelector(':scope > .slip-own-name');
+    var name = ownChild(own, '__slipName', 'slip-own-name');
     var text = known && known[0] ? known[0] : '';
 
     if (name.textContent !== text) name.textContent = text;
@@ -1654,7 +1850,7 @@
       hover.text = text;
       hover.since = Date.now();
       if (configId || text || wasTagged) redraw();
-      if (configId || text) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+      if (configId || text) redrawLater(win, hover, redraw);
     }, true);
     doc.addEventListener('mouseout', function (e) {
       if (e.relatedTarget || !isTaggedHover(win)) return;
@@ -1670,11 +1866,11 @@
     doc.addEventListener('mouseup', function () {
       hover.isPressed = false;
       hover.since = Date.now();
-      if (isTaggedHover(win)) win.setTimeout(redraw, STATION_TIP_DELAY_MS);
+      if (isTaggedHover(win)) redrawLater(win, hover, redraw);
     }, true);
     win.addEventListener('blur', function () { hover.isPressed = false; }, true);
     doc.addEventListener('mousemove', function () {
-      var own = doc.getElementById('slip-own-tip');
+      var own = findOwn(doc);
 
       if (isTaggedHover(win) && own && own.style.display === 'block') keepOnScreen(win, own);
     }, true);
@@ -1730,7 +1926,7 @@
 
     if (isShown && !hover.configId) return drawOwnText(win, doc, hover.text, note);
 
-    var model = isShown ? tipModel(hover.configId, { live: null, withEffects: true }) : null;
+    var model = isShown ? cachedModel(hover, hover.configId, NO_LIVE_PAGE) : null;
     var known = facts.items[hover.configId];
 
     // An item with nothing more to say still shows its name.
@@ -1750,12 +1946,13 @@
   }
 
   function drawNote(doc, own, note) {
-    var line = own.querySelector(':scope > .slip-own-note');
+    var line = ownChild(own, '__slipNote', 'slip-own-note');
 
     if (!line) {
       line = doc.createElement('div');
       line.className = 'slip-own-note';
-      own.querySelector(':scope > .slip-own-name').after(line);
+      ownChild(own, '__slipName', 'slip-own-name').after(line);
+      own.__slipNote = line;
     }
 
     if (line.textContent !== (note || '')) line.textContent = note || '';
@@ -1770,7 +1967,7 @@
     if (!text) return drawOwnTip(win, doc, 0, null);
 
     var own = ownTip(doc);
-    var name = own.querySelector(':scope > .slip-own-name');
+    var name = ownChild(own, '__slipName', 'slip-own-name');
 
     if (name.textContent !== text) name.textContent = text;
 
@@ -1790,26 +1987,62 @@
 
     var setup = vueSetup(doc);
     var list = setup && setup.state ? setup.state.attrList : null;
+
+    if (!list || isHudDrawn(doc, list)) return;
+
     var tips = doc.querySelectorAll('.status-row > .progress-bar-wrapper > .status-tooltip');
 
-    if (!list || tips.length !== list.length) return;
+    if (tips.length !== list.length) return;
+
+    var hud = { version: dataVersion, icons: [], tips: tips };
 
     for (var i = 0; i < tips.length; i++) {
-      var lines = hudLines(hudStat(list[i] && list[i].attrIcon));
+      var icon = list[i] && list[i].attrIcon;
+      var lines = hudLines(hudStat(icon));
       // Stats UI hides the game's box and opens its own in the same bar while the cursor is on it.
       var other = tips[i].parentNode.querySelector(':scope > .stui-stat-tip');
 
-      setRateLines(tips[i], doc, lines);
-      if (other) setRateLines(other, doc, lines);
+      hud.icons.push(icon);
+      setRateLines(tips[i], doc, lines, hud);
+      if (other) setRateLines(other, doc, lines, hud);
     }
+
+    doc.__slipHud = hud;
+  }
+
+  // A poll has nothing to do when no data came in since the last pass, the bars are the same ones, and every box that
+  // pass drew in (and every Stats UI box now open) still holds what it put there.
+  function isHudDrawn(doc, list) {
+    var hud = doc.__slipHud;
+    var others = doc.__slipStui || (doc.__slipStui = doc.getElementsByClassName('stui-stat-tip'));
+    var i;
+
+    if (!hud || hud.version !== dataVersion || hud.icons.length !== list.length) return false;
+
+    for (i = 0; i < list.length; i++) {
+      if (hud.icons[i] !== (list[i] && list[i].attrIcon) || !isRateDrawn(hud.tips[i], hud)) return false;
+    }
+
+    for (i = 0; i < others.length; i++) {
+      if (!isRateDrawn(others[i], hud)) return false;
+    }
+
+    return true;
+  }
+
+  function isRateDrawn(tip, hud) {
+    var box = tip.__slipRate;
+
+    return tip.isConnected && tip.__slipRateBy === hud && (!box || box.parentNode === tip);
   }
 
   // Stats UI builds a new box each time its numbers change, so ours is put back into the new one before it is drawn.
+  // This stays a synchronous pass rather than waiting for the next frame, so the new box is never shown without our
+  // lines; the boxes it adds are then dropped from the queue, so they do not wake it again.
   function watchStatsUi(win, doc) {
     if (win.__slipStatsUi || !doc.body) return;
 
-    win.__slipStatsUi = true;
-    new win.MutationObserver(function (records) {
+    var observer = new win.MutationObserver(function (records) {
       for (var r = 0; r < records.length; r++) {
         for (var n = 0; n < records[r].addedNodes.length; n++) {
           var node = records[r].addedNodes[n];
@@ -1821,11 +2054,16 @@
               diag('stats ui tooltip', e);
             }
 
+            observer.takeRecords();
+
             return;
           }
         }
       }
-    }).observe(doc.body, { childList: true, subtree: true });
+    });
+
+    win.__slipStatsUi = observer;
+    observer.observe(doc.body, { childList: true, subtree: true });
   }
 
   function hudStat(icon) {
@@ -1848,12 +2086,16 @@
   }
 
   // Appended after the game's own lines in the hover box; the game sets those by text, so its updates leave ours alone.
-  function setRateLines(tip, doc, lines) {
-    var box = tip.querySelector(':scope > .slip-rate');
+  // hud marks the pass that drew the box, which tells a later poll this box needs nothing.
+  function setRateLines(tip, doc, lines, hud) {
+    var box = ownChild(tip, '__slipRate', 'slip-rate');
     var text = lines.join('\n');
+
+    tip.__slipRateBy = hud;
 
     if (!lines.length) {
       if (box) box.remove();
+      tip.__slipRate = null;
 
       return;
     }
@@ -1865,6 +2107,7 @@
       tip.appendChild(box);
     }
 
+    tip.__slipRate = box;
     if (box.textContent !== text) box.textContent = text;
   }
 
@@ -1887,20 +2130,25 @@
     { pattern: /\.html/, isOn: always, isFor: isStationPage, patch: patchStation }
   ];
 
-  // The game's pages are same-origin iframes of this document, created and dropped whenever the game likes.
+  // The game's pages are same-origin iframes of this document, created and dropped whenever the game likes. Which
+  // pages match a frame is worked out again only when its address changes.
   function patchPages() {
-    var frames = document.querySelectorAll('iframe');
-
     if (!features) return;
 
-    for (var i = 0; i < frames.length; i++) {
-      var src = frames[i].src || '';
+    for (var i = 0; i < pageFrames.length; i++) {
+      var frame = pageFrames[i];
+      var src = frame.src || '';
 
-      for (var p = 0; p < PAGES.length; p++) {
-        if (PAGES[p].pattern.test(src) && PAGES[p].isOn()) patchFrame(frames[i], PAGES[p], src);
+      if (frame.__slipSrc !== src) {
+        frame.__slipSrc = src;
+        frame.__slipPages = PAGES.filter(function (page) { return page.pattern.test(src); });
       }
 
-      watchTagged(frames[i]);
+      for (var p = 0; p < frame.__slipPages.length; p++) {
+        if (frame.__slipPages[p].isOn()) patchFrame(frame, frame.__slipPages[p], src);
+      }
+
+      watchTagged(frame);
     }
 
     // Other mods' panels drawn over the game (Storage Hub's) live in this page itself, not in a game page.

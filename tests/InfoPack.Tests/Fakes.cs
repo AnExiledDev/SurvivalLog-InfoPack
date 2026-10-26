@@ -57,15 +57,6 @@ internal static class Rows
 
 internal sealed class FakeText : IGameText
 {
-    public static readonly StatFormat[] English =
-    {
-        new("Satiety +{0}", "Satiety {0}"),
-        new("Mood +{0}", "Mood {0}"),
-        new("Energy +{0}", "Energy {0}"),
-        new("Health +{0}", "Health {0}"),
-        new("Life +{0}", "Life {0}"),
-    };
-
     private readonly Dictionary<int, string> _descriptions = new();
     private readonly Dictionary<int, string> _itemNames = new();
     private readonly Dictionary<int, string> _furnitureNames = new();
@@ -106,8 +97,6 @@ internal sealed class FakeText : IGameText
 
         return this;
     }
-
-    public IReadOnlyList<StatFormat> StatFormats() => English;
 
     public string? Description(int itemId) => _descriptions.TryGetValue(itemId, out var description) ? description : null;
 

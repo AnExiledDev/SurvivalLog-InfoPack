@@ -148,9 +148,6 @@ public readonly record struct Placement(int FurnitureId, int PlaceId);
 /// <summary>The port for text that lives in the game's localisation rather than its tables.</summary>
 public interface IGameText
 {
-    /// <summary>The game's gain and loss wording for satiety, mood, energy, health and life, in that order.</summary>
-    IReadOnlyList<StatFormat> StatFormats();
-
     /// <summary>The item's description in the player's language, or null when it has none.</summary>
     string? Description(int itemId);
 

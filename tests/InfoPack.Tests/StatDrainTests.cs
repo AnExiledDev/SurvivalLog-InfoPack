@@ -126,4 +126,58 @@ public class StatDrainTests
         Assert.Null(drain.PerHour(Satiety));
         Assert.Null(drain.Latest(Satiety));
     }
+
+    [Fact]
+    public void The_version_moves_only_when_the_readings_change()
+    {
+        var drain = Drain();
+        var start = drain.Version;
+
+        drain.Add(0, At(80f));
+
+        var first = drain.Version;
+
+        drain.Add(0, At(10f));
+
+        Assert.NotEqual(start, first);
+        // A paused clock measured nothing new.
+        Assert.Equal(first, drain.Version);
+
+        drain.Add(Hour, At(78f));
+
+        var second = drain.Version;
+
+        drain.Reset();
+
+        Assert.NotEqual(first, second);
+        Assert.NotEqual(second, drain.Version);
+    }
+
+    [Fact]
+    public void A_reading_is_kept_as_it_was_when_the_caller_reuses_its_dictionary()
+    {
+        var drain = Drain();
+        var values = At(80f);
+
+        drain.Add(0, values);
+        values[Satiety] = 10f;
+        drain.Add(Hour, At(78f));
+
+        Assert.Equal(2f, drain.PerHour(Satiety));
+    }
+
+    [Fact]
+    public void A_stat_from_a_dropped_reading_does_not_turn_up_in_a_later_one()
+    {
+        var drain = Drain();
+
+        drain.Add(10 * Hour, At(80f, mood: 50f));
+        drain.Add(11 * Hour, At(78f, mood: 40f));
+        // A loaded save: both readings are handed back for reuse.
+        drain.Add(0, new Dictionary<int, float> { [Satiety] = 90f });
+        drain.Add(Hour, new Dictionary<int, float> { [Satiety] = 87f });
+
+        Assert.Null(drain.Latest(Mood));
+        Assert.Equal(3f, drain.PerHour(Satiety));
+    }
 }

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.ReduxUI;
@@ -12,105 +10,286 @@ namespace InfoPack.Adapters;
 /// <summary>
 /// What the save says right now: the player's craving, the relief requests in progress, which foods the codex has, the
 /// player's stats and the game clock. Read only. Matching every item against a craving or a request is the slow part,
-/// so it is done again only when the craving or the requests change. Each piece fails on its own and is logged once.
+/// so it is done again only when the craving or the requests change, and the codex is asked about each food only when
+/// its count of eaten foods moved. <see cref="Version"/> goes up whenever an answer changes, so a caller can skip
+/// building its message when nothing did. Each piece fails on its own and is logged once.
 /// </summary>
 internal sealed class LiveReader
 {
     /// <summary>The HUD's four bars by AttrName: satiety, mood, energy, life.</summary>
     public static readonly int[] HudStats = { (int)AttrName.Satiety, (int)AttrName.Morale, (int)AttrName.Stamina, (int)AttrName.Vitality };
 
+    private static readonly IReadOnlyCollection<int> NoItems = Array.Empty<int>();
+    private static readonly IReadOnlyDictionary<int, int> NoNeeds = new SortedDictionary<int, int>();
+    private static readonly Func<int, int, bool> AidMatches = (demandItem, item) => AidPlatformManager.DemandMatchTier(demandItem, item) > 0;
+
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
-    private string? _wishKey;
-    private readonly HashSet<int> _tried = new();
-    private IReadOnlyCollection<int> _wishItems = Array.Empty<int>();
-    private string? _aidKey;
-    private IReadOnlyDictionary<int, int> _aidNeeds = new SortedDictionary<int, int>();
+    private long _version;
+
+    // The craving the items were matched for, and the item list they were matched in.
+    private bool _isWishKnown;
+    private bool _hasWish;
+    private int _wishType;
+    private int _wishTarget;
+    private readonly List<int> _wishTargets = new();
+    private readonly List<int> _readTargets = new();
+    private IReadOnlyList<int>? _wishItemIds;
+    private readonly SortedSet<int> _wishItems = new();
+
+    // The demands the needs were worked out for, and the item list they were worked out in.
+    private bool _isAidKnown;
+    private List<AidDemand> _demands = new();
+    private List<AidDemand> _readDemands = new();
+    private IReadOnlyList<int>? _aidItemIds;
+    private IReadOnlyDictionary<int, int> _aidNeeds = NoNeeds;
+
+    private readonly UntriedFoods _untried = new();
+    private readonly Func<int, bool> _isEaten;
+    private CodexManager? _codex;
+    private bool _hasCodex;
+
+    private IntPtr _role;
+    private AttributeComponent? _attributes;
 
     public LiveReader(Action<string> log)
     {
         _log = log;
+        _isEaten = id => _codex!.IsEntryUnlocked(CodexCategory.Food, id);
     }
 
+    /// <summary>Goes up whenever the craving items, the request needs or the untried foods change.</summary>
+    public long Version => _version + _untried.Version;
+
     /// <summary>The items that would satisfy the craving the player has now; none without one.</summary>
-    public IReadOnlyCollection<int> WishItems(BattleLogicWorld world, IReadOnlyList<int> itemIds) => Guarded("craving", () =>
+    public IReadOnlyCollection<int> WishItems(BattleLogicWorld world, IReadOnlyList<int> itemIds)
     {
-        var wishes = world._WishManager;
-        var wish = wishes == null || wishes.IsLocked ? null : wishes.currentWish;
+        try
+        {
+            var wishes = world._WishManager;
+            var wish = wishes == null || wishes.IsLocked ? null : wishes.currentWish;
 
-        if (wish == null || wish.IsCompleted || wish.IsExpired) return Remember(ref _wishKey, ref _wishItems, "", () => Array.Empty<int>());
+            if (wish == null || wish.IsCompleted || wish.IsExpired)
+            {
+                if (_isWishKnown && !_hasWish) return NoItems;
 
-        var targets = Ints(wish.TargetValues);
-        var key = (int)wish.Type + ":" + wish.TargetValue + ":" + string.Join(",", targets);
+                ClearWish();
+                _isWishKnown = true;
 
-        return Remember(ref _wishKey, ref _wishItems, key, () => MatchWish((int)wish.Type, wish.TargetValue, wish.TargetValues, itemIds));
-    }, Array.Empty<int>());
+                return NoItems;
+            }
+
+            var type = (int)wish.Type;
+            var target = wish.TargetValue;
+            var targets = wish.TargetValues;
+
+            _readTargets.Clear();
+
+            for (var i = 0; targets != null && i < targets.Count; i++) _readTargets.Add(targets[i]);
+
+            if (_isWishKnown && _hasWish && type == _wishType && target == _wishTarget && ReferenceEquals(itemIds, _wishItemIds) && Same(_readTargets, _wishTargets)) return _wishItems;
+
+            ClearWish();
+            MatchWish(type, target, targets, itemIds);
+            _hasWish = true;
+            _wishType = type;
+            _wishTarget = target;
+            _wishTargets.AddRange(_readTargets);
+            _wishItemIds = itemIds;
+            _isWishKnown = true;
+
+            return _wishItems;
+        }
+        catch (Exception ex)
+        {
+            Report("craving", ex);
+            ClearWish();
+
+            return NoItems;
+        }
+    }
 
     /// <summary>How many more of each item the relief requests in progress still need.</summary>
-    public IReadOnlyDictionary<int, int> AidNeeds(BattleLogicWorld world, IReadOnlyList<int> itemIds) => Guarded("relief requests", () =>
+    public IReadOnlyDictionary<int, int> AidNeeds(BattleLogicWorld world, IReadOnlyList<int> itemIds)
     {
-        var demands = Demands(world._AidPlatformManager);
-        var key = string.Join(";", demands.Select(demand => demand.Kind + ":" + demand.ItemId + ":" + demand.Need + ":" + demand.Paid));
-
-        return Remember(ref _aidKey, ref _aidNeeds, key, () => Wanted.AidNeeds(demands, itemIds, (demandItem, item) => AidPlatformManager.DemandMatchTier(demandItem, item) > 0));
-    }, new SortedDictionary<int, int>());
-
-    /// <summary>The food codex items the player has never eaten.</summary>
-    public IReadOnlyCollection<int> Untried(BattleLogicWorld world, IReadOnlyList<int> foodCodexItems) => Guarded("food codex", () =>
-    {
-        var codex = world._CodexManager;
-
-        // A food once eaten stays in the codex, so only the ones not eaten yet are asked again.
-        return codex == null ? new SortedSet<int>() : Wanted.Untried(foodCodexItems, id => _tried.Contains(id) || (codex.IsEntryUnlocked(CodexCategory.Food, id) && _tried.Add(id)));
-    }, new SortedSet<int>());
-
-    /// <summary>The game clock in seconds and the HUD stats as the bars show them, or null before a player exists.</summary>
-    public (int Seconds, Dictionary<int, float> Values)? Stats(BattleLogicWorld world) => Guarded<(int, Dictionary<int, float>)?>("player stats", () =>
-    {
-        var time = world._GameTimeManager;
-        var role = world._AgentManager?.GetLeadingRole();
-        var attributes = role == null ? null : AgentTools.GetAgentComponent<AttributeComponent>(role);
-
-        if (time == null || attributes?.AttrDict == null) return null;
-
-        var values = new Dictionary<int, float>();
-
-        foreach (var stat in HudStats)
+        try
         {
-            if (Shown(attributes, (AttrName)stat) is { } value) values[stat] = value;
-        }
+            ReadDemands(world._AidPlatformManager, _readDemands);
 
-        return (time.GetTotalSeconds(), values);
-    }, null);
+            if (_isAidKnown && ReferenceEquals(itemIds, _aidItemIds) && Same(_readDemands, _demands)) return _aidNeeds;
+
+            var needs = Wanted.AidNeeds(_readDemands, itemIds, AidMatches);
+
+            // The list just read becomes the one kept; the old one is read into next time.
+            (_demands, _readDemands) = (_readDemands, _demands);
+            _aidItemIds = itemIds;
+            _isAidKnown = true;
+
+            if (!Same(needs, _aidNeeds)) _version++;
+
+            _aidNeeds = needs;
+
+            return _aidNeeds;
+        }
+        catch (Exception ex)
+        {
+            Report("relief requests", ex);
+            ClearAid();
+
+            return NoNeeds;
+        }
+    }
+
+    /// <summary>The food codex items the player has never eaten, ascending.</summary>
+    public IReadOnlyCollection<int> Untried(BattleLogicWorld world, IReadOnlyList<int> foodCodexItems)
+    {
+        try
+        {
+            var codex = world._CodexManager;
+
+            HasCodex(codex != null);
+
+            if (codex == null) return NoItems;
+
+            _codex = codex;
+            _untried.Check(foodCodexItems, codex.GetUnlockedCount(CodexCategory.Food), _isEaten);
+
+            return _untried.Items;
+        }
+        catch (Exception ex)
+        {
+            Report("food codex", ex);
+
+            // Asked again from the start next time, as a failed read used to be.
+            _untried.Reset();
+            HasCodex(false);
+
+            return NoItems;
+        }
+        finally
+        {
+            _codex = null;
+        }
+    }
+
+    /// <summary>
+    /// The game clock in seconds, or null before a player exists. The HUD stats go into values as the bars show them;
+    /// values is cleared first.
+    /// </summary>
+    public int? Stats(BattleLogicWorld world, Dictionary<int, float> values)
+    {
+        values.Clear();
+
+        try
+        {
+            var time = world._GameTimeManager;
+            var role = world._AgentManager?.GetLeadingRole();
+
+            if (time == null || role == null) return null;
+
+            // The player's attribute component lives as long as the player does.
+            if (role.Pointer != _role || _attributes == null)
+            {
+                _attributes = AgentTools.GetAgentComponent<AttributeComponent>(role);
+                _role = _attributes == null ? IntPtr.Zero : role.Pointer;
+            }
+
+            var attributes = _attributes;
+            var dictionary = attributes?.AttrDict;
+
+            if (attributes == null || dictionary == null) return null;
+
+            var ratio = GameKey.Attr_ScalingRatio;
+
+            // The value the HUD bar shows: a stat kept as a fraction is scaled by the game's ratio, and the bar divides
+            // it by that ratio (AttributeComponent.SyncAttr2UI). The whole-number read of a fraction stat only logs a
+            // complaint.
+            for (var i = 0; ratio > 0f && i < HudStats.Length; i++)
+            {
+                var name = (AttrName)HudStats[i];
+
+                if (!dictionary.ContainsKey(name)) continue;
+
+                var raw = attributes.IsSingle(name) ? attributes.GetTotalValue_Float(name) * ratio : attributes.GetTotalValue_Int(name);
+
+                values[HudStats[i]] = raw / ratio;
+            }
+
+            return time.GetTotalSeconds();
+        }
+        catch (Exception ex)
+        {
+            Report("player stats", ex);
+            values.Clear();
+
+            return null;
+        }
+    }
 
     /// <summary>A new world: what was matched belongs to the old one.</summary>
     public void Reset()
     {
-        _wishKey = null;
-        _aidKey = null;
-        _tried.Clear();
+        ClearWish();
+        ClearAid();
+        _untried.Reset();
+        _hasCodex = false;
+        _role = IntPtr.Zero;
+        _attributes = null;
+        _version++;
     }
 
-    private static IReadOnlyCollection<int> MatchWish(int type, int targetValue, Il2CppSystem.Collections.Generic.List<int>? targetValues, IReadOnlyList<int> itemIds)
+    private void HasCodex(bool hasCodex)
+    {
+        if (hasCodex == _hasCodex) return;
+
+        _hasCodex = hasCodex;
+        _version++;
+    }
+
+    private void ClearWish()
+    {
+        if (_wishItems.Count > 0) _version++;
+
+        _isWishKnown = false;
+        _hasWish = false;
+        _wishTargets.Clear();
+        _wishItemIds = null;
+        _wishItems.Clear();
+    }
+
+    private void ClearAid()
+    {
+        if (_aidNeeds.Count > 0) _version++;
+
+        _isAidKnown = false;
+        _demands.Clear();
+        _aidItemIds = null;
+        _aidNeeds = NoNeeds;
+    }
+
+    private void MatchWish(int type, int targetValue, Il2CppSystem.Collections.Generic.List<int>? targetValues, IReadOnlyList<int> itemIds)
     {
         var config = GameSingleton.Existing<ConfigManager>();
-        var matched = new SortedSet<int>();
+        var table = config?._Config_Item_Dict;
 
-        if (config == null) return matched;
-
-        foreach (var id in itemIds)
+        if (table != null)
         {
-            var item = config.Get_Config_Item(id);
+            for (var i = 0; i < itemIds.Count; i++)
+            {
+                var id = itemIds[i];
 
-            if (item != null && Reducer_Web_BackpackUI.IsWishTargetItem(item, id, type, targetValue, targetValues)) matched.Add(id);
+                if (table.TryGetValue(id, out var item) && item != null && Reducer_Web_BackpackUI.IsWishTargetItem(item, id, type, targetValue, targetValues)) _wishItems.Add(id);
+            }
         }
 
-        return matched;
+        // ClearWish counted a non-empty list going away; this counts the new one arriving.
+        if (_wishItems.Count > 0) _version++;
     }
 
-    private static List<AidDemand> Demands(AidPlatformManager? platform)
+    private static void ReadDemands(AidPlatformManager? platform, List<AidDemand> into)
     {
-        var demands = new List<AidDemand>();
+        into.Clear();
+
         var requests = platform?.GetDispatchableRequests();
 
         for (var i = 0; requests != null && i < requests.Count; i++)
@@ -121,57 +300,37 @@ internal sealed class LiveReader
             {
                 var demand = found[j];
 
-                if (demand != null) demands.Add(new AidDemand(demand.Kind, demand.ItemId, demand.Need, demand.Paid));
+                if (demand != null) into.Add(new AidDemand(demand.Kind, demand.ItemId, demand.Need, demand.Paid));
             }
         }
-
-        return demands;
     }
 
-    /// <summary>
-    /// The value the HUD bar shows: a stat kept as a fraction is scaled by the game's ratio, and the bar divides it by
-    /// that ratio (AttributeComponent.SyncAttr2UI). The whole-number read of a fraction stat only logs a complaint.
-    /// </summary>
-    private static float? Shown(AttributeComponent attributes, AttrName name)
+    private static bool Same<T>(List<T> a, List<T> b) where T : IEquatable<T>
     {
-        if (!attributes.AttrDict.ContainsKey(name)) return null;
+        if (a.Count != b.Count) return false;
 
-        var ratio = GameKey.Attr_ScalingRatio;
-        var raw = attributes.IsSingle(name) ? attributes.GetTotalValue_Float(name) * ratio : attributes.GetTotalValue_Int(name);
-
-        return ratio > 0f ? raw / ratio : null;
-    }
-
-    private static T Remember<T>(ref string? cachedKey, ref T cached, string key, Func<T> work)
-    {
-        if (cachedKey == key) return cached;
-
-        cached = work();
-        cachedKey = key;
-
-        return cached;
-    }
-
-    private static List<int> Ints(Il2CppSystem.Collections.Generic.List<int>? list)
-    {
-        var ints = new List<int>();
-
-        for (var i = 0; list != null && i < list.Count; i++) ints.Add(list[i]);
-
-        return ints;
-    }
-
-    private T Guarded<T>(string what, Func<T> read, T empty)
-    {
-        try
+        for (var i = 0; i < a.Count; i++)
         {
-            return read();
+            if (!a[i].Equals(b[i])) return false;
         }
-        catch (Exception ex)
-        {
-            if (_reportedFailures.Add(what)) _log($"could not read the {what}, its tooltip lines show nothing (reported once): {ex}");
 
-            return empty;
+        return true;
+    }
+
+    private static bool Same(IReadOnlyDictionary<int, int> a, IReadOnlyDictionary<int, int> b)
+    {
+        if (a.Count != b.Count) return false;
+
+        foreach (var pair in a)
+        {
+            if (!b.TryGetValue(pair.Key, out var value) || value != pair.Value) return false;
         }
+
+        return true;
+    }
+
+    private void Report(string what, Exception ex)
+    {
+        if (_reportedFailures.Add(what)) _log($"could not read the {what}, its tooltip lines show nothing (reported once): {ex}");
     }
 }

@@ -58,14 +58,6 @@ public class WantedTests
     }
 
     [Fact]
-    public void Food_is_untried_until_the_codex_has_it()
-    {
-        var tried = new HashSet<int> { Bread };
-
-        Assert.Equal(new[] { 702, 703 }, Wanted.Untried(new[] { 703, Bread, 702 }, tried.Contains));
-    }
-
-    [Fact]
     public void The_page_gets_the_craving_the_requests_and_the_untried_foods_by_id()
     {
         var json = Wanted.ToJson(new[] { Bread }, new Dictionary<int, int> { [Rope] = 3 }, new[] { 702 });

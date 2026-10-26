@@ -15,6 +15,9 @@ internal sealed class FakeHome : IHomeItems
         _homeIds = homeIds.ToList();
     }
 
+    /// <summary>How many times a storage's stacks were read.</summary>
+    public int Reads { get; private set; }
+
     public FakeHome Holds(long storageId, int configId, int count)
     {
         _stacks.Add((storageId, new HeldStack(storageId, configId, count)));
@@ -29,8 +32,19 @@ internal sealed class FakeHome : IHomeItems
         return this;
     }
 
+    /// <summary>Takes the storage's stacks of that item away, as using or moving them does.</summary>
+    public FakeHome Empties(long storageId, int configId)
+    {
+        _stacks.RemoveAll(entry => entry.ListedUnder == storageId && entry.Stack.ConfigId == configId);
+
+        return this;
+    }
+
     public IReadOnlyList<long> HomeStorageIds() => _homeIds;
 
-    public IEnumerable<HeldStack> StacksIn(long storageId) =>
-        _stacks.Where(entry => entry.ListedUnder == storageId).Select(entry => entry.Stack);
+    public void StacksIn(long storageId, List<HeldStack> into)
+    {
+        Reads++;
+        into.AddRange(_stacks.Where(entry => entry.ListedUnder == storageId).Select(entry => entry.Stack));
+    }
 }

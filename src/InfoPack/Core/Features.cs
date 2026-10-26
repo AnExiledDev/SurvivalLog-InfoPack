@@ -40,9 +40,6 @@ public sealed record Features(
         BaseCounts || TradeStats || AlcoholQuality || ScrapOnly || CookingCodex || PlanningBadges
         || SpoilBadges || KeepOnScreen || Tip.ShowsAnySection || NeedsLive;
 
-    /// <summary>The stat line is shown by two pieces: the trade tooltip and the cooking codex section.</summary>
-    public bool NeedsStats => TradeStats || CookingCodex;
-
     /// <summary>The flags the page script reads to decide what to draw.</summary>
     public string ToJson() =>
         "{\"counts\":" + Flag(BaseCounts)

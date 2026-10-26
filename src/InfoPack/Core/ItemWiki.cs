@@ -188,7 +188,7 @@ public static class ItemWiki
             FuelBurn.Of(burnValue, tables.Fuel));
     }
 
-    /// <summary>Rounded the way the stat line rounds them, so the two never disagree. Always five, so the page can index them.</summary>
+    /// <summary>Rounded to one decimal, with -0 shown as 0. Always five, so the page can index them.</summary>
     private static IReadOnlyList<double>? Effects(IReadOnlyList<float> stats)
     {
         var effects = stats.Concat(Enumerable.Repeat(0f, 5)).Take(5).Select(value => Math.Round(value, 1)).Select(value => value == 0 ? 0 : value).ToList();

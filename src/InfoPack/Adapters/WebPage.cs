@@ -17,6 +17,7 @@ internal sealed class WebPage
     private const string ScriptResource = "InfoPack.page.js";
     private const string Handle = "window.__slinfopack";
     private const string NoScriptReply = "window.vuplex&&window.vuplex.postMessage('" + PageCommand.Prefix + "noscript')";
+    private const string InstallCheck = Handle + "||" + NoScriptReply;
 
     private readonly Action<string> _log;
     private string? _script;
@@ -28,12 +29,15 @@ internal sealed class WebPage
         _log = log;
     }
 
-    public void KeepInstalled(float now)
+    /// <summary>True when it checked this frame, which reads the game's web view.</summary>
+    public bool KeepInstalled(float now)
     {
-        if (now < _nextCheckAt) return;
+        if (now < _nextCheckAt) return false;
 
         _nextCheckAt = now + CheckSeconds;
-        Run(Handle + "||" + NoScriptReply);
+        Run(InstallCheck);
+
+        return true;
     }
 
     public void Install()

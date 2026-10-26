@@ -6,14 +6,14 @@ using System.Text;
 namespace InfoPack.Core;
 
 /// <summary>
-/// The JSON the page script draws from. The facts are fixed for a loaded world (stat lines, descriptions, which dish a
-/// recipe makes, brew tiers, the scrap list, planning card badges) and only the pieces the player left on are worked
-/// out. The home counts change as the player plays and go in their own message.
+/// The JSON the page script draws from. The facts are fixed for a loaded world (descriptions, which dish a recipe makes,
+/// brew tiers, the scrap list, planning card badges) and only the pieces the player left on are worked out. The home
+/// counts change as the player plays and go in their own message.
 /// </summary>
 public static class PageFacts
 {
     /// <summary>
-    /// {"stats":{id:text},"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id],
+    /// {"desc":{id:text},"dish":{recipeId:itemId},"brew":{id:[rank,of]},"scrap":[id],
     /// "plan":{talentId:badge},"bait":{id:text},"robot":{id:level},"items":{id:[name,icon]},"wiki":{id:{...}},
     /// "ui":{key:text}}, with a key left out when its piece is off. "desc", "bait", "robot", "items", "wiki" and "ui" are
     /// always there, because every tooltip draws on them. "ui" holds the
@@ -24,8 +24,6 @@ public static class PageFacts
     {
         var parts = new List<string>();
         var wiki = ItemWiki.Build(tables, text);
-
-        if (features.NeedsStats) parts.Add(Member("stats", TextObject(Stats(tables.Items, text.StatFormats()))));
 
         parts.Add(Member("desc", TextObject(Descriptions(tables.Items, text))));
 
@@ -65,21 +63,6 @@ public static class PageFacts
         }
 
         return kinds;
-    }
-
-    /// <summary>The stat line of every item that changes a stat.</summary>
-    public static SortedDictionary<int, string> Stats(IEnumerable<ItemRow> items, IReadOnlyList<StatFormat> formats)
-    {
-        var lines = new SortedDictionary<int, string>();
-
-        foreach (var item in items)
-        {
-            var line = StatLine.Describe(formats, item.Stats);
-
-            if (line is not null) lines[item.Id] = line;
-        }
-
-        return lines;
     }
 
     /// <summary>The description of every item that has one: the cooking window and every tooltip's about line show it.</summary>
