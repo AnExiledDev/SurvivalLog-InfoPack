@@ -119,6 +119,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 ## Changelog
 
 - 0.8.15: Less stutter, and no hitch when a save loads or the language changes.
+- 0.8.14: Less stutter: the home is counted once per check, and foods you have already eaten are not looked up again.
 - 0.8.13: Neighbor Basket's station shows Info Pack tooltips with the progress each item adds.
 - 0.8.12: Tooltips use the game's own effect numbers, and hide the game's effect and home lines where Info Pack shows them.
 - 0.8.11: The At home count shows on every tooltip again, without holding Shift.
