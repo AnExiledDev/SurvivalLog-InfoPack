@@ -47,7 +47,7 @@ Works in English and Chinese.
 [list]
 [*]Survival Log 1.1.19611. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
-[*]Optional: [url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.[/*]
+[*]Optional: [url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start. With 0.10.0 or newer, the tooltips Info Pack shows over another mod's window also take that window's UI size.[/*]
 [/list]
 
 [size=5]Installation[/size]
@@ -72,6 +72,7 @@ To reach me directly, message [b]exiled.dev[/b] on Discord; you can find me in t
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.16: Tooltips over another mod's window take that window's UI size (Exiled's Toolkit 0.10.0 or newer).[/*]
 [*]0.8.15: Less stutter, and no hitch when a save loads or the language changes.[/*]
 [*]0.8.14: Less stutter: the home is counted once per check, and foods you have already eaten are not looked up again.[/*]
 [*]0.8.13: Neighbor Basket's station shows Info Pack tooltips with the progress each item adds.[/*]
@@ -146,7 +147,7 @@ Info Pack 不会往存档里写入任何内容，也不会修改游戏文件。�
 [list]
 [*]Survival Log 1.1.19611。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
-[*]可选：[url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效；没装的话，改动在下次启动游戏时生效。[/*]
+[*]可选：[url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效；没装的话，改动在下次启动游戏时生效。0.10.0 或更新版本还会让 Info Pack 在其他模组窗口上显示的提示框跟随该窗口的界面大小。[/*]
 [/list]
 
 [size=5]安装[/size]

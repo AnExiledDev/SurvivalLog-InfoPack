@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.16
+
+- The tooltips Info Pack shows over another mod's window take that window's size when the window is drawn bigger or smaller with the UI size setting of Exiled's Toolkit 0.10.0 or newer. A change shows at once.
+- Tooltips on the game's own screens keep the game's size.
+- Made for Survival Log 1.1.19611.
+
 ## 0.8.15
 
 - Less stutter while you play: Info Pack does much less work each frame and skips its updates when nothing has changed.

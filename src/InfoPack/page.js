@@ -1781,7 +1781,7 @@
   }
 
   // note is the tagged row's data-slip-note, shown under the name; the station bags have none.
-  function drawOwnTip(win, doc, configId, model, note) {
+  function drawOwnTip(win, doc, configId, model, note, zoom) {
     var own = findOwn(doc);
 
     if (!model) {
@@ -1791,6 +1791,7 @@
     }
 
     own = ownTip(doc);
+    zoomOwn(own, zoom);
 
     var known = facts.items[configId];
     var name = ownChild(own, '__slipName', 'slip-own-name');
@@ -1922,27 +1923,55 @@
 
     addStyle(doc);
 
-    var note = isShown ? hoveredNote(win, doc) : '';
+    var row = isShown ? hoveredRow(win, doc) : null;
+    var note = row ? row.getAttribute('data-slip-note') || '' : '';
+    var zoom = panelZoom(row);
 
-    if (isShown && !hover.configId) return drawOwnText(win, doc, hover.text, note);
+    if (isShown && !hover.configId) return drawOwnText(win, doc, hover.text, note, zoom);
 
     var model = isShown ? cachedModel(hover, hover.configId, NO_LIVE_PAGE) : null;
     var known = facts.items[hover.configId];
 
     // An item with nothing more to say still shows its name.
-    if (model && !model.sections.length && !model.hint) return drawOwnText(win, doc, known && known[0] ? known[0] : hover.text, note);
+    if (model && !model.sections.length && !model.hint) return drawOwnText(win, doc, known && known[0] ? known[0] : hover.text, note, zoom);
 
-    drawOwnTip(win, doc, isShown ? hover.configId : 0, model, note);
+    drawOwnTip(win, doc, isShown ? hover.configId : 0, model, note, zoom);
   }
 
-  // The note of the tagged row under the cursor, read on every draw: the mod that drew the row may have drawn it
-  // again since the cursor arrived, with new words.
-  function hoveredNote(win, doc) {
+  // The tagged row under the cursor, found again on every draw: the mod that drew the row may have drawn it again
+  // since the cursor arrived, with new words or at a new size.
+  function hoveredRow(win, doc) {
     var pointer = win.__slipPointer;
     var under = pointer && pointer.isKnown ? doc.elementFromPoint(pointer.x, pointer.y) : null;
-    var row = under && under.closest ? under.closest(TAGGED) : null;
 
-    return row ? row.getAttribute('data-slip-note') || '' : '';
+    return under && under.closest ? under.closest(TAGGED) : null;
+  }
+
+  // A row inside another mod's panel that Exiled's Toolkit draws at the player's UI size gets its tooltip at the same
+  // size. The tooltip sits on the page's body, outside the panel, so it takes the panel's zoom itself, read again on
+  // every draw so a new size while it shows is taken at the next poll. The page's own zoom is not counted: the tooltip
+  // on its body has that already.
+  function panelZoom(row) {
+    var toolkit = window.ExiledUi;
+
+    if (!row || !toolkit || typeof toolkit.zoomAt !== 'function') return 1;
+
+    try {
+      return Number(toolkit.zoomAt(row)) || 1;
+    } catch (e) {
+      return 1;
+    }
+  }
+
+  // The station tooltips stand in for the game's own and keep its size, so they pass no zoom.
+  function zoomOwn(own, zoom) {
+    var value = zoom > 0 && Math.abs(zoom - 1) >= 0.005 ? String(zoom) : '';
+
+    if (own.style.zoom === value) return;
+
+    own.style.zoom = value;
+    // keepOnScreen reads a shown tooltip's zoom once, and this one has a new zoom.
+    own.__slipZoom = 0;
   }
 
   function drawNote(doc, own, note) {
@@ -1963,10 +1992,12 @@
   }
 
   // The words alone, in the box an item tooltip uses.
-  function drawOwnText(win, doc, text, note) {
+  function drawOwnText(win, doc, text, note, zoom) {
     if (!text) return drawOwnTip(win, doc, 0, null);
 
     var own = ownTip(doc);
+
+    zoomOwn(own, zoom);
     var name = ownChild(own, '__slipName', 'slip-own-name');
 
     if (name.textContent !== text) name.textContent = text;
