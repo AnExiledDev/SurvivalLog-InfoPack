@@ -2,6 +2,8 @@ Name: Info Pack
 Summary: Turns Survival Log's item tooltips into a small wiki: effects, freshness, home counts, what an item is used in and made from, and where it is found. Flags the food you crave, what relief requests still need and food you never tried. HUD stat bars show how fast they drop and how long the food at home lasts. Trade stats and brew quality too.
 
 Description (BBCode):
+[center][img]https://sldb.core-directive.com/media/save/1-save-safe.png[/img][/center]
+
 Survival Log knows a lot it never shows you. Info Pack adds that information to the game's own tooltips and windows, in the game's own style. It only shows things; it never changes an item, a stat or a save.
 
 [size=5]Main features[/size]
