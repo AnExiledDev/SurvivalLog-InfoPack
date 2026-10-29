@@ -41,7 +41,7 @@
     <AssemblyMetadata Include="ModManager.Description" Value="Turns item tooltips into a small wiki with sections for effects, freshness, home counts, uses, growing and more on Shift, and shows what the game knows but never puts on screen: how many of an item you have at home, a trader's food stats, brew quality, scrap-only loot, ingredient info while cooking and how long planning cards last. Emptied containers stop staying highlighted.&#10;把物品提示变成小图鉴，分栏显示效果、保质期、家中数量、用途和种植信息，按住 Shift 查看更多；并显示游戏知道却从不显示的信息：一件物品家里有多少、商人食物的属性、酒的品质、只适合回收的物品、烹饪时的食材信息，以及规划卡牌的持续时间。搜空的容器不再保持高亮。" />
     <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
     <AssemblyMetadata Include="ModManager.Category" Value="Interface" />
-    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.19611" />
+    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20151" />
     <AssemblyMetadata Include="ModManager.Settings" Value="Restart" />
     <AssemblyMetadata Include="ModManager.GitHub" Value="AnExiledDev/SurvivalLog-InfoPack" />
     <AssemblyMetadata Include="ModManager.Changelog" Value="https://github.com/AnExiledDev/SurvivalLog-InfoPack/blob/main/CHANGELOG.md" />

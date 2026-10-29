@@ -14,7 +14,7 @@ namespace InfoPack;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.8.16";
+    private const string Version = "0.8.17";
 
     public override void Load()
     {
@@ -33,7 +33,7 @@ public sealed class Plugin : BasePlugin
             "When on (the default), items only worth shredding get an 'Only useful as scrap' line in their tooltip, a 'Scrap' chip on their backpack slot and a 'Scrap' tag in the pickup list.\n" +
             "开启时（默认），只值得粉碎的物品会在提示里多一行「只适合回收」，在背包格子上显示「回收」角标，并在拾取列表里带上「回收」标记。");
         var cookingCodex = Config.Bind("Features", "CookingCodex", true,
-            "When on (the default), hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes. Turning it off leaves the cooking window's tooltips as the game draws them, with no Info Pack block.\n" +
+            "When on (the default), hovering an ingredient in the cooking window adds its description and stats to the tooltip. Hovering a recipe does the same for the dish it makes. Turning it off leaves the cooking window's tooltips as the game draws them, with nothing added by Info Pack.\n" +
             "开启时（默认），在烹饪界面悬停食材，提示里会加上它的描述和属性；悬停菜谱，则加上做出的菜肴的描述和属性。关闭后，烹饪界面的提示恢复游戏原样，不再显示 Info Pack 的内容。");
         var planningBadges = Config.Bind("Features", "PlanningBadges", true,
             "When on (the default), cards on the Survival Planning screen get a small badge on their picture. A timed card shows how long it lasts, like '3d' or '24h'. A card that takes effect once shows '1x'. Cards that last for good get no badge.\n" +

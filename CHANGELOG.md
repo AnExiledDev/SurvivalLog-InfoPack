@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.17
+
+- Clearer description for the `CookingCodex` setting.
+- Made for Survival Log 1.1.20151.
+
 ## 0.8.16
 
 - The tooltips Info Pack shows over another mod's window take that window's size when the window is drawn bigger or smaller with the UI size setting of Exiled's Toolkit 0.10.0 or newer. A change shows at once.
