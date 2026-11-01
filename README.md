@@ -76,7 +76,7 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 
 ## Requirements
 
-- Survival Log 1.1.19611. Built for this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.20151. Built for this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Not together with ItemTotals, unless you turn off `BaseCounts` (see [Replaces ItemTotals](#replaces-itemtotals)).
 - Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start. With 0.10.0 or newer, the tooltips Info Pack shows over another mod's window also take that window's UI size.
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.17: Clearer description for the CookingCodex setting.
 - 0.8.16: Tooltips over another mod's window take that window's UI size (Exiled's Toolkit 0.10.0 or newer).
 - 0.8.15: Less stutter, and no hitch when a save loads or the language changes.
 - 0.8.14: Less stutter: the home is counted once per check, and foods you have already eaten are not looked up again.
