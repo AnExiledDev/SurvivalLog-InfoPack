@@ -356,7 +356,7 @@ internal sealed class GameTableReader
         }
     }
 
-    /// <summary>The game's own effective values, so a brewing talent the player has when the world loads counts.</summary>
+    /// <summary>The game's effective values, so a brewing talent the player has when the world loads counts.</summary>
     private static BrewRules BrewSettings()
     {
         Furniture.GetEffectiveTierThresholds(out var low, out var high);

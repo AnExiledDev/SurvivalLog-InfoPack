@@ -136,7 +136,7 @@ internal sealed unsafe class HomeItems : IHomeItems
     }
 
     /// <summary>
-    /// A home storage's name in the game's language: the game's own words for the bag and the workbench drawer, and a
+    /// A home storage's name in the game's language: the game's words for the bag and the workbench drawer, and a
     /// furniture's name from its table row, as Storage Hub names them.
     /// </summary>
     public string StorageName(long storageId, bool isChinese)
@@ -264,7 +264,7 @@ internal sealed unsafe class HomeItems : IHomeItems
     }
 
     /// <summary>
-    /// Where the fields sit, from the game's own type data, once. Anything missing leaves the memory reader off and the
+    /// Where the fields sit, from the game's type data, once. Anything missing leaves the memory reader off and the
     /// count goes through the game's objects.
     /// </summary>
     private void Learn(Il2CppItems cache)

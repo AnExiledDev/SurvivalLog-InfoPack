@@ -21,7 +21,7 @@ public sealed class UntriedFoods
     public IReadOnlyList<int> Items => _untried;
 
     /// <summary>
-    /// Brings the list up to date. A new food list (new facts) starts over from it. isUnlocked is the game's own
+    /// Brings the list up to date. A new food list (new facts) starts over from it. isUnlocked is the game's
     /// question, asked only for foods still on the list and only when unlockedCount moved.
     /// </summary>
     public void Check(IReadOnlyList<int> foods, int unlockedCount, Func<int, bool> isUnlocked)

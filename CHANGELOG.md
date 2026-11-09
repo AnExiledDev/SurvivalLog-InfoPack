@@ -8,7 +8,7 @@
 ## 0.8.16
 
 - The tooltips Info Pack shows over another mod's window take that window's size when the window is drawn bigger or smaller with the UI size setting of Exiled's Toolkit 0.10.0 or newer. A change shows at once.
-- Tooltips on the game's own screens keep the game's size.
+- Tooltips on the game's screens keep the game's size.
 - Made for Survival Log 1.1.19611.
 
 ## 0.8.15
@@ -30,8 +30,8 @@
 
 ## 0.8.12
 
-- Effects chips use the game's own effect numbers on the Backpack and Trade tooltips.
-- When Info Pack shows its Effects or At home section, the game's own effect rows and home lines on the same tooltip are hidden. With a section set to Off, the game's lines show as before.
+- Effects chips use the game's effect numbers on the Backpack and Trade tooltips.
+- When Info Pack shows its Effects or At home section, the game's effect rows and home lines on the same tooltip are hidden. With a section set to Off, the game's lines show as before.
 - The game's category, description and uses rows are restyled to match Info Pack's sections.
 - Made for Survival Log 1.1.19611.
 
@@ -101,7 +101,7 @@
 
 - Dishes under Used in: each dish an item cooks into now shows its cook time, like `Cooking, 15m`, and what eating it does on a second line, like `+30 Satiety, +5 Mood`.
 - How long fuel burns: under Fuel, an item that burns shows how long one lasts in a cooking pot, a heater and a fuel generator, like `Cooks for 1h 51m` and `Runs a generator for 2d 2h`. Where the game has more than one model with different rates, it shows the range. Fuel saving talents count as they were when the world loaded.
-- The Chinese brewing lines now use the game's own word for mood.
+- The Chinese brewing lines now use the game's word for mood.
 - Made for Survival Log 1.1.19131.
 
 ## 0.7.0
@@ -128,7 +128,7 @@ Other changes:
 
 ## 0.5.0
 
-Item tooltips work like a small wiki now. Below the game's own lines, Info Pack adds one tidy block split into sections, each with a short heading:
+Item tooltips work like a small wiki now. Below the game's lines, Info Pack adds one tidy block split into sections, each with a short heading:
 
 - Effects: what the item does to satiety, mood, energy, health and life, green for gains and red for losses.
 - Freshness: how long until it spoils, how long it keeps when fresh and what it rots into.
@@ -158,7 +158,7 @@ Other changes:
 
 ## 0.3.2
 
-- The mod no longer touches container outlines, because the game's own grey outline for searched containers works better.
+- The mod no longer touches container outlines, because the game's grey outline for searched containers works better.
 - The `HideLootedHighlights` setting is removed. If your config file still lists it, it does nothing and can be deleted.
 
 ## 0.3.1

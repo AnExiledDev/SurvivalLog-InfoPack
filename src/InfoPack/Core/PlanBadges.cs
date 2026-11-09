@@ -78,7 +78,7 @@ public static class PlanBadges
 
     /// <summary>
     /// Whole days from two days up ("3d"), else whole hours ("24h", "36h"), else minutes rounded up ("90m"). A single
-    /// day reads as "24h", the way the game's own card text words it.
+    /// day reads as "24h", the way the game's card text words it.
     /// </summary>
     public static string Length(double seconds)
     {

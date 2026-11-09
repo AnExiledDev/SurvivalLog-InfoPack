@@ -11,7 +11,7 @@ public readonly record struct Phrase(string En, string Zh)
 /// <summary>
 /// The words the page script puts on screen. {0}, {1} and so on are filled in by the page: the brew
 /// tier and how many tiers there are, the brew panel's score, tier names and where each tier starts, or a tooltip
-/// line's number, time or name. The Chinese uses the game's own words where it has them.
+/// line's number, time or name. The Chinese uses the game's words where it has them.
 /// </summary>
 public static class Texts
 {
@@ -23,7 +23,7 @@ public static class Texts
 
     public static readonly Phrase BrewScore = new("Quality {0}: {1} from {2}, {3} from {4}", "品质 {0}：{2} 起为{1}，{4} 起为{3}");
 
-    /// <summary>The breakdown's name for the player's bag when the game has none to give; the game's own word.</summary>
+    /// <summary>The breakdown's name for the player's bag when the game has none to give; the game's word.</summary>
     public static readonly Phrase Inventory = new("Inventory", "背包");
 
     /// <summary>The breakdown's name for the workbench drawer when the game has none to give.</summary>

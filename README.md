@@ -2,11 +2,11 @@
 
 Turn item tooltips into a small wiki: what an item does, how long it keeps, what it is used in and made from, and where it can be found. See how many of an item you have at home, what a trader's food does to you, how good a brew is, which loot is only worth scrapping and which planning cards wear off, and stop emptied containers from staying highlighted.
 
-Survival Log knows a lot it never puts on screen. You can't see how many planks are already in your storages while you trade, what a trader's food will do to your stats before you buy it, or which brew tier a bottle is. Info Pack adds that to the game's own tooltips and windows, marks junk that is only good for scrap, and lets containers you have already emptied look like plain furniture. It only shows things. It never changes an item, a stat or a save.
+Survival Log knows a lot it never puts on screen. You can't see how many planks are already in your storages while you trade, what a trader's food will do to your stats before you buy it, or which brew tier a bottle is. Info Pack adds that to the game's tooltips and windows, marks junk that is only good for scrap, and lets containers you have already emptied look like plain furniture. It only shows things. It never changes an item, a stat or a save.
 
 ## Features
 
-- **Tooltip sections**: item tooltips in the backpack, storage, trade and cooking windows get one Info Pack block below the game's own lines, split into sections with a short heading each. A section with nothing to say about an item is left out.
+- **Tooltip sections**: item tooltips in the backpack, storage, trade and cooking windows get one Info Pack block below the game's lines, split into sections with a short heading each. A section with nothing to say about an item is left out.
   - **Effects**: what the item does to satiety, mood, energy, health and life, green for gains and red for losses.
   - **Freshness**: how long until it spoils, coloured as it gets close, how long it keeps when fresh and what it rots into.
   - **Notes**: the scrap and brew quality lines below.
@@ -19,14 +19,14 @@ Survival Log knows a lot it never puts on screen. You can't see how many planks 
 - **Spoil badges**: food in backpack and storage slots that is about to spoil gets a small coloured corner: red when it spoils within a day, amber when it spoils within three days and half its shelf life is gone.
 - **Tooltips stay on screen**: a tooltip that would run past an edge of the window is moved back inside it.
 - **Home counts**: item tooltips in the backpack, storage, trade and cooking windows get an **At home** section: how many of that item are in your bag, in every storage at home (hidden ones included, the neighbor's basket left out) and in the workbench drawer, added together. That is the same pool the game crafts from. The number refreshes every two seconds.
-- **Trade stats**: in the trade window, the tooltip of an item on the trader's shelf says what it does to satiety, mood, energy, health and life, in the game's own wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
+- **Trade stats**: in the trade window, the tooltip of an item on the trader's shelf says what it does to satiety, mood, energy, health and life, in the game's wording (for example `Satiety +12, Energy +3`). Items that change no stat get no line.
 - **Brew quality**: the tooltip of a brewed drink says where it sits among what its barrel makes, as `Brew quality: 2 of 3` (1 is the lowest). While you set up a brew, before it starts, the brew panel shows the batch's quality score and the score each better tier starts at, for example `Quality 0.62: Normal from 0.40, Strong from 0.80`.
 - **Scrap only**: items only worth breaking down get a line `Only useful as scrap` in their tooltips, a small `Scrap` chip on their backpack slots and a `Scrap` tag in the pickup list.
 - **Cooking codex**: in the cooking window, hovering an ingredient adds its description and stats to the game's tooltip. Hovering a recipe does the same for the dish it makes. Turned off, the cooking window's tooltips stay as the game draws them.
 - **Planning badges**: on the Survival Planning screen, each card's picture gets a badge in its corner. A timed card shows how long it lasts in an amber badge, like `3d` (days), `24h` (hours) or `90m` (minutes). A card that takes effect once, like an airdrop, shows `1x` in a blue badge. Cards that last for good get no badge, so you can tell them apart at a glance.
 - **A log file**: what the mod did and anything that went wrong is written to `BepInEx\info-pack.log`.
 
-Every piece has its own setting, so you can turn off the ones you don't want. The tooltip lines draw inside the game's own windows, in the game's own tooltip style.
+Every piece has its own setting, so you can turn off the ones you don't want. The tooltip lines draw inside the game's windows, in the game's tooltip style.
 
 There are no buttons. Everything shows up in tooltips and windows the game already has. Two keys, both changeable in the settings:
 
@@ -57,13 +57,13 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 
 **Brew quality** reads the brew tiers the game itself uses for each barrel. The tier names in the brew panel come from the game, in your language.
 
-**Planning badges** read how long each card's effect lasts from the game's own tables. Lengths of two days or more show in days, shorter ones in hours, and anything that is not a whole number of hours in minutes, rounded up. A few cards have a second stage the badge does not count: Knuckle Down gives 3 extra Survival Points a day for five days and then takes 1 a day for five more, and its badge shows `5d`.
+**Planning badges** read how long each card's effect lasts from the game's tables. Lengths of two days or more show in days, shorter ones in hours, and anything that is not a whole number of hours in minutes, rounded up. A few cards have a second stage the badge does not count: Knuckle Down gives 3 extra Survival Points a day for five days and then takes 1 a day for five more, and its badge shows `5d`.
 
 **The pages** in the game's windows keep these additions across reloads: the mod puts them back whenever the game reloads its web view.
 
 ## Known issues and limits
 
-- The ingredient lines under a recipe in the cooking window are the game's own and get no counts.
+- The ingredient lines under a recipe in the cooking window are the game's and get no counts.
 - The scrap rule does not know about cravings, robot modules or trap bait, so an item only those ask for can still be marked as scrap. Items a relief request asks for are never marked. Check before you shred something rare. Anything the game burns as fuel counts as useful and is never marked.
 - Items on the trader's side that the game has not loaded yet get no lines in the trade tooltip. Items you sell can take a moment to show their lines the first time.
 - The brewing lines under Used in use the brew thresholds and bottle size from when the world loaded. A brewing talent picked later counts after you load the save again. The same goes for fuel saving talents and the burn times under Fuel.
@@ -124,7 +124,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 - 0.8.15: Less stutter, and no hitch when a save loads or the language changes.
 - 0.8.14: Less stutter: the home is counted once per check, and foods you have already eaten are not looked up again.
 - 0.8.13: Neighbor Basket's station shows Info Pack tooltips with the progress each item adds.
-- 0.8.12: Tooltips use the game's own effect numbers, and hide the game's effect and home lines where Info Pack shows them.
+- 0.8.12: Tooltips use the game's effect numbers, and hide the game's effect and home lines where Info Pack shows them.
 - 0.8.11: The At home count shows on every tooltip again, without holding Shift.
 - 0.8.10: What is in the neighbor's basket no longer counts as at home.
 - 0.8.9: No more empty tooltips on the workbench for items with nothing to show until Shift is held.
@@ -141,7 +141,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 - 0.6.0: Tooltips say when an item is the food you are craving, how many more a relief request needs (with a star on the slot), and when you have never tried a food. Robot modules show their level and bait its kind. Hover a HUD stat bar to see how fast it drops and when it runs out, and the satiety bar for how many days the food at home lasts. Items relief requests ask for are no longer marked as scrap. See [CHANGELOG.md](CHANGELOG.md).
 - 0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot. See [CHANGELOG.md](CHANGELOG.md).
 - 0.4.0: Settings can be changed on the Mod Manager's Mods screen without a restart; turning a feature off takes away what it drew. Works with Exiled's Toolkit 0.4.0 or newer, which is optional.
-- 0.3.2: The hide looted highlights setting is removed. The game's own grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.
+- 0.3.2: The hide looted highlights setting is removed. The game's grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.
 - 0.3.1: The mod's own tooltip lines and tags show in Chinese when the game is in Chinese, and the cfg descriptions use the same words. Built for game version 1.1.18902.
 - 0.3.0: New planning badges: cards on the Survival Planning screen show how long they last (`3d`, `24h`) or `1x` for a one-time effect, so timed and permanent cards are easy to tell apart. On by default; set `PlanningBadges` to `false` to turn it off.
 - 0.2.2: The setting descriptions are shorter and plainer, and each one now has a Simplified Chinese line. No setting or default changed.

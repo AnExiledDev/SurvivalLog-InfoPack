@@ -25,7 +25,7 @@ public static class Wanted
     /// <summary>
     /// How many more of each item the requests still need. Only demands that name an item count; a demand for an amount
     /// of a category is left out, since nearly any item of that category would match it. An item that answers two
-    /// demands needs the sum. matches(demandItemId, itemId) is the game's own rule for which items a demand takes.
+    /// demands needs the sum. matches(demandItemId, itemId) is the game's rule for which items a demand takes.
     /// </summary>
     public static SortedDictionary<int, int> AidNeeds(IEnumerable<AidDemand> demands, IEnumerable<int> itemIds, Func<int, int, bool> matches)
     {

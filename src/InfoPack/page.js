@@ -1,7 +1,7 @@
 // Info Pack's web half. Runs in Root.html, the document every game page iframe sits in. It only reads: it adds a
-// small wiki block to the game's own item tooltips (backpack and storage, trade, shop bag, cooking, every station's bag), keeps those
+// small wiki block to the game's item tooltips (backpack and storage, trade, shop bag, cooking, every station's bag), keeps those
 // tooltips inside the window, puts Scrap chips and spoil corners on backpack slots, a tag on the pickup list, a quality
-// readout on the brew panel and duration badges on Survival Planning cards, all in the game's own tooltip palette.
+// readout on the brew panel and duration badges on Survival Planning cards, all in the game's tooltip palette.
 // The tooltip block is split into sections (effects, freshness, home count, recipes, sources...) that the player
 // shows always, only while the detail key is held, or never. The game pages come and go as iframes and Vue redraws
 // them at will, so every addition is checked on a short poll and on changes to the tooltip, and put back when gone.
@@ -26,7 +26,7 @@
 
   // The tooltip takes the look of the other Exiled mods (New Loop Plus, More Rewards, Cooking Hub): a warm brown
   // panel with an amber line along its top, amber section headings with a bar before and a fading line after, and
-  // round green and red stat chips. The game's own tooltip is restyled only while it holds our block.
+  // round green and red stat chips. The game's tooltip is restyled only while it holds our block.
   var PANEL = 'background:radial-gradient(ellipse at 12% 0%,rgba(150,100,40,.28),transparent 60%),linear-gradient(180deg,#3a3129,#2b241d 55%,#221c16);' +
     'border:1px solid rgba(220,188,120,.3);border-radius:5px;box-shadow:0 18px 50px rgba(0,0,0,.75),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,230,180,.08)';
   var HAIRLINE = "content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:5px 5px 0 0;background:linear-gradient(90deg,transparent 8%,#ffc83a 50%,transparent 92%);opacity:.75;pointer-events:none";
@@ -83,7 +83,7 @@
     '.slip-own-tip>.slip-tip.slip-hint-only{min-width:0;margin-top:4px;padding-top:0;border-top:0}',
     '.slip-hint-only>.slip-hint{margin-top:0;padding-top:0;border-top:0}',
     '.tooltip.slip-own-fresh>.tooltip-shelf-life{display:none}',
-    // The game's own stat rows and home stock lines say what our Effects and At home sections say, so while ours
+    // The game's stat rows and home stock lines say what our Effects and At home sections say, so while ours
     // show, theirs are hidden. Stat rows are the ones whose value is coloured; the uses row is not and stays.
     '.tooltip.slip-own-effects .tooltip-attr:has(>.value.pos),.tooltip.slip-own-effects .tooltip-attr:has(>.value.neg){display:none}',
     '.tooltip.slip-own-effects .tooltip-attrs:not(:has(>.tooltip-attr>.value:not(.pos):not(.neg))){display:none}',
@@ -618,7 +618,7 @@
     var live = context.page.live;
     var days = liveDaysLeft(context.page);
 
-    // Polluted food keeps the game's own time-left line, so ours would say it twice.
+    // Polluted food keeps the game's time-left line, so ours would say it twice.
     if (days > 0 && !live.expired && !live.polluted) rows.push({ parts: [say('freshLeft', formatDays(days))], cls: days < 1 ? 'slip-bad' : days < 3 ? 'slip-amber' : 'slip-fresh', bar: wiki.life > 0 ? Math.min(1, days / wiki.life) : null });
     else if (days === 0 || (live && live.expired && wiki.life > 0)) rows.push({ parts: [say('spoiled')], cls: 'slip-bad' });
 
@@ -925,7 +925,7 @@
     return el;
   }
 
-  // Page iframes sit two folders below WebUI, so the game's own relative icon path works as it is. A missing icon
+  // Page iframes sit two folders below WebUI, so the game's relative icon path works as it is. A missing icon
   // keeps its square so names stay aligned.
   function refElement(doc, ref) {
     var el = doc.createElement('span');
@@ -949,7 +949,7 @@
     return el;
   }
 
-  // The block's live freshness line replaces the game's own shelf-life line, which says the same in plainer type, and
+  // The block's live freshness line replaces the game's shelf-life line, which says the same in plainer type, and
   // its Effects and At home sections the game's stat rows and home stock lines. Only touched when it changes:
   // re-adding a class still counts as a change to the tooltip's watcher.
   function setOwned(tip, model) {
@@ -966,7 +966,7 @@
 
   // The game places its tooltips as if they were 200x100, so a tall one runs off the bottom. Ours is placed the way
   // the game does it (15px right of and below the cursor), flipped to the other side of the cursor on the axis where it
-  // does not fit and pushed inside the window when neither side does. It runs straight after each of the game's own
+  // does not fit and pushed inside the window when neither side does. It runs straight after each of the game's
   // moves (watchTooltip), before the frame is drawn, so the two never show as a jump.
   function keepOnScreen(win, tip) {
     if (!features.onScreen) return;
@@ -1038,7 +1038,7 @@
     return tip.__slipZoom;
   }
 
-  // The cursor as the page last saw it, read in the capture phase so it is current before the game's own handlers run.
+  // The cursor as the page last saw it, read in the capture phase so it is current before the game's handlers run.
   function trackPointer(win, doc) {
     if (win.__slipPointer) return;
 
@@ -1226,7 +1226,7 @@
 
   // Red for food that spoils within a day. Amber under three days, but only once half the item's shelf life is gone,
   // so food that keeps only a few days when fresh is not amber the moment it is picked up. Items that do not spoil
-  // (the game sends -1) and spoiled ones (the game's own red mask) get nothing.
+  // (the game sends -1) and spoiled ones (the game's red mask) get nothing.
   function spoilLevel(item) {
     var days = item.shelfLifeDays;
     var wiki = facts.wiki[item.cfgId];
@@ -1963,7 +1963,7 @@
     }
   }
 
-  // The station tooltips stand in for the game's own and keep its size, so they pass no zoom.
+  // The station tooltips stand in for the game's and keep its size, so they pass no zoom.
   function zoomOwn(own, zoom) {
     var value = zoom > 0 && Math.abs(zoom - 1) >= 0.005 ? String(zoom) : '';
 
@@ -2116,7 +2116,7 @@
     return lines;
   }
 
-  // Appended after the game's own lines in the hover box; the game sets those by text, so its updates leave ours alone.
+  // Appended after the game's lines in the hover box; the game sets those by text, so its updates leave ours alone.
   // hud marks the pass that drew the box, which tells a later poll this box needs nothing.
   function setRateLines(tip, doc, lines, hud) {
     var box = ownChild(tip, '__slipRate', 'slip-rate');

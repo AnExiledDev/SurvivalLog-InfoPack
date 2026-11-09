@@ -12,7 +12,7 @@ namespace InfoPack.Core;
 /// <param name="SatietyPerBottle">The satiety one bottle takes.</param>
 public sealed record BrewRules(float TierP1, float TierP2, float SatietyPerBottle)
 {
-    /// <summary>The game's own fallbacks, for when its settings cannot be read.</summary>
+    /// <summary>The game's fallbacks, for when its settings cannot be read.</summary>
     public static readonly BrewRules Default = new(0f, 0.5f, 25f);
 }
 

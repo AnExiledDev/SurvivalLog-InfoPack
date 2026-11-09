@@ -46,7 +46,7 @@ public sealed record GameTables(
 /// <summary>One row of the item table, reduced to what the pieces ask about.</summary>
 /// <param name="Category">The game's ItemCategory number (0 None, 1 Food, 4 Electrical, 5 Daily goods, 9 Material).</param>
 /// <param name="IsShreddable">
-/// The game's own IsShredableItem: an id of 20000 or more that is not the tower repair part and not blocked in the demo,
+/// The game's IsShredableItem: an id of 20000 or more that is not the tower repair part and not blocked in the demo,
 /// with a shred recipe, and either a material (category 9) or with a shred recipe whose NoteCategory is 9.
 /// </param>
 /// <param name="IsEdible">CanCook or any food tag: the cooking pot takes it.</param>
