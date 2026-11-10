@@ -1,4 +1,3 @@
-using Jint;
 using Xunit;
 
 namespace InfoPack.Tests;
@@ -13,7 +12,7 @@ public class TaggedTipSizeTests
     [Fact]
     public void A_row_in_a_panel_drawn_at_150_percent_gets_its_tooltip_at_150_percent()
     {
-        var page = new Page();
+        var page = RootPage.WithTooltipsOnScreen();
         page.Run("var p = panel(); sized(p, 1.5); var row = tagged('Fill all', p); hover(row, 100, 100); wait(600)");
 
         Assert.Equal(("block", "Fill all", "1.5"), (page.Text("ownTip().style.display"), page.Text("ownTip().children[0].textContent"), page.Text("ownTip().style.zoom")));
@@ -26,7 +25,7 @@ public class TaggedTipSizeTests
     [Fact]
     public void A_zoomed_tooltip_keeps_its_gap_from_the_cursor_on_screen()
     {
-        var page = new Page();
+        var page = RootPage.WithTooltipsOnScreen();
         page.Run("var p = panel(); sized(p, 2); var row = tagged('Fill all', p); hover(row, 100, 100); wait(600)");
 
         Assert.Equal(("65px", "65px"), (page.Text("ownTip().style.left"), page.Text("ownTip().style.top")));
@@ -35,7 +34,7 @@ public class TaggedTipSizeTests
     [Fact]
     public void A_new_size_while_the_tooltip_shows_is_taken_at_the_next_poll_and_placed_again()
     {
-        var page = new Page();
+        var page = RootPage.WithTooltipsOnScreen();
         page.Run("var p = panel(); sized(p, 1.5); var row = tagged('Fill all', p); hover(row, 100, 100); wait(600)");
 
         page.Run("sized(p, 2); poll()");
@@ -47,7 +46,7 @@ public class TaggedTipSizeTests
     [Fact]
     public void A_row_outside_any_sized_panel_keeps_the_game_size_even_on_a_page_the_game_zoomed()
     {
-        var page = new Page();
+        var page = RootPage.WithTooltipsOnScreen();
         page.Run("document.body.style.zoom = '0.8'; var row = tagged('Fill all'); hover(row, 100, 100); wait(600)");
 
         Assert.Equal(("block", ""), (page.Text("ownTip().style.display"), page.Text("ownTip().style.zoom")));
@@ -56,7 +55,7 @@ public class TaggedTipSizeTests
     [Fact]
     public void Moving_from_a_sized_row_to_a_loose_one_draws_the_tooltip_at_the_game_size_again()
     {
-        var page = new Page();
+        var page = RootPage.WithTooltipsOnScreen();
         page.Run("var p = panel(); sized(p, 2); var first = tagged('Fill all', p); var loose = tagged('Clear'); hover(first, 100, 100); wait(600)");
 
         page.Run("hover(loose, 100, 100); wait(600)");
@@ -69,34 +68,9 @@ public class TaggedTipSizeTests
     [InlineData("window.ExiledUi = { version: 1, size: function () {} }")]
     public void Without_the_Toolkit_or_with_one_older_than_the_ui_size_the_tooltip_keeps_the_game_size(string toolkit)
     {
-        var page = new Page();
+        var page = RootPage.WithTooltipsOnScreen();
         page.Run(toolkit + "; var p = panel(); sized(p, 2); var row = tagged('Fill all', p); hover(row, 100, 100); wait(600)");
 
         Assert.Equal(("block", ""), (page.Text("ownTip().style.display"), page.Text("ownTip().style.zoom")));
-    }
-
-    /// <summary>page.js on TaggedFake.js, with the tooltips kept on screen and the first poll run.</summary>
-    private sealed class Page
-    {
-        private readonly Engine _engine = new();
-
-        public Page()
-        {
-            _engine.Execute(Resource("InfoPack.Tests.TaggedFake.js"));
-            _engine.Execute(Resource("InfoPack.page.js"));
-            _engine.Execute("window.__slinfopack.setFeatures({ onScreen: true }); poll()");
-        }
-
-        public void Run(string statements) => _engine.Execute(statements);
-
-        public string Text(string expression) => _engine.Evaluate($"String({expression})").AsString();
-
-        private static string Resource(string name)
-        {
-            using var stream = typeof(TaggedTipSizeTests).Assembly.GetManifestResourceStream(name) ?? throw new InvalidOperationException(name + " is not embedded in the test assembly");
-            using var reader = new StreamReader(stream);
-
-            return reader.ReadToEnd();
-        }
     }
 }

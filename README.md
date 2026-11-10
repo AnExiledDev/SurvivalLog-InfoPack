@@ -76,16 +76,16 @@ The rule leans towards leaving an item unmarked: when in doubt, it is not called
 
 ## Requirements
 
-- Survival Log 1.1.20151. Built for this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.20719. Built for this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Optional: [Mod Manager](https://www.nexusmods.com/survivallog/mods/73). With it, you can change every setting in game on its Mods screen and see what each one does, without opening the config file.
 - Not together with ItemTotals, unless you turn off `BaseCounts` (see [Replaces ItemTotals](#replaces-itemtotals)).
-- Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start. With 0.10.0 or newer, the tooltips Info Pack shows over another mod's window also take that window's UI size.
+- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.19.0 or newer. Info Pack does not load without it. It passes messages between Info Pack and its tooltips, applies settings changed on the Mod Manager's Mods screen without a restart, and gives the tooltips Info Pack shows over another mod's window that window's UI size.
 
 ## Install
 
 1. Install the [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12) (if no other mods were installed before, start the game once so BepInEx finishes setup, then quit).
-2. Optional, to change settings without a restart: install Exiled's Toolkit. Download `ExiledToolkit-x.y.z.zip` from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61), and extract it into the game folder (the folder with `SurvivalLog.exe`).
+2. Install Exiled's Toolkit. Download `ExiledToolkit-x.y.z.zip` from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61), and extract it into the game folder (the folder with `SurvivalLog.exe`).
 3. Download `InfoPack-x.y.z.zip` from the [latest release](https://github.com/AnExiledDev/SurvivalLog-InfoPack/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/81).
 4. Extract the zip into the game folder (the folder with `SurvivalLog.exe`). It holds a `BepInEx` folder, so the DLL lands in the right place. When asked, merge the folders. The result should be:
    `C:\Program Files (x86)\Steam\steamapps\common\Survival Log\BepInEx\plugins\InfoPack.dll`
@@ -97,13 +97,13 @@ Delete `InfoPack.dll` from the `BepInEx\plugins` folder. For a clean slate, also
 
 ## Configuration
 
-Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, where they take effect at once, or edit the file while the game is closed. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.infopack.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, where they take effect at once, or edit the file while the game is closed. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting.
 
 ## Troubleshooting
 
 Built against BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.17 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read or a page piece that failed each get one line.
+Check `BepInEx\LogOutput.log` for a line starting `===== Info Pack 0.8.18 started`. The `features` line after it lists which pieces are on, and is written again when a setting changes on the Mods screen. The lines after it say when the item facts were built for a loaded game (how many items, which language, whether the player was found yet, and how long it took). A game table that could not be read or a page piece that failed each get one line.
 
 The same lines are in `BepInEx\info-pack.log`, which survives restarts.
 
@@ -119,6 +119,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.18: Uses Exiled's Toolkit for its shared parts, so it now needs Exiled's Toolkit 0.19.0 or newer. Made for Survival Log 1.1.20719.
 - 0.8.17: Clearer description for the CookingCodex setting.
 - 0.8.16: Tooltips over another mod's window take that window's UI size (Exiled's Toolkit 0.10.0 or newer).
 - 0.8.15: Less stutter, and no hitch when a save loads or the language changes.
@@ -149,18 +150,18 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Build
 
-This is a BepInEx 6 IL2CPP plugin. It compiles against BepInEx and the game's IL2CPP interop assemblies, so a game install with BepInEx set up and started once is required. Those assemblies come from the game and are not part of this repo. The .NET 8 SDK is required.
+This is a BepInEx 6 IL2CPP plugin. It compiles against BepInEx, the game's IL2CPP interop assemblies and Exiled's Toolkit, so a game install with BepInEx set up and started once is required. Those assemblies are not part of this repo. The .NET 8 SDK is required.
 
 ```
-dotnet build src/InfoPack -c Release -p:GameDir="C:\path\to\Survival Log"
+dotnet build src/InfoPack -c Release -p:GameDir="C:\path\to\Survival Log" -p:ToolkitDll="C:\path\to\ExiledToolkit.dll"
 ```
 
-`GameDir` is the game folder. The default in the project file is a local path you will almost certainly need to override. The output DLL is at `src\InfoPack\bin\Release\InfoPack.dll`.
+`GameDir` is the game folder and `ToolkitDll` is a built `ExiledToolkit.dll`. The defaults in the project file are local paths you will almost certainly need to override. The output DLL is at `src\InfoPack\bin\Release\InfoPack.dll`.
 
-The unit tests cover the pure rules (home counts and where items are kept, brew tiers, the scrap rule, the planning badges and the tooltip settings) and need nothing from the game:
+The unit tests cover the pure rules (home counts and where items are kept, brew tiers, the scrap rule, the planning badges and the tooltip settings) and need nothing from the game. They use a few files from Exiled's Toolkit's source, found from `ToolkitDll` (the folder its `bin\Release` sits in):
 
 ```
-dotnet test tests/InfoPack.Tests
+dotnet test tests/InfoPack.Tests -p:ToolkitDll="C:\path\to\ExiledToolkit.dll"
 ```
 
 ## License

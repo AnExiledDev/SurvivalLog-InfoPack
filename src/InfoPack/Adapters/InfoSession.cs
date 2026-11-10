@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ExiledToolkit.Game;
+using ExiledToolkit.Kit;
+using ExiledToolkit.Web;
 using GameCore.HotUpdate.Battle.Logic;
 using InfoPack.Core;
 
@@ -28,7 +31,8 @@ internal sealed class InfoSession
 
     private Features _features;
     private readonly TipKeys _keys;
-    private readonly WebPage _page;
+    private readonly InfoPage _page;
+    private readonly PageMailbox _messages = PageInbox.Listen(PageCommand.Prefix);
     private readonly GameTableReader _tables;
     private readonly GameTextReader _text;
     private readonly Action<string> _log;
@@ -57,7 +61,7 @@ internal sealed class InfoSession
     private bool _hasSentFacts;
     private bool _hasReportedWhereFailure;
 
-    public InfoSession(Features features, TipKeys keys, WebPage page, GameTableReader tables, GameTextReader text, Action<string> log)
+    public InfoSession(Features features, TipKeys keys, InfoPage page, GameTableReader tables, GameTextReader text, Action<string> log)
     {
         _features = features;
         _keys = keys;
@@ -111,8 +115,10 @@ internal sealed class InfoSession
 
     private void TakePageCommands()
     {
-        while (PageMessages.TryTake(out var command))
+        while (_messages.TryTake(out var message))
         {
+            var command = PageCommand.Parse(message);
+
             switch (command)
             {
                 case PageCommand.Ready:

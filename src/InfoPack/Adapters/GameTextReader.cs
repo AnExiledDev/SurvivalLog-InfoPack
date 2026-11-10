@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using InfoPack.Core;
 
@@ -17,25 +18,15 @@ internal sealed class GameTextReader : IGameText
     private ConfigManager? _config;
 
     /// <summary>The language the game shows, or null before its settings exist. A plain field read on the game's side.</summary>
-    public string? LanguageKey() => GameSingleton.Existing<SettingManager>()?.GetLanguageKey();
+    public string? LanguageKey() => GameLanguage.Key() is { Length: > 0 } key ? key : null;
 
-    public bool IsChinese()
-    {
-        try
-        {
-            return GameSingleton.Existing<SettingManager>()?.IsChinese() == true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
+    public bool IsChinese() => GameLanguage.IsChinese();
 
     public string? LocalText(string key)
     {
         var config = Config();
 
-        return config == null ? null : Clean(Translate(config, key));
+        return config == null ? null : Clean(GameNames.Translate(config, key));
     }
 
     public string? Description(int itemId)
@@ -45,7 +36,7 @@ internal sealed class GameTextReader : IGameText
 
         if (config == null || table == null || !table.TryGetValue(itemId, out var item) || item == null) return null;
 
-        return Clean(Translate(config, item.ItemDes1)) ?? Clean(item.ItemDes1_Local);
+        return Clean(GameNames.Translate(config, item.ItemDes1)) ?? Clean(item.ItemDes1_Local);
     }
 
     public string? ItemName(int itemId)
@@ -55,7 +46,7 @@ internal sealed class GameTextReader : IGameText
 
         if (config == null || table == null || !table.TryGetValue(itemId, out var item) || item == null) return null;
 
-        return Clean(Translate(config, item.ItemName)) ?? Clean(item.ItemName_Local);
+        return Clean(GameNames.Translate(config, item.ItemName)) ?? Clean(item.ItemName_Local);
     }
 
     public string? FurnitureName(int furnitureId)
@@ -65,7 +56,7 @@ internal sealed class GameTextReader : IGameText
 
         if (config == null || table == null || !table.TryGetValue(furnitureId, out var furniture) || furniture == null) return null;
 
-        return Clean(Translate(config, furniture.Name)) ?? Clean(furniture.Name_Local);
+        return Clean(GameNames.Translate(config, furniture.Name)) ?? Clean(furniture.Name_Local);
     }
 
     public string? PlaceName(int placeId)
@@ -75,7 +66,7 @@ internal sealed class GameTextReader : IGameText
 
         if (config == null || table == null || !table.TryGetValue(placeId, out var place) || place == null) return null;
 
-        return Clean(Translate(config, place.Name)) ?? Clean(place.Name_Local);
+        return Clean(GameNames.Translate(config, place.Name)) ?? Clean(place.Name_Local);
     }
 
     /// <summary>
@@ -91,16 +82,6 @@ internal sealed class GameTextReader : IGameText
         if (_config == null || _config.Pointer != pointer) _config = GameSingleton.Existing<ConfigManager>();
 
         return _config;
-    }
-
-    /// <summary>The game's lookup hands the key back when it has no text for it.</summary>
-    private static string? Translate(ConfigManager config, string? key)
-    {
-        if (string.IsNullOrEmpty(key)) return null;
-
-        var text = config.GetLocalTxt(key);
-
-        return string.IsNullOrEmpty(text) || text == key ? null : text;
     }
 
     private static string? Clean(string? text)

@@ -5,11 +5,13 @@
 // The tooltip block is split into sections (effects, freshness, home count, recipes, sources...) that the player
 // shows always, only while the detail key is held, or never. The game pages come and go as iframes and Vue redraws
 // them at will, so every addition is checked on a short poll and on changes to the tooltip, and put back when gone.
-// Talks to the plugin through vuplex.postMessage("slmod|infopack|<verb>") and is driven by window.__slinfopack.
+// Talks to the plugin through Exiled's Toolkit's send("slmod|infopack|<verb>") and is driven by window.__slinfopack.
 (function () {
   if (window.__slinfopack) return;
 
   var PREFIX = 'slmod|infopack|';
+  // Exiled's Toolkit's page API, once it has loaded. Until then nothing is sent and no style is added.
+  var etk = null;
   var POLL_MS = 250;
   var INSTANCE_RETRY_MS = 3000;
   var WHERE_RETRY_MS = 2000;
@@ -183,9 +185,7 @@
   var pageFrames = document.getElementsByTagName('iframe');
 
   function send(message) {
-    try {
-      if (window.vuplex) window.vuplex.postMessage(PREFIX + message);
-    } catch (e) {}
+    if (etk) etk.send(PREFIX, message);
   }
 
   // One note per kind of failure, so a page a game update reshaped says so once instead of every poll.
@@ -1083,21 +1083,9 @@
   // Checked on every poll, so once it is in place the check is one property read: comparing the sheet's text each
   // time would copy all of it.
   function addStyle(doc) {
-    if (doc.__slipStyle && doc.__slipStyle.isConnected) return;
+    if (!etk || (doc.__slipStyle && doc.__slipStyle.isConnected)) return;
 
-    var style = doc.getElementById('slip-style');
-
-    if (!doc.head) return;
-
-    if (!style) {
-      style = doc.createElement('style');
-      style.id = 'slip-style';
-      doc.head.appendChild(style);
-    }
-
-    if (style.textContent !== CSS) style.textContent = CSS;
-
-    doc.__slipStyle = style;
+    doc.__slipStyle = etk.addStyle(doc, 'slip-style', CSS);
   }
 
   function vueSetup(doc) {
@@ -2231,5 +2219,11 @@
     // Other mods check this before leaving their data-slip-tip, data-slip-name and data-slip-note tooltips to this mod.
     tags: ['item', 'name', 'tip', 'note']
   };
-  send('ready');
+
+  // The plugin hears the page only through Exiled's Toolkit, so the page says it is ready once the Toolkit's page
+  // API is there, whichever of the two scripts the game ran first.
+  (window.ExiledToolkitReady = window.ExiledToolkitReady || []).push(function (api) {
+    etk = api;
+    send('ready');
+  });
 })();

@@ -1,5 +1,5 @@
 // A fake root page for page.js's own tooltip on other mods' tagged rows: elements with a box, the cursor, timers and a
-// clock the tests move, and a fake Exiled's Toolkit that sizes panels.
+// clock the tests move, the bridge the page sends its messages on, and a fake Exiled's Toolkit that sizes panels.
 var window = this;
 var now = 100000;
 Date.now = function () { return now; };
@@ -172,6 +172,18 @@ window.innerWidth = 1920;
 window.innerHeight = 1080;
 window.getComputedStyle = function (el) { return { zoom: el.style.zoom || '1' }; };
 window.addEventListener = function () {};
+
+// The game's bridge to the plugin: every message the page sends, in order.
+var sent = [];
+window.vuplex = { postMessage: function (message) { sent.push(String(message)); } };
+
+function readyCount() {
+  return sent.filter(function (m) { return m === 'slmod|infopack|ready'; }).length;
+}
+
+function slipStyles() {
+  return document.head.children.filter(function (el) { return el.id === 'slip-style'; });
+}
 
 // The cursor arriving on target at x, y.
 function hover(target, x, y) {

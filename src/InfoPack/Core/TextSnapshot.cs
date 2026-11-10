@@ -6,7 +6,7 @@ namespace InfoPack.Core;
 /// The game text the facts use, copied once so the facts can be built away from the game's thread: the description
 /// and name of every item, the name of every furniture kind that holds loot and of every place furniture is set down
 /// at, the text of every bait kind, and whether the game shows Chinese. Filled a step at a time, one lookup each, so
-/// a <see cref="SlicedJob"/> can spread the lookups over frames; a fill cut short carries on where it stopped. Text the
+/// a <see cref="ExiledToolkit.Kit.SlicedJob"/> can spread the lookups over frames; a fill cut short carries on where it stopped. Text the
 /// copy does not hold reads as missing, as the game's would.
 /// </summary>
 public sealed class TextSnapshot : IGameText

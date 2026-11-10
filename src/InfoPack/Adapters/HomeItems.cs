@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.ReduxUI;
@@ -316,20 +317,10 @@ internal sealed unsafe class HomeItems : IHomeItems
         var table = config._Config_Furniture_Dict;
         var name = table != null && table.TryGetValue(configId, out var row) ? row?.Name : null;
 
-        return Translate(config, name) ?? NonEmpty(name);
+        return GameNames.Translate(config, name) ?? GameNames.NonEmpty(name);
     }
 
-    /// <summary>The game's lookup hands the key back when it has no text for it.</summary>
-    private static string? Translate(ConfigManager config, string? key)
-    {
-        if (string.IsNullOrEmpty(key)) return null;
-
-        return NonEmpty(config.GetLocalTxt(key)) is { } text && text != key ? text : null;
-    }
-
-    private static string? ConstantText(string textId) => NonEmpty(ConstantTextTools.ToConstantTextOrEmpty(textId));
-
-    private static string? NonEmpty(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;
+    private static string? ConstantText(string textId) => GameNames.NonEmpty(ConstantTextTools.ToConstantTextOrEmpty(textId));
 
     private Il2CppItems? ItemCache() =>
         GameSingleton.Existing<ReduxUISystem>()?.GetData<State_Data_Item>(_itemStateType ??= Il2CppType.Of<State_Data_Item>())?.OwnerCache;

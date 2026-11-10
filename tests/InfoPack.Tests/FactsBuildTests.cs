@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ExiledToolkit.Kit;
 using InfoPack.Core;
 using Xunit;
 using static InfoPack.Tests.Rows;

@@ -1,25 +1,24 @@
-using System.IO;
 using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
+using ExiledToolkit;
+using ExiledToolkit.Kit;
+using ExiledToolkit.Web;
 using InfoPack.Adapters;
 using InfoPack.Core;
 
 namespace InfoPack;
 
 [BepInPlugin(Guid, "Info Pack", Version)]
-[BepInDependency(OptionalLive.ToolkitGuid, BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency(ExiledToolkit.Plugin.Guid, ">=0.19.0")]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.infopack";
-    private const string Version = "0.8.17";
+    private const string Version = "0.8.18";
 
     public override void Load()
     {
-        if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
-
         var baseCounts = Config.Bind("Features", "BaseCounts", true,
             "When on (the default), item tooltips in the backpack, storage, trade and cooking windows get an 'At home' section with how many of that item are in your backpack, every storage at home and the workbench drawer. Turn it off if you also use the ItemTotals mod, so tooltips don't show two counts.\n" +
             "开启时（默认），背包、储物、交易和烹饪界面的物品提示会多一栏「家中」，显示这件物品在背包、家里所有储物家具和工作台抽屉里一共有多少。如果同时装了 ItemTotals 模组，请关闭此项，免得提示里出现两行数量。");
@@ -52,7 +51,7 @@ public sealed class Plugin : BasePlugin
             "开启时（默认），悬停界面上的饱腹条，会显示家中食物大约够你吃几天。按家中所有食物的饱腹值和你饿的速度估算，不计腐坏和烹饪。");
         var featureSettings = new ConfigEntryBase[] { baseCounts, tradeStats, alcoholQuality, scrapOnly, cookingCodex, planningBadges, wanted, neverTried, statRates, foodForecast };
         var tooltip = new TooltipConfig(Config);
-        var log = new InfoLog(Log, Path.Combine(Paths.BepInExRootPath, "info-pack.log"));
+        var log = new ModLog(Log, "info-pack.log");
 
         log.Write($"===== Info Pack {Version} started");
 
@@ -67,15 +66,21 @@ public sealed class Plugin : BasePlugin
             FoodForecast = foodForecast.Value,
         };
 
-        var harmony = new Harmony(Guid);
+        // Without the Toolkit's hook the page's messages never arrive, so a session would only send the install check forever.
+        if (!PageInbox.IsListening)
+        {
+            const string stayingOff = "Exiled's Toolkit cannot hear page script messages, so Info Pack stays off";
 
-        // Without the patch the page's messages never arrive, so a session would only re-post the install check forever.
-        if (!PageMessages.Apply(harmony, log.Write)) return;
+            Log.LogError(stayingOff);
+            log.WriteFileOnly(stayingOff);
+
+            return;
+        }
 
         var keys = new TipKeys(tooltip.DetailKey.Value, tooltip.WhereKey.Value);
-        var session = new InfoSession(ReadFeatures(), keys, new WebPage(log.Write), new GameTableReader(log.Write), new GameTextReader(), log.Write);
+        var session = new InfoSession(ReadFeatures(), keys, new InfoPage(log.Write), new GameTableReader(log.Write), new GameTextReader(), log.Write);
 
-        OptionalLive.Watch(() =>
+        LiveSettings.Watch(() =>
         {
             var features = ReadFeatures();
 

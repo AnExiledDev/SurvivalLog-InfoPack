@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using Il2CppInterop.Runtime.InteropTypes;
@@ -11,7 +12,7 @@ namespace InfoPack.Adapters;
 /// <summary>
 /// Copies what the facts need out of the game's config tables into plain data. Read only. Each table is read on its
 /// own, so one the game changed shape on costs only the pieces built from it: a table that fails reads as empty and is
-/// logged once. The reading is a list of steps, one table row each, so a <see cref="SlicedJob"/> can spread it over
+/// logged once. The reading is a list of steps, one table row each, so a <see cref="ExiledToolkit.Kit.SlicedJob"/> can spread it over
 /// frames. The copy is kept while none of the tables it came from changed, so a save load or a language change reads
 /// them again only to check that; the brewing and fuel numbers follow the player's talents and are read every time.
 /// </summary>

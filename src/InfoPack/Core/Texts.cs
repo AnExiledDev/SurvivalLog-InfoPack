@@ -1,12 +1,7 @@
 using System.Collections.Generic;
+using ExiledToolkit.Kit;
 
 namespace InfoPack.Core;
-
-/// <summary>One piece of on-screen text in the two languages the game ships.</summary>
-public readonly record struct Phrase(string En, string Zh)
-{
-    public string Pick(bool isChinese) => isChinese ? Zh : En;
-}
 
 /// <summary>
 /// The words the page script puts on screen. {0}, {1} and so on are filled in by the page: the brew
