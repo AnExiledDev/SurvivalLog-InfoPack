@@ -23,11 +23,11 @@ internal sealed class TooltipConfig
     {
         _modes = TipSections.DefaultOrder.ToDictionary(section => section, section => BindMode(config, section));
         _order = config.Bind(Section, "Order", TipOrder.DefaultText, new ConfigDescription(
-            "The order of the sections in the Info Pack part of item tooltips, as section names separated by commas. Names are the ones these settings use: Effects, Fresh, Notes, Home, UsedIn, Grow, Value, MadeFrom, Breaks, Fuel, FoundIn, About. A section left out keeps its usual place after the ones named; an unknown or repeated name is ignored.\n" +
-            "物品提示中 Info Pack 部分各栏的顺序，用英文逗号分隔栏目名称。名称与这些设置的名称相同：Effects、Fresh、Notes、Home、UsedIn、Grow、Value、MadeFrom、Breaks、Fuel、FoundIn、About。没写到的栏目按原有顺序排在后面；不认识或重复的名称会被忽略。",
+            "The order of the sections in the Info Pack part of item tooltips, as section names separated by commas. Names are the ones these settings use: Effects, Fresh, Notes, Home, UsedIn, Grow, Value, MadeFrom, Breaks, Fuel, FoundIn, About. Sections you leave out go after the ones you name, in their usual order. Unknown or repeated names are ignored.\n" +
+            "物品提示中 Info Pack 部分各栏的顺序，用英文逗号分隔栏目名称。名称与这些设置的名称相同：Effects、Fresh、Notes、Home、UsedIn、Grow、Value、MadeFrom、Breaks、Fuel、FoundIn、About。没写到的栏目按原有顺序排在后面。不认识或重复的名称会被忽略。",
             null, Advanced));
         DetailKey = config.Bind(Section, "DetailKey", KeyCode.LeftShift,
-            "Hold this key over an item to see the sections set to Detail, and every row of long lists. The tooltip shows a hint naming the key when there is more to see. Either side of Shift, Ctrl or Alt works.\n" +
+            "Hold this key over an item to see the sections set to Detail, and all the rows of long lists. The tooltip shows a hint naming the key when there is more to see. Either side of Shift, Ctrl or Alt works.\n" +
             "在物品上按住此键，可查看设为 Detail 的栏目以及长列表的全部内容。有更多内容时，提示底部会显示此键的名称。Shift、Ctrl、Alt 左右两侧都可以。");
         WhereKey = config.Bind(Section, "WhereKey", KeyCode.LeftControl,
             "Hold this key over an item to see the whole tooltip, as DetailKey does, and which storages at home hold it and how many each one has, under the home count. Either side of Shift, Ctrl or Alt works.\n" +
@@ -65,7 +65,7 @@ internal sealed class TooltipConfig
         var defaultMode = TipSections.DefaultMode(section).ToString();
 
         return config.Bind(Section, section.ToString(), defaultMode, new ConfigDescription(
-            $"When item tooltips show {shown.En}. Always: every time. Detail: only while DetailKey or WhereKey is held. Off: never. {defaultMode} by default.\n" +
+            $"Sets when item tooltips show {shown.En}. Always: every time. Detail: only while DetailKey or WhereKey is held. Off: never. {defaultMode} by default.\n" +
             $"物品提示何时显示{shown.Zh}。Always：一直显示。Detail：仅在按住 DetailKey 或 WhereKey 时显示。Off：不显示。默认为 {defaultMode}。",
             new AcceptableValueList<string>(SectionModes.Choices), Advanced));
     }
@@ -92,7 +92,7 @@ internal sealed class TooltipConfig
         TipSection.Breaks => new("the Breaks down into section: what shredding, cutting or rotting turns the item into",
             "「可分解为」一栏：粉碎、切割或腐烂后会变成什么"),
         TipSection.Fuel => new("the Fuel section: the item's burn value as fuel, and how long one burns in a cooking pot, a heater and a fuel generator",
-            "「燃料」一栏：作为燃料的燃烧值，以及一个在灶具、暖炉和燃料发电机里能烧多久"),
+            "「燃料」一栏：作为燃料的燃烧值，以及一个在灶具、取暖器和燃油发电机里能烧多久"),
         TipSection.FoundIn => new("the Found in section: the furniture the item can turn up in while searching, and where that furniture stands",
             "「搜寻来源」一栏：搜寻时可能找到这件物品的家具，以及这些家具所在的地点"),
         TipSection.About => new("the About section: the item's description",

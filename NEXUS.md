@@ -1,25 +1,25 @@
 Name: Info Pack
-Summary: Turns Survival Log's item tooltips into a small wiki: effects, freshness, home counts, what an item is used in and made from, and where it is found. Flags the food you crave, what relief requests still need and food you never tried. HUD stat bars show how fast they drop and how long the food at home lasts. Trade stats and brew quality too.
+Summary: Turns Survival Log's item tooltips into a small wiki: effects, freshness, home counts, what an item is used in and made from, and where it is found. Flags the food you crave, what relief requests still need and food you never tried. HUD stat bars show how fast they drop and how long the food at home lasts. It also shows trade stats and brew quality.
 
 Description (BBCode):
 [center][img]https://sldb.core-directive.com/media/save/1-save-safe.png[/img][/center]
 
-Survival Log knows a lot it never shows you. Info Pack adds that information to the game's tooltips and windows, in the game's style. It only shows things; it never changes an item, a stat or a save.
+Survival Log knows a lot it never shows you. Info Pack adds that information to the game's tooltips and windows, in the game's style. It only shows things. It never changes an item, a stat or a save.
 
 [size=5]Main features[/size]
 [list]
-[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one tidy Info Pack block below the game's lines, split into sections. Effects (green for gains, red for losses) and Freshness (time left, shelf life, what it rots into) show at once. Hold Shift or Ctrl for the rest: At home, Used in (with how many you can make now, and each dish's cook time and what eating it does, best dishes first), Growing for seeds, Value, Made from, Breaks down into, Fuel (with how long it burns in a cooking pot, heater or generator), Found in and About. Sections with nothing to say are left out.[/*]
-[*][b]Where is it?[/b]: hold Ctrl over an item to see which storages at home hold it and how many each has.[/*]
-[*][b]What the game wants[/b]: the food you are craving says "You're craving this", and an item a relief request still needs says how many more, with a gold star on its backpack slot. Food and drink you have never had say "Never tried". Robot modules show their level and bait its kind.[/*]
+[*][b]Tooltip wiki[/b]: item tooltips in the backpack, storage, trade and cooking windows get one Info Pack block below the game's lines, split into sections. Effects (green for gains, red for losses) and Freshness (time left, shelf life, what it rots into) show at once. Hold Shift or Ctrl for the rest: At home, Used in (with how many you can make now, and each dish's cook time and what eating it does, best dishes first), Growing for seeds, Value, Made from, Breaks down into, Fuel (with how long it burns in a cooking pot, heater or generator), Found in and About. Sections with nothing to say are left out.[/*]
+[*][b]Where it's stored[/b]: hold Ctrl over an item to see which storages at home hold it and how many each has.[/*]
+[*][b]Cravings and relief requests[/b]: the food you are craving says "You're craving this", and an item a relief request still needs says how many more, with a gold star on its backpack slot. Food and drink you have never had say "Never tried". Robot modules show their level, and bait shows what kind it is.[/*]
 [*][b]Stat bars[/b]: hover a stat bar on the HUD to see how much it drops per game hour and about how long until it is empty. The satiety bar also shows about how many days the food at home lasts you.[/*]
 [*][b]Spoil badges[/b]: food about to spoil gets a small coloured corner on its slot: red within a day, amber within three days once half its shelf life is gone.[/*]
-[*][b]Tooltips stay on screen[/b]: tall tooltips no longer run off the bottom of the window.[/*]
+[*][b]Tooltips stay on screen[/b]: a tooltip that would run past the edge of the window is moved back inside it.[/*]
 [*][b]Home counts[/b]: item tooltips in the backpack, storage, trade and cooking windows show an At home section, counting your bag, every storage at home except the neighbor's basket, and the workbench drawer.[/*]
 [*][b]Trade stats[/b]: see what a trader's item does to satiety, mood, energy, health and life before you buy it.[/*]
 [*][b]Brew quality[/b]: a brewed drink's tooltip shows its tier, like "Brew quality: 2 of 3". While setting up a brew, the brew panel shows the quality score and what the next tier needs. Brewable items show the drink and quality a barrel of only that item gives, and the satiety and mood each adds to a brew.[/*]
 [*][b]Scrap only[/b]: items only worth breaking down get an "Only useful as scrap" line, a Scrap chip on backpack slots and a Scrap tag in the pickup list.[/*]
 [*][b]Cooking codex[/b]: hover an ingredient or recipe in the cooking window to see its description and stats.[/*]
-[*][b]Planning badges[/b]: cards on the Survival Planning screen get a badge on their picture. Timed cards show how long they last, like "3d" or "24h"; cards that take effect once show "1x". Permanent cards get none. A few cards have a second stage the badge does not count, such as Knuckle Down, which gives 3 Survival Points a day for five days and then takes 1 a day for five more.[/*]
+[*][b]Planning badges[/b]: cards on the Survival Planning screen get a badge on their picture. Timed cards show how long they last, like "3d" or "24h". Cards that take effect once show "1x". Permanent cards get none. A few cards have a second stage the badge does not count, such as Knuckle Down, which gives 3 Survival Points a day for five days and then takes 1 a day for five more.[/*]
 [/list]
 Every piece can be turned off on its own in the config. Each tooltip section can show always, only while Shift is held, or never, in the order you choose. The two keys, Shift for more and Ctrl for where, can be changed in the config.
 
@@ -47,7 +47,7 @@ Works in English and Chinese.
 [list]
 [*]Survival Log 1.1.20719. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
-[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 or newer. Info Pack does not load without it. It passes messages between Info Pack and its tooltips, applies settings changed on the Mod Manager's Mods screen without a restart, and gives the tooltips Info Pack shows over another mod's window that window's UI size.[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 or newer. Info Pack does not load without it. It passes messages between Info Pack and its tooltips, applies settings changed on the Mod Manager's Mods screen without a restart, and makes Info Pack's tooltips over another mod's window match that window's UI size.[/*]
 [*]Optional: [url=https://www.nexusmods.com/survivallog/mods/73]Mod Manager[/url]. With it, you can change every setting in game on its Mods screen and see what each one does, without opening the config file.[/*]
 [/list]
 
@@ -65,19 +65,20 @@ Works in English and Chinese.
 Delete [font=Courier New]InfoPack.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder.
 
 [size=5]Configuration[/size]
-To turn off any piece, edit [font=Courier New]BepInEx\config\com.dev.survivallog.infopack.cfg[/font] while the game is closed, or do it in game on the Mod Manager's Mods screen, where changes take effect at once (see [url=https://github.com/AnExiledDev/SurvivalLog-InfoPack/blob/main/CONFIG.md]CONFIG.md[/url] for every setting; the cfg file explains each setting in English and Chinese).
+To turn off any piece, edit [font=Courier New]BepInEx\config\com.dev.survivallog.infopack.cfg[/font] while the game is closed, or do it in game on the Mod Manager's Mods screen, where changes take effect at once. [url=https://github.com/AnExiledDev/SurvivalLog-InfoPack/blob/main/CONFIG.md]CONFIG.md[/url] lists every setting, and the cfg file explains each one in English and Chinese.
 
 [size=5]Feedback[/size]
 Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url], or post in this page's Posts tab. For bugs, please include [font=Courier New]BepInEx\LogOutput.log[/font] and [font=Courier New]BepInEx\info-pack.log[/font].
-To reach me directly, message [b]exiled.dev[/b] on Discord; you can find me in the [url=https://discord.gg/MZGg4gQAUe]official Survival Log Discord[/url]. I'm also on X as [url=https://x.com/AnExiledDev]@AnExiledDev[/url].
+To reach me directly, message [b]exiled.dev[/b] on Discord. You can find me in the [url=https://discord.gg/MZGg4gQAUe]official Survival Log Discord[/url]. I'm also on X as [url=https://x.com/AnExiledDev]@AnExiledDev[/url].
 
 [size=5]Changelog[/size]
 [list]
+[*]0.8.19: Clearer wording in the settings, in the brewing lines on tooltips and in the brew panel. Made for Survival Log 1.1.20719.[/*]
 [*]0.8.18: Uses Exiled's Toolkit for its shared parts, so it now needs Exiled's Toolkit 0.19.0 or newer. Made for Survival Log 1.1.20719.[/*]
 [*]0.8.17: Clearer description for the CookingCodex setting.[/*]
 [*]0.8.16: Tooltips over another mod's window take that window's UI size (Exiled's Toolkit 0.10.0 or newer).[/*]
 [*]0.8.15: Less stutter, and no hitch when a save loads or the language changes.[/*]
-[*]0.8.14: Less stutter: the home is counted once per check, and foods you have already eaten are not looked up again.[/*]
+[*]0.8.14: Less stutter. Info Pack counts your home half as often and stops checking foods you have already eaten.[/*]
 [*]0.8.13: Neighbor Basket's station shows Info Pack tooltips with the progress each item adds.[/*]
 [*]0.8.12: Tooltips use the game's effect numbers, and hide the game's effect and home lines where Info Pack shows them.[/*]
 [*]0.8.11: The At home count shows on every tooltip again, without holding Shift.[/*]
@@ -86,7 +87,7 @@ To reach me directly, message [b]exiled.dev[/b] on Discord; you can find me in t
 [*]0.8.8: Tooltips are shorter: only Effects and Freshness show until you hold Shift or Ctrl.[/*]
 [*]0.8.7: Item tooltips show in Storage Hub's panel too.[/*]
 [*]0.8.6: The cooking screen's tooltips start with the name in gold above the details, with no plain copy of the stats.[/*]
-[*]0.8.5: Shift and Ctrl work on Home tab tooltips; Crafting Hub's buttons and materials get tooltips.[/*]
+[*]0.8.5: Shift and Ctrl work on Home tab tooltips, and Crafting Hub's buttons and materials get tooltips.[/*]
 [*]0.8.4: Item tooltips show on Storage Hub's Home tab too, beside a station or the bag.[/*]
 [*]0.8.3: A new look for the tooltip: a warm brown panel, amber section headings, round stat chips, a freshness bar and stat chips under each dish. Talents count in fuel and brew numbers right after a save loads.[/*]
 [*]0.8.2: Tooltips work while a station is open (generator, heater, brewing barrel, workbench and the rest), and the HUD stat bar lines also show in the Stats UI mod's tooltip.[/*]
@@ -97,7 +98,7 @@ To reach me directly, message [b]exiled.dev[/b] on Discord; you can find me in t
 [*]0.5.0: Item tooltips work like a small wiki, split into sections: effects, freshness, home count, what the item is used in, growing, and on Shift its value, what it is made from and breaks down into, its fuel value, where it is found and its description. Hold Ctrl for which storages hold an item. Each section can show always, only on Shift or never, in the order you choose. Tooltips stay on screen, and food about to spoil gets a badge on its slot.[/*]
 [*]0.3.2: The hide looted highlights setting is removed. The game's grey outline for searched containers works better, so the mod no longer touches container outlines. If your config file still lists HideLootedHighlights, it does nothing and can be deleted.[/*]
 [*]0.3.1: The mod's own tooltip lines and tags now show in Chinese when the game is in Chinese, and the setting descriptions use the same words. Built for game version 1.1.18902.[/*]
-[*]0.3.0: New planning badges: cards on the Survival Planning screen show how long they last ("3d", "24h") or "1x" for a one-time effect, so timed and permanent cards are easy to tell apart. On by default; turn off PlanningBadges in the config to hide them.[/*]
+[*]0.3.0: New planning badges: cards on the Survival Planning screen show how long they last ("3d", "24h") or "1x" for a one-time effect, so timed and permanent cards are easy to tell apart. It is on by default. Turn off PlanningBadges in the config to hide them.[/*]
 [*]0.2.2: The setting descriptions are shorter and plainer, and each one now has a Simplified Chinese line. No setting or default changed.[/*]
 [*]0.2.1: Hide looted highlights is turned off by default after a crash on expeditions, and reworked to hook a safer spot. If you used 0.2.0, your config file still has it on: set HideLootedHighlights to false to turn it off.[/*]
 [/list]
@@ -108,16 +109,16 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-InfoPack]
 [line]
 [size=5]简体中文[/size]
 
-Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信息加进游戏自己的提示和窗口里，风格和游戏一致。它只显示信息，从不改动物品、属性或存档。
+Survival Log 知道很多信息，却从不显示给你。Info Pack 把这些信息加进游戏的提示和窗口里，风格和游戏一致。它只显示信息，从不改动物品、属性或存档。
 
 [size=5]主要功能[/size]
 [list]
-[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏自带内容下方加上一块整齐的 Info Pack 信息，分为几栏。「效果」（增加为绿色，减少为红色）和「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）直接显示。按住 Shift 或 Ctrl 可查看其余各栏：「家中」、「用途」（以及现在能做几份、每道菜的烹饪时间和食用效果，效果最好的菜排在前面）、种子的「种植」、「价值」、「获取方式」、「可分解为」、「燃料」（以及在灶具、取暖器和发电机中能烧多久）、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
+[*][b]提示图鉴[/b]：背包、储物、交易和烹饪界面的物品提示，会在游戏原有内容下方加上一块 Info Pack 信息，分为几栏。「效果」（增加为绿色，减少为红色）和「保质期」（剩余时间、新鲜时的保质期、会腐烂成什么）直接显示。按住 Shift 或 Ctrl 可查看其余各栏：「家中」、「用途」（以及现在能做几份、每道菜的烹饪时间和食用效果，效果最好的菜排在前面）、种子的「种植」、「价值」、「获取方式」、「可分解为」、「燃料」（以及在灶具、取暖器和发电机中能烧多久）、「搜寻来源」和「描述」。没有内容的栏目不会显示。[/*]
 [*][b]放在哪里[/b]：在物品上按住 Ctrl，可以看到家里哪些储物家具放着它，以及各有多少。[/*]
-[*][b]游戏想要什么[/b]：你正想吃的食物会显示「正想吃这个」；救助委托还需要的物品会显示还差几个，背包格子上还有一颗金色星星。从没吃过的食物和饮品会显示「从没尝过」。机器人模块显示等级，诱饵显示种类。[/*]
+[*][b]想吃的食物和救助委托[/b]：你正想吃的食物会显示「正想吃这个」；救助委托还需要的物品会显示还差几个，背包格子上还有一颗金色星星。从没吃过的食物和饮品会显示「从没尝过」。机器人模块显示等级，诱饵显示种类。[/*]
 [*][b]状态条[/b]：悬停界面上的状态条，可以看到它每个游戏小时下降多少，以及大约多久后耗尽。饱腹条还会显示家中食物大约够你吃几天。[/*]
 [*][b]腐败角标[/b]：快要腐败的食物，格子上会显示一个彩色小角标：一天内腐败为红色，三天内腐败且保质期已过半为橙色。[/*]
-[*][b]提示不出屏幕[/b]：变高的提示不会再超出窗口底部。[/*]
+[*][b]提示不出屏幕[/b]：会超出窗口边缘的提示会被移回窗口内。[/*]
 [*][b]家中数量[/b]：背包、储物、交易和烹饪界面的物品提示会显示「家中」一栏，统计背包、家里所有储物家具（邻居的篮子除外）和工作台抽屉里的数量。[/*]
 [*][b]交易属性[/b]：购买前就能看到商人的物品对饱腹、心态、精力、健康和生命的影响。[/*]
 [*][b]酒的品质[/b]：酿出的酒在提示里显示档次，例如「酿造品质：第 2 档，共 3 档」。准备酿造时，酿酒面板会显示品质分数，以及下一档需要多少分。可酿造的物品会显示只用它酿出的酒和品质，以及每个能为酒桶加多少饱腹和心态。[/*]

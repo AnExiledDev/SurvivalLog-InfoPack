@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.19
+
+- Clearer wording in the settings, in the brewing lines on tooltips and in the brew panel.
+- Made for Survival Log 1.1.20719.
+
 ## 0.8.18
 
 - Now uses Exiled's Toolkit for its shared parts, so it needs Exiled's Toolkit 0.19.0 or newer.
@@ -12,8 +17,8 @@
 
 ## 0.8.16
 
-- The tooltips Info Pack shows over another mod's window take that window's size when the window is drawn bigger or smaller with the UI size setting of Exiled's Toolkit 0.10.0 or newer. A change shows at once.
-- Tooltips on the game's screens keep the game's size.
+- Info Pack's tooltips over another mod's window now match the UI size that window has in Exiled's Toolkit 0.10.0 or newer, and follow a change right away.
+- Tooltips on the game's screens keep their normal size.
 - Made for Survival Log 1.1.19611.
 
 ## 0.8.15
@@ -25,17 +30,17 @@
 
 ## 0.8.14
 
-- Less stutter: the home is counted once per check instead of twice, the count and the live tooltips no longer run in the same frame, and foods you have already eaten are not looked up again.
+- Less stutter. Info Pack counts your home half as often, spreads its work over more frames and stops checking foods you have already eaten.
 - Made for Survival Log 1.1.19611.
 
 ## 0.8.13
 
-- Other mods' item rows can add a line under the item's name on Info Pack's tooltip. Neighbor Basket uses it to show the progress an item adds.
+- Other mods can now add a line under the item's name in Info Pack's tooltips. Neighbor Basket uses this to show how much progress an item adds.
 - Made for Survival Log 1.1.19611.
 
 ## 0.8.12
 
-- Effects chips use the game's effect numbers on the Backpack and Trade tooltips.
+- The Effects section on backpack and trade tooltips now shows the same numbers the game does.
 - When Info Pack shows its Effects or At home section, the game's effect rows and home lines on the same tooltip are hidden. With a section set to Off, the game's lines show as before.
 - The game's category, description and uses rows are restyled to match Info Pack's sections.
 - Made for Survival Log 1.1.19611.
@@ -47,7 +52,7 @@
 
 ## 0.8.10
 
-- At home counts, Used in counts and the days of food on the satiety bar leave out what is staged in the neighbor's basket.
+- The At home count, the Used in counts and the days of food on the satiety bar no longer include what you have put in the neighbor's basket.
 - Made for Survival Log 1.1.19131.
 
 ## 0.8.9
@@ -57,7 +62,7 @@
 
 ## 0.8.8
 
-- Shorter tooltips: only Effects and Freshness show at first. Holding Shift or Ctrl shows the rest (At home, Used in, Growing and the notes now wait for the key too). Ctrl still adds the per-storage list. Each section can be set back to `Always` in the settings.
+- Shorter tooltips: only Effects and Freshness show at first. Holding Shift or Ctrl shows the rest (At home, Used in, Growing and the notes now need the key too). Ctrl still adds the per-storage list. Each section can be set back to `Always` in the settings.
 - Made for Survival Log 1.1.19131.
 
 ## 0.8.7
@@ -73,7 +78,7 @@
 ## 0.8.5
 
 - Fixed: holding Shift or Ctrl did not expand or change a tooltip on Storage Hub's Home tab.
-- Other mods can now show a tooltip on any button or label, plain text or an item found by its name. Crafting Hub uses this for its materials, bell and amount buttons.
+- Other mods can now add a tooltip to any button or label, with plain text or an item's details. Crafting Hub uses this for its materials, bell and amount buttons.
 - Made for Survival Log 1.1.19131.
 
 ## 0.8.4
@@ -86,7 +91,7 @@
 - New tooltip look, matching New Loop Plus, More Rewards and Cooking Hub: a warm brown panel with an amber line along the top, amber section headings, and round green and red stat chips.
 - Freshness shows a bar of how much fresh time is left, coloured green, amber or red.
 - Dishes under Used in show their stats as chips instead of a line of text.
-- Fixed: fuel burn times and brew rules ignored your talents when a save was loaded before your character appeared.
+- Fixed: fuel burn times and brewing numbers ignored your talents when a save was loaded before your character appeared.
 - Fixed: polluted food showed its time left twice.
 - Fixed: station tooltips could stay hidden after letting go of the mouse outside the window.
 - Made for Survival Log 1.1.19131.
@@ -105,7 +110,7 @@
 ## 0.8.0
 
 - Dishes under Used in: each dish an item cooks into now shows its cook time, like `Cooking, 15m`, and what eating it does on a second line, like `+30 Satiety, +5 Mood`.
-- How long fuel burns: under Fuel, an item that burns shows how long one lasts in a cooking pot, a heater and a fuel generator, like `Cooks for 1h 51m` and `Runs a generator for 2d 2h`. Where the game has more than one model with different rates, it shows the range. Fuel saving talents count as they were when the world loaded.
+- How long fuel burns: under Fuel, an item that burns shows how long one lasts in a cooking pot, a heater and a fuel generator, like `Cooks for 1h 51m` and `Runs a generator for 2d 2h`. When different models burn at different rates, it shows the range. Fuel saving talents count as they were when the world loaded.
 - The Chinese brewing lines now use the game's word for mood.
 - Made for Survival Log 1.1.19131.
 
@@ -133,7 +138,7 @@ Other changes:
 
 ## 0.5.0
 
-Item tooltips work like a small wiki now. Below the game's lines, Info Pack adds one tidy block split into sections, each with a short heading:
+Item tooltips work like a small wiki now. Below the game's lines, Info Pack adds one block split into sections, each with a short heading:
 
 - Effects: what the item does to satiety, mood, energy, health and life, green for gains and red for losses.
 - Freshness: how long until it spoils, how long it keeps when fresh and what it rots into.

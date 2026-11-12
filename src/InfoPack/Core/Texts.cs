@@ -16,7 +16,7 @@ public static class Texts
 
     public static readonly Phrase ScrapChip = new("Scrap", "回收");
 
-    public static readonly Phrase BrewScore = new("Quality {0}: {1} from {2}, {3} from {4}", "品质 {0}：{2} 起为{1}，{4} 起为{3}");
+    public static readonly Phrase BrewScore = new("Quality {0}. {1} needs {2}, {3} needs {4}", "品质 {0}。{1}需要 {2}，{3}需要 {4}");
 
     /// <summary>The breakdown's name for the player's bag when the game has none to give; the game's word.</summary>
     public static readonly Phrase Inventory = new("Inventory", "背包");
@@ -67,7 +67,7 @@ public static class Texts
         Key("useCook", new("Cooking", "烹饪")),
         Key("useCookTime", new("Cooking, {0}", "烹饪，{0}")),
         Key("useBrew", new("Brewed alone, quality {0}", "单独酿造，品质 {0}")),
-        Key("useBrewMix", new("In a barrel: {0} satiety, {1} mood each; {2} per bottle", "酒桶中：每个 {0} 饱腹、{1} 心态；每瓶 {2} 个")),
+        Key("useBrewMix", new("In a barrel: {0} satiety and {1} mood each, {2} for one bottle", "酒桶中：每个 {0} 饱腹、{1} 心态，{2} 个酿一瓶")),
         Key("useBrewMood", new("In a barrel: {0} mood each, no satiety", "酒桶中：每个 {0} 心态，不加饱腹")),
         Key("more", new("+{0} more", "另有 {0} 项")),
 
