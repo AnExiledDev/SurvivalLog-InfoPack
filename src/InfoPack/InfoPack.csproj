@@ -41,7 +41,7 @@
     <AssemblyMetadata Include="ModManager.Description" Value="Turns item tooltips into a small wiki: effects, freshness, how many you have at home, what an item is used in and made from, and more while you hold Shift. It also shows what you are craving, how fast your stats drop, what a trader's food does, brew quality, loot that is only worth scrapping and how long planning cards last.&#10;把物品提示变成小图鉴：效果、保质期、家里有多少、用途和获取方式，按住 Shift 还能看到更多。还会显示你正想吃什么、各项状态下降多快、商人食物的效果、酒的品质、只适合回收的物品，以及规划卡牌的持续时间。" />
     <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
     <AssemblyMetadata Include="ModManager.Category" Value="Interface" />
-    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20719" />
+    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.21671" />
     <AssemblyMetadata Include="ModManager.Settings" Value="Restart" />
     <AssemblyMetadata Include="ModManager.GitHub" Value="AnExiledDev/SurvivalLog-InfoPack" />
     <AssemblyMetadata Include="ModManager.Changelog" Value="https://github.com/AnExiledDev/SurvivalLog-InfoPack/blob/main/CHANGELOG.md" />

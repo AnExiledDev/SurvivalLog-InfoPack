@@ -75,7 +75,7 @@ When the mod isn't sure, it leaves the item unmarked.
 
 ## Requirements
 
-- Survival Log 1.1.20719. Built for this version. A game update can break it until the mod is updated.
+- Survival Log 1.1.21671. Built for this version. A game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Optional: [Mod Manager](https://www.nexusmods.com/survivallog/mods/73). With it, you can change every setting in game on its Mods screen and see what each one does, without opening the config file.
 - Not together with ItemTotals, unless you turn off `BaseCounts` (see [Replaces ItemTotals](#replaces-itemtotals)).
@@ -118,6 +118,7 @@ A Survival Log wiki with detailed documentation for all of my mods is coming soo
 
 ## Changelog
 
+- 0.8.20: The days of food on the satiety hover now count every use of food like compressed biscuits and oatmeal. Made for Survival Log 1.1.21671.
 - 0.8.19: Clearer wording in the settings, in the brewing lines on tooltips and in the brew panel. Made for Survival Log 1.1.20719.
 - 0.8.18: Uses Exiled's Toolkit for its shared parts, so it now needs Exiled's Toolkit 0.19.0 or newer. Made for Survival Log 1.1.20719.
 - 0.8.17: Clearer description for the CookingCodex setting.

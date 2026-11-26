@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.20
+
+- Fixed: the days of food on the satiety hover counted only one use of food that has several, like compressed biscuits or oatmeal, so it showed far fewer days than you had.
+- Made for Survival Log 1.1.21671.
+
 ## 0.8.19
 
 - Clearer wording in the settings, in the brewing lines on tooltips and in the brew panel.

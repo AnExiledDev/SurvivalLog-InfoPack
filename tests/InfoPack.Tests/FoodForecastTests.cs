@@ -22,6 +22,14 @@ public class FoodForecastTests
     }
 
     [Fact]
+    public void Food_with_several_uses_gives_satiety_for_each_use()
+    {
+        var items = new[] { Edible(Bread, 20f) with { UseTimes = 10 }, Edible(Jerky, 35f) with { UseTimes = 0 } };
+
+        Assert.Equal(new Dictionary<int, float> { [Bread] = 200f, [Jerky] = 35f }, FoodForecast.SatietyById(items));
+    }
+
+    [Fact]
     public void The_food_at_home_adds_up_by_count()
     {
         var satiety = new Dictionary<int, float> { [Bread] = 20f, [Jerky] = 35f };

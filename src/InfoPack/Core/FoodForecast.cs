@@ -13,14 +13,18 @@ public static class FoodForecast
     private const float HoursPerDay = 24f;
     private const int FoodCategory = 1;
 
-    /// <summary>The satiety one of each food item gives (ValueDisplay1), for every food item that gives any; the first row of an id wins.</summary>
+    /// <summary>
+    /// The satiety one fresh food item gives: ValueDisplay1 for each use times its uses, as the game's
+    /// Furniture.GetRatCageFoodSatiety counts it, with 0 or fewer uses counted as 1. Only food that gives any is listed,
+    /// and the first row of an id wins.
+    /// </summary>
     public static Dictionary<int, float> SatietyById(IEnumerable<ItemRow> items)
     {
         var satiety = new Dictionary<int, float>();
 
         foreach (var item in items)
         {
-            if (item.Category == FoodCategory && item.Stats.Count > 0 && item.Stats[0] > 0f) satiety.TryAdd(item.Id, item.Stats[0]);
+            if (item.Category == FoodCategory && item.Stats.Count > 0 && item.Stats[0] > 0f) satiety.TryAdd(item.Id, item.Stats[0] * Math.Max(item.UseTimes, 1));
         }
 
         return satiety;
